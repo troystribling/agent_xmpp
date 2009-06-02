@@ -1,0 +1,5 @@
+require 'agent_xmpp/version'
+require 'agent_xmpp/patches'
+require 'agent_xmpp/app'
+require 'agent_xmpp/client'
+require 'agent_xmpp/utils'

@@ -1,0 +1,7 @@
+= agent_xmpp
+
+Description goes here.
+
+== Copyright
+
+Copyright (c) 2009 Troy Stribling. See LICENSE for details.
