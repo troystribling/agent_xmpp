@@ -12,13 +12,13 @@ end
   
 
 ####------------------------------------------------------------------------------------------------------
-config_file = 'config/agent.yml'
 AgentXmpp.log_file = STDOUT
 OptionParser.new do |opts|
   opts.banner = 'Usage: agent_xmpp.rb [options]'
   opts.separator ''
-  opts.on('-f', '--file config.yml', 'YAML agent configuration file') {|f| config_file = f}
+  opts.on('-f', '--file config.yml', 'YAML agent configuration file') {|f| AgentXmpp.config_file = f}
   opts.on('-l', '--logfile file.log', 'name of logfile') {|f| AgentXmpp.log_file = f}
+  opts.on('-d', '--dir path', 'application directory path') {|f| AgentXmpp.app_dir = d}
   opts.on_tail('-h', '--help', 'Show this message') {
     puts opts
     exit
