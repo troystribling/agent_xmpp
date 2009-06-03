@@ -72,18 +72,18 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rake>, [">= 0.8.3"])
       s.add_runtime_dependency(%q<eventmachine>, ["= 0.12.6"])
-      s.add_runtime_dependency(%q<troystribling-evma_eventmachine>, ["= 0.0.1"])
+      s.add_runtime_dependency(%q<troystribling-evma_xmlpushparser>, ["= 0.0.1"])
       s.add_runtime_dependency(%q<xmpp4r>, ["= 0.4"])
     else
       s.add_dependency(%q<rake>, [">= 0.8.3"])
       s.add_dependency(%q<eventmachine>, ["= 0.12.6"])
-      s.add_dependency(%q<troystribling-evma_eventmachine>, ["= 0.0.1"])
+      s.add_dependency(%q<troystribling-evma_xmlpushparser>, ["= 0.0.1"])
       s.add_dependency(%q<xmpp4r>, ["= 0.4"])
     end
   else
     s.add_dependency(%q<rake>, [">= 0.8.3"])
     s.add_dependency(%q<eventmachine>, ["= 0.12.6"])
-    s.add_dependency(%q<troystribling-evma_eventmachine>, ["= 0.0.1"])
+    s.add_dependency(%q<troystribling-evma_xmlpushparser>, ["= 0.0.1"])
     s.add_dependency(%q<xmpp4r>, ["= 0.4"])
   end
 end
