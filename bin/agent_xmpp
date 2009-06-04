@@ -16,9 +16,9 @@ AgentXmpp.log_file = STDOUT
 OptionParser.new do |opts|
   opts.banner = 'Usage: agent_xmpp.rb [options]'
   opts.separator ''
-  opts.on('-f', '--file config.yml', 'YAML agent configuration file') {|f| AgentXmpp.config_file = f}
+  opts.on('-p', '--path path', 'application path') {|p| AgentXmpp.app_path = p}
+  opts.on('-f', '--file config.yml', 'YAML agent configuration file relative to application path') {|f| AgentXmpp.config_file = f}
   opts.on('-l', '--logfile file.log', 'name of logfile') {|f| AgentXmpp.log_file = f}
-  opts.on('-d', '--dir path', 'application directory path') {|f| AgentXmpp.app_dir = d}
   opts.on_tail('-h', '--help', 'Show this message') {
     puts opts
     exit
@@ -27,13 +27,16 @@ OptionParser.new do |opts|
 end
 
 ####------------------------------------------------------------------------------------------------------
-raise Exception, "Configuration file #{config_file} required." unless File.exist?(config_file) 
+AgentXmpp.log_file = File.join(AgentXmpp.app_path, AgentXmpp.log_file) if AgentXmpp.log_file.kind_of?(String)
+AgentXmpp.config_file = File.join(AgentXmpp.AgentXmpp.config_file, AgentXmpp.config_file)
+AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
+raise Exception, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
 
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
 AgentXmpp.logger.info "STARTING AgentXmpp"
 AgentXmpp.logger.info "LOG FILE: #{AgentXmpp.log_file.kind_of?(String) ? AgentXmpp.log_file : "STDOUT"}"
-AgentXmpp.logger.info "CONFIGURATION FILE: #{config_file}"
+AgentXmpp.logger.info "APPLICATION PATH: #{AgentXmpp.AgentXmpp.config_file}"
+AgentXmpp.logger.info "CONFIGURATION FILE: #{AgentXmpp.config_file}"
 
 ####------------------------------------------------------------------------------------------------------
 AgentXmpp::Boot.call_before_config_load if AgentXmpp::Boot.respond_to?(:call_before_config_load)
@@ -52,5 +55,4 @@ AgentXmpp::Boot.load('app/controllers')
 AgentXmpp::Boot.call_after_app_load if AgentXmpp::Boot.respond_to?(:call_after_app_load)
 
 ####------------------------------------------------------------------------------------------------------
-config = File.open(config_file) {|yf| YAML::load(yf)}
-AgentXmpp::Client.new(config).connect
+AgentXmpp::Client.new(File.open(AgentXmpp.config_file) {|yf| YAML::load(yf)}).connect

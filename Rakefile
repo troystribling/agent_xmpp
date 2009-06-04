@@ -31,9 +31,15 @@ end
 #####-------------------------------------------------------------------------------------------------------
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/*_test.rb'
-  test.verbose = true
+  begin
+    require 'shoulda'
+    test.libs << 'test/test_app'
+    test.pattern = 'test/**/*_test.rb'
+    test.verbose = true
+    %x[bin/agent -p test/test_app -c config/test_agent -l logs/test_agent.log &> test/test_app/logs/test_agent_out.log]
+  rescue LoadError
+    abort "shoulda is not available. In order to run test, you must: sudo gem install thoughtbot-shoulda --source=http://gems.github.com"
+  end
 end
 
 #####-------------------------------------------------------------------------------------------------------
