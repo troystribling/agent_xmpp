@@ -7,7 +7,7 @@ module AgentXmpp
   @app_path = "."
 
   class << self
-    attr_accessor :config_file, :app_dir
+    attr_accessor :config_file, :app_path
   end
   
 end

@@ -1,7 +1,11 @@
 ############################################################################################################
+$:.unshift('lib')
 require 'rubygems'
 require 'rake'
-require 'lib/agent_xmpp/version'
+require 'agent_xmpp'
+
+#####-------------------------------------------------------------------------------------------------------
+task :default => :test
 
 #####-------------------------------------------------------------------------------------------------------
 require 'jeweler'
@@ -29,14 +33,20 @@ task :uninstall do
 end
 
 #####-------------------------------------------------------------------------------------------------------
+task :start_test_agent do
+  AgentXmpp.app_path = 'test/test_app'
+  AgentXmpp.config_file = 'config/test_agent.yml'
+  AgentXmpp::Boot.boot
+end
+
+#####-------------------------------------------------------------------------------------------------------
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   begin
     require 'shoulda'
     test.libs << 'test/test_app'
-    test.pattern = 'test/**/*_test.rb'
+    test.pattern = 'test/test_cases/**/test_*.rb'
     test.verbose = true
-    %x[bin/agent -p test/test_app -c config/test_agent -l logs/test_agent.log &> test/test_app/logs/test_agent_out.log]
   rescue LoadError
     abort "shoulda is not available. In order to run test, you must: sudo gem install thoughtbot-shoulda --source=http://gems.github.com"
   end
@@ -57,7 +67,6 @@ rescue LoadError
 end
 
 #####-------------------------------------------------------------------------------------------------------
-task :default => :test
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
