@@ -1,5 +1,5 @@
 ############################################################################################################
-class ChatMessageBodyController < AgentXmpp::Controller
+class ChatController < AgentXmpp::Controller
 
   #.........................................................................................................
   def body
@@ -9,7 +9,7 @@ class ChatMessageBodyController < AgentXmpp::Controller
     respond_to do |result|
       result.to_s
     end
-    AgentXmpp.logger.info "ACTION: ChatMessageBodyController\#body"
+    AgentXmpp.logger.info "ACTION: ChatController\#body"
   end
   
 #### ChatMessageBodyController

@@ -15,7 +15,7 @@ module AgentXmpp
       #.........................................................................................................
       def initialize
         @routes = Hash.new
-        @chat_message_body_route = {:controller => 'chat_message_body', :action => 'body'}
+        @chat_route = {:controller => 'chat', :action => 'body'}
       end
 
       #.........................................................................................................
@@ -32,8 +32,8 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def connect_chat_message_body(route)
-        @chat_message_body_route = {:controller => route[:controller], :action => route[:action]}
+      def chat_route(route)
+        @chat_route = {:controller => route[:controller], :action => route[:action]}
       end
          
     #### Map

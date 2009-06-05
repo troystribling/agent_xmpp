@@ -48,11 +48,11 @@ module AgentXmpp
         end
 
         #.......................................................................................................
-        def invoke_chat_message_body_response(connection, params)
-          route = map.chat_message_body_route
+        def invoke_chat_response(connection, params)
+          route = map.chat_route
           begin
             controller_class = eval("#{route[:controller].classify}Controller")
-          rescue ArgumentError
+          rescue NameError
             AgentXmpp.logger.error "ROUTING ERROR: #{params[:node].classify}Controller inavlid for node:#{params[:node]} action:#{params[:action]}."
           else          
             controller_class.new.handle_request(connection, route[:action], params)

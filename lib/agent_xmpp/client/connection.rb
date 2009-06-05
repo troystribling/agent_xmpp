@@ -161,7 +161,7 @@ module AgentXmpp
     def process_chat_message_body(stanza)
       params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, 
         :body => stanza.body}
-      Routing::Routes.invoke_chat_message_body_response(self, params)
+      Routing::Routes.invoke_chat_response(self, params)
       AgentXmpp.logger.info "RECEIVED MESSAGE BODY: #{stanza.body}"
     end
 
