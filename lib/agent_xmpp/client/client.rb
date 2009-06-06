@@ -29,6 +29,12 @@ module AgentXmpp
     end
 
     #.........................................................................................................
+    def close_connection
+      connection.close_connection_after_writing
+      AgentXmpp.logger.info "CLOSE CONNECTION"
+    end
+
+    #.........................................................................................................
     def reconnect
       AgentXmpp.logger.info "RECONNECTING"
       connection.reconnect(jid.domain, port)
