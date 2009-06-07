@@ -18,13 +18,15 @@ class AgentXmpp::Connection
       end
       @id_callbacks[data.id] = blk
     end    
+    AgentXmpp.logger.info "SEND: #{data.to_s}"
     data.to_s
   end
 
   #.........................................................................................................
   def connection_completed
     init_connection
-    add_delegate(client)      
+    add_delegate(client)  
+    add_delegate(TestDelegate)    
     broadcast_to_delegates(:did_connect, self)
   end
 

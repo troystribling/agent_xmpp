@@ -4,7 +4,17 @@ class Test::Unit::TestCase
   #### received messages    
   #.........................................................................................................
   def recv_preauthentication_stream_features_with_plain_SASL
-    "<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{client.jid.domain}' version='1.0' xml:lang='en'><stream:features><mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'><mechanism>DIGEST-MD5</mechanism><mechanism>PLAIN</mechanism></mechanisms><register xmlns='http://jabber.org/features/iq-register'/></stream:features></stream:stream>"
+    <<-MSG
+      <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{client.jid.domain}' version='1.0' xml:lang='en'>
+        <stream:features>
+          <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
+            <mechanism>DIGEST-MD5</mechanism>
+            <mechanism>PLAIN</mechanism>
+          </mechanisms>
+        <register xmlns='http://jabber.org/features/iq-register'/>
+        </stream:features>
+      </stream:stream>
+    MSG
   end
 
   #.........................................................................................................

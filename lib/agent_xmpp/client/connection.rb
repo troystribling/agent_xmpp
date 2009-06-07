@@ -49,8 +49,8 @@ module AgentXmpp
         end
         @id_callbacks[data.id] = blk
       end
-      send_data(data.to_s)
       AgentXmpp.logger.info "SEND: #{data.to_s}"
+      send_data(data.to_s)
     end
 
     #---------------------------------------------------------------------------------------------------------

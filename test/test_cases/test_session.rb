@@ -6,6 +6,7 @@ class TestSession < Test::Unit::TestCase
 
   #.........................................................................................................
   should "authenticate with PLAIN SASL authentication when stream features includes PLAIN authentication" do
+    TestDelegate.did_connect_flag.should be(true)
     stream_receive(recv_preauthentication_stream_features_with_plain_SASL).include?(send_plain_authentication).should be(true) 
   end
 
