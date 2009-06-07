@@ -1,5 +1,0 @@
-require 'agent_xmpp/patches/standard_library_patches/object'
-require 'agent_xmpp/patches/standard_library_patches/array'
-require 'agent_xmpp/patches/standard_library_patches/hash'
-require 'agent_xmpp/patches/standard_library_patches/string'
-require 'agent_xmpp/patches/standard_library_patches/float'

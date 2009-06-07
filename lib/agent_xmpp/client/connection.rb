@@ -3,6 +3,7 @@ module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
   class NotConnected < Exception; end
+  class AuthenticationFailure < Exception; end
 
   #####-------------------------------------------------------------------------------------------------------
   class Connection < EventMachine::Connection
@@ -12,7 +13,8 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive
+    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive,
+                :stream_features, :stream_mechanisms
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
@@ -31,6 +33,11 @@ module AgentXmpp
     #.........................................................................................................
     def remove_delegate(delegate)
       @delegates.delete(delegate)
+    end
+    
+    #.........................................................................................................
+    def broadcast_to_delegates(method, *args)
+      delegates.each{|d| d.send(method, *args) if d.respond_to?(method)}
     end
     
     #.........................................................................................................
@@ -172,57 +179,54 @@ module AgentXmpp
       if stanza.kind_of?(Jabber::XMPPStanza) and stanza.id and blk = @id_callbacks[stanza.id]
         @id_callbacks.delete(stanza.id)
         blk.call(stanza)
-        return
-      end
-
-      case stanza.xpath
-      when 'stream:features'
-        @stream_features, @stream_mechanisms = {}, []
-        @current.each do |e|
-          if e.name == 'mechanisms' and e.namespace == 'urn:ietf:params:xml:ns:xmpp-sasl'
-            e.each_element('mechanism') {|mech| @stream_mechanisms.push(mech.text)}
-          else
-            @stream_features[e.name] = e.namespace
-          end
-        end
-        if @connection_status.eql?(:offline)
-          authenticate
-        elsif @connection_status.eql?(:authenticated)
-          bind(stanza)
-        end
-      when 'stream:stream'
-      when 'success'
-        case connection_status
-        when :offline
-          reset_parser
-          init_connection(false)
-          @connection_status = :authenticated
-        end
-        return
-      when 'failure'
-        case connection_status
-        when :offline
-          reset_parser
-          broadcast_to_delegates(:did_not_authenticate, self, stanza)
-        end
       else
-        demux_channel(stanza)
+        case stanza.name
+        when 'features'
+          set_stream_features(stanza)
+          if connection_status.eql?(:offline)
+            authenticate
+          elsif connection_status.eql?(:authenticated)
+            bind(stanza)
+          end
+        when 'stream'
+        when 'success'
+          if connection_status.eql?(:offline)
+            reset_parser
+            @connection_status = :authenticated
+            init_connection(false)
+          end
+        when 'failure'
+          if connection_status.eql?(:offline)
+            reset_parser
+            broadcast_to_delegates(:did_not_authenticate, self, stanza)
+          end
+        else
+          demux_channel(stanza)
+        end
       end
             
     end
 
-    #---------------------------------------------------------------------------------------------------------
-    protected
-    #---------------------------------------------------------------------------------------------------------
+  #---------------------------------------------------------------------------------------------------------
+  protected
+  #---------------------------------------------------------------------------------------------------------
   
     #---------------------------------------------------------------------------------------------------------
     # Process XMPP messages
     #.........................................................................................................
     def authenticate
-      begin
-          Jabber::SASL.new(self, 'PLAIN').auth(password)
-      rescue
-        raise ClientAuthenticationFailure.new, $!.to_s
+      Jabber::SASL.new(self, 'PLAIN').auth(password)
+    end
+
+    #.........................................................................................................
+    def set_stream_features(stanza)
+      @stream_features, @stream_mechanisms = {}, []
+      stanza.elements.each do |e|
+        if e.name == 'mechanisms' and e.namespace == 'urn:ietf:params:xml:ns:xmpp-sasl'
+          e.each_element('mechanism') {|mech| @stream_mechanisms.push(mech.text)}
+        else
+          @stream_features[e.name] = e.namespace
+        end
       end
     end
   
@@ -302,11 +306,6 @@ module AgentXmpp
       end
     end
   
-    #.........................................................................................................
-    def broadcast_to_delegates(method, *args)
-      delegates.each{|d| d.send(method, *args) if d.respond_to?(method)}
-    end
-
   #### Connection
   end
 

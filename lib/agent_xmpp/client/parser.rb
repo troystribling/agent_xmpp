@@ -43,7 +43,7 @@ module AgentXmpp
     def characters(text)
       @current.text = @current.text.to_s + text if @current
     end
-
+    
     #.........................................................................................................
     def error(*args)
       AgentXmpp.logger.error *args

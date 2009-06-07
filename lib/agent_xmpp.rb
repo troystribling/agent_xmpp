@@ -10,7 +10,7 @@ require 'xmpp4r/dataforms'
 require 'xmpp4r/command/iq/command'
 
 require 'agent_xmpp/config'
-require 'agent_xmpp/patches'
 require 'agent_xmpp/app'
 require 'agent_xmpp/client'
 require 'agent_xmpp/utils'
+require 'agent_xmpp/patches'

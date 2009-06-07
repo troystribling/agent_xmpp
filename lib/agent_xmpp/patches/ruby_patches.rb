@@ -1,0 +1,5 @@
+require 'agent_xmpp/patches/ruby_patches/object'
+require 'agent_xmpp/patches/ruby_patches/array'
+require 'agent_xmpp/patches/ruby_patches/hash'
+require 'agent_xmpp/patches/ruby_patches/string'
+require 'agent_xmpp/patches/ruby_patches/float'
