@@ -1,13 +1,13 @@
 ##############################################################################################################
-class Test::Unit::TestCase
+class TestClient
 
   #.........................................................................................................
-  @@client = AgentXmpp::Client.new(File.open('test/test_client/test_client.yml') {|yf| YAML::load(yf)})
-  @@client.connect
+  @client = AgentXmpp::Client.new(File.open('test/test_client/test_client.yml') {|yf| YAML::load(yf)})
+  @client.connect
 
   #.........................................................................................................
   def client
-    @@client
+    @client
   end
 
   #.........................................................................................................

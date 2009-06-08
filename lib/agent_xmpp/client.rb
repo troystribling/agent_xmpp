@@ -1,3 +1,6 @@
 require 'agent_xmpp/client/parser'
+require 'agent_xmpp/client/roster_messages'
+require 'agent_xmpp/client/service_discovery_messages'
+require 'agent_xmpp/client/session_messages'
 require 'agent_xmpp/client/connection'
 require 'agent_xmpp/client/client'

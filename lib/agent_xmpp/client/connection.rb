@@ -10,11 +10,13 @@ module AgentXmpp
 
     #---------------------------------------------------------------------------------------------------------
     include Parser
+    include SessionMessages
+    include RosterMessages
+    include ServiceDiscoveryMessages
     #---------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive,
-                :stream_features, :stream_mechanisms
+    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive                
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
@@ -37,7 +39,7 @@ module AgentXmpp
     
     #.........................................................................................................
     def broadcast_to_delegates(method, *args)
-      delegates.each{|d| d.send(method, *args) if d.respond_to?(method)}
+      delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}
     end
     
     #.........................................................................................................
@@ -80,73 +82,6 @@ module AgentXmpp
       end
       @connection_status = :off_line
       broadcast_to_delegates(:did_disconnect, self)
-    end
-
-    #---------------------------------------------------------------------------------------------------------
-    # service discovery
-    #.........................................................................................................
-    def get_client_version(contact_jid)
-      iq = Jabber::Iq.new(:get, contact_jid)
-      iq.query = Jabber::Version::IqQueryVersion.new
-      send(iq) do |r|
-        if (r.type == :result) && r.query.kind_of?(Jabber::Version::IqQueryVersion)
-          broadcast_to_delegates(:did_receive_client_version_result, self, r.from, r.query)
-        end
-      end
-    end
-
-    #.........................................................................................................
-    def send_client_version(request)
-      iq = Jabber::Iq.new(:result, request.from.to_s)
-      iq.id = request.id unless request.id.nil?
-      iq.query = Jabber::Version::IqQueryVersion.new
-      iq.query.set_iname(AgentXmpp::AGENT_XMPP_NAME).set_version(AgentXmpp::VERSION).set_os(AgentXmpp::OS_VERSION)
-      send(iq)
-    end
-    
-    #---------------------------------------------------------------------------------------------------------
-    # roster management
-    #.........................................................................................................
-    def get_roster
-      send(Jabber::Iq.new_rosterget) do |r|
-        if r.type == :result and r.query.kind_of?(Jabber::Roster::IqQueryRoster)
-          r.query.each_element {|i|  broadcast_to_delegates(:did_receive_roster_item, self, i)}
-          broadcast_to_delegates(:did_receive_all_roster_items, self)
-        end
-      end
-    end
-
-    #.........................................................................................................
-    def add_contact(contact_jid)
-      request = Jabber::Iq.new_rosterset
-      request.query.add(Jabber::Roster::RosterItem.new(contact_jid))
-      send(request) do |r|
-        send(Jabber::Presence.new.set_type(:subscribe).set_to(contact_jid))
-        broadcast_to_delegates(:did_acknowledge_add_contact, self, r, contact_jid)
-      end
-    end
-
-    #.........................................................................................................
-    def remove_contact(contact_jid)
-      request = Jabber::Iq.new_rosterset
-      request.query.add(Jabber::Roster::RosterItem.new(contact_jid, nil, :remove))
-      send(request) do |r|
-        broadcast_to_delegates(:did_remove_contact, self, r, contact_jid)
-      end
-    end
-
-    #.........................................................................................................
-    def accept_contact_request(contact_jid)
-      presence = Jabber::Presence.new.set_type(:subscribed)
-      presence.to = contact_jid      
-      send(presence)
-    end
-
-    #.........................................................................................................
-    def reject_contact_request(contact_jid)
-      presence = Jabber::Presence.new.set_type(:unsubscribed)
-      presence.to = contact_jid      
-      send(presence)
     end
 
     #---------------------------------------------------------------------------------------------------------
@@ -211,67 +146,7 @@ module AgentXmpp
   protected
   #---------------------------------------------------------------------------------------------------------
   
-    #---------------------------------------------------------------------------------------------------------
-    # Process XMPP messages
-    #.........................................................................................................
-    def authenticate
-      Jabber::SASL.new(self, 'PLAIN').auth(password)
-    end
-
-    #.........................................................................................................
-    def set_stream_features(stanza)
-      @stream_features, @stream_mechanisms = {}, []
-      stanza.elements.each do |e|
-        if e.name == 'mechanisms' and e.namespace == 'urn:ietf:params:xml:ns:xmpp-sasl'
-          e.each_element('mechanism') {|mech| @stream_mechanisms.push(mech.text)}
-        else
-          @stream_features[e.name] = e.namespace
-        end
-      end
-    end
   
-    #.........................................................................................................
-    def bind(stanza)
-      if stream_features.has_key?('bind')
-        iq = Jabber::Iq.new(:set)
-        bind = iq.add(REXML::Element.new('bind'))
-        bind.add_namespace(stream_features['bind'])                
-        resource = bind.add REXML::Element.new('resource')
-        resource.text = jid.resource
-        send(iq) do |r|
-          if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
-            @connection_status = :bind
-            jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)      
-            broadcast_to_delegates(:did_bind, self, stanza)
-            session(stanza)
-          end
-        end
-      end                
-    end
-    
-    #.........................................................................................................
-    def session(stanza)
-      if stream_features.has_key?('session')
-        iq = Jabber::Iq.new(:set)
-        session = iq.add REXML::Element.new('session')
-        session.add_namespace stream_features['session']                
-        send(iq) do |r|
-          if r.type == :result                
-            @connection_status = :active
-            broadcast_to_delegates(:did_authenticate, self, stanza)
-            send(Jabber::Presence.new(nil, nil, 1))
-            get_roster
-          end
-        end
-      end
-    end
-
-    #.........................................................................................................
-    def init_connection(starting=true)
-      send("<?xml version='1.0' ?>") if starting
-      send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>" )
-    end
-
     #.........................................................................................................
     def demux_channel(stanza)
       stanza_class = stanza.class.to_s
