@@ -3,7 +3,6 @@ module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
   class NotConnected < Exception; end
-  class AuthenticationFailure < Exception; end
 
   #####-------------------------------------------------------------------------------------------------------
   class Connection < EventMachine::Connection

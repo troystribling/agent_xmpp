@@ -2,6 +2,9 @@
 module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
+  class AuthenticationFailure < Exception; end
+  
+  #####-------------------------------------------------------------------------------------------------------
   module SessionMessages
 
     #---------------------------------------------------------------------------------------------------------
@@ -10,7 +13,11 @@ module AgentXmpp
     
     #.........................................................................................................
     def authenticate
-      Jabber::SASL.new(self, 'PLAIN').auth(password)
+      if stream_mechanisms.include?('PLAIN')
+        Jabber::SASL.new(self, 'PLAIN').auth(password)
+      else
+        raise AuthenticationFailure, "PLAIN authentication not supported"
+      end
     end
     
     #.........................................................................................................
@@ -46,8 +53,9 @@ module AgentXmpp
 
     #.........................................................................................................
     def init_connection(starting=true)
-      send("<?xml version='1.0' ?>") if starting
-      send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>" )
+      result = []
+      result.push(send("<?xml version='1.0' ?>")) if starting
+      result.push(send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
     end
     
     #.........................................................................................................

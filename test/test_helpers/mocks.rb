@@ -34,7 +34,11 @@ class AgentXmpp::Connection
   def error?
     false
   end
-    
+
+  #.........................................................................................................
+  def reset_parser
+  end
+  
 #### AgentXmpp::Connection  
 end
 

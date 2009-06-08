@@ -8,7 +8,7 @@ module Session
     #.........................................................................................................
     def recv_preauthentication_stream_features_with_plain_SASL
       <<-MSG
-        <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{client.jid.domain}' version='1.0' xml:lang='en'>
+        <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{TestClient.client.jid.domain}' version='1.0' xml:lang='en'>
           <stream:features>
             <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
               <mechanism>DIGEST-MD5</mechanism>
@@ -23,7 +23,7 @@ module Session
     #.........................................................................................................
     def recv_preauthentication_stream_features_without_plain_SASL
       <<-MSG
-        <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{client.jid.domain}' version='1.0' xml:lang='en'>
+        <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{TestClient.client.jid.domain}' version='1.0' xml:lang='en'>
           <stream:features>
             <mechanisms xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
               <mechanism>DIGEST-MD5</mechanism>
@@ -47,7 +47,7 @@ module Session
     #.........................................................................................................
     def recv_postauthentication_stream_features
       <<-MSG
-        <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{client.jid.domain}' version='1.0' xml:lang='en'>
+        <stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' id='1' from='#{TestClient.client.jid.domain}' version='1.0' xml:lang='en'>
           <stream:features>
             <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'/>
             <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -61,7 +61,7 @@ module Session
       <<-MSG
         <iq id='1327' type='result'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
-            <jid>#{client.jid.to_s}</jid>
+            <jid>#{TestClient.client.jid.to_s}</jid>
           </bind>
         </iq>
       MSG
@@ -100,7 +100,7 @@ module Session
       <<-MSG
         <iq id='1327' type='set' xmlns='jabber:client'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
-            <resource>#{client.jid.resource}</resource>
+            <resource>#{TestClient.client.jid.resource}</resource>
           </bind>
         </iq>
       MSG
