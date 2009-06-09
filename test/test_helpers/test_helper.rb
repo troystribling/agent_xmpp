@@ -20,6 +20,7 @@ AgentXmpp.logger.level = Logger::INFO
 require 'test_delegate'
 require 'mocks'
 require 'test_client'
+require 'matchers'
 
 #####-------------------------------------------------------------------------------------------------------
 require 'commands'

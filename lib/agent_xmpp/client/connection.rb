@@ -91,8 +91,8 @@ module AgentXmpp
       unless command.x.nil? 
         params = {:xmlns => command.x.namespace, :action => command.action, :to => stanza.from.to_s, 
           :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
-        Routing::Routes.invoke_command_response(self, params)
         AgentXmpp.logger.info "RECEIVED COMMAND: #{command.node}, FROM: #{stanza.from.to_s}"
+        Routing::Routes.invoke_command_response(self, params)
       end
     end
 
@@ -102,8 +102,8 @@ module AgentXmpp
     def process_chat_message_body(stanza)
       params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, 
         :body => stanza.body}
-      Routing::Routes.invoke_chat_response(self, params)
       AgentXmpp.logger.info "RECEIVED MESSAGE BODY: #{stanza.body}"
+      Routing::Routes.invoke_chat_response(self, params)
     end
 
     #---------------------------------------------------------------------------------------------------------
@@ -114,38 +114,42 @@ module AgentXmpp
         @id_callbacks.delete(stanza.id)
         blk.call(stanza)
       else
-        case stanza.name
-        when 'features'
-          set_stream_features(stanza)
-          if connection_status.eql?(:offline)
-            authenticate
-          elsif connection_status.eql?(:authenticated)
-            bind(stanza)
-          end
-        when 'stream'
-        when 'success'
-          if connection_status.eql?(:offline)
-            reset_parser
-            @connection_status = :authenticated
-            init_connection(false)
-          end
-        when 'failure'
-          if connection_status.eql?(:offline)
-            reset_parser
-            broadcast_to_delegates(:did_not_authenticate, self, stanza)
-          end
-        else
-          demux_channel(stanza)
-        end
-      end
-            
+        process_stanza(stanza)
+      end           
     end
 
   #---------------------------------------------------------------------------------------------------------
   protected
   #---------------------------------------------------------------------------------------------------------
-  
-  
+    
+    #.........................................................................................................
+    def process_stanza(stanza)
+      case stanza.name
+      when 'features'
+        set_stream_features(stanza)
+        if connection_status.eql?(:offline)
+          authenticate
+        elsif connection_status.eql?(:authenticated)
+          broadcast_to_delegates(:did_authenticate, self, stanza)
+          bind(stanza)
+        end
+      when 'stream'
+      when 'success'
+        if connection_status.eql?(:offline)
+          reset_parser
+          @connection_status = :authenticated
+          init_connection(false)
+        end
+      when 'failure'
+        if connection_status.eql?(:offline)
+          reset_parser
+          broadcast_to_delegates(:did_not_authenticate, self, stanza)
+        end
+      else
+        demux_channel(stanza)
+      end
+    end
+    
     #.........................................................................................................
     def demux_channel(stanza)
       stanza_class = stanza.class.to_s

@@ -59,7 +59,7 @@ module Session
     #.........................................................................................................
     def recv_bind_success
       <<-MSG
-        <iq id='1327' type='result'>
+        <iq id='1' type='result'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
             <jid>#{TestClient.client.jid.to_s}</jid>
           </bind>
@@ -98,7 +98,7 @@ module Session
     #.........................................................................................................
     def send_bind
       <<-MSG
-        <iq id='1327' type='set' xmlns='jabber:client'>
+        <iq id='1' type='set' xmlns='jabber:client'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
             <resource>#{TestClient.client.jid.resource}</resource>
           </bind>
@@ -107,9 +107,9 @@ module Session
     end
 
     #.........................................................................................................
-    def send_session_start
+    def send_session_init
       <<-MSG
-        <iq id='2144' type='set' xmlns='jabber:client'>
+        <iq id='1' type='set' xmlns='jabber:client'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
         </iq>
       MSG

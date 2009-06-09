@@ -31,7 +31,7 @@ module AgentXmpp
         send(iq) do |r|
           if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
             jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)      
-            [broadcast_to_delegates(:did_bind, self, stanza), session(stanza)].flatten
+            [session(stanza), broadcast_to_delegates(:did_bind, self, stanza)].flatten
           end
         end
       end                
@@ -45,7 +45,7 @@ module AgentXmpp
         session.add_namespace stream_features['session']                
         send(iq) do |r|
           if r.type == :result                
-            [broadcast_to_delegates(:did_authenticate, self, stanza), send(Jabber::Presence.new(nil, nil, 1))].flatten
+            [send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].flatten
           end
         end
       end

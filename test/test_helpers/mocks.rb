@@ -14,7 +14,7 @@ class AgentXmpp::Connection
   def send(data, &blk)
     if block_given? and data.is_a? Jabber::XMPPStanza
       if data.id.nil?
-        data.id = Jabber::IdGenerator.instance.generate_id
+        data.id = 1
       end
       @id_callbacks[data.id] = blk
     end    
@@ -37,6 +37,12 @@ class AgentXmpp::Connection
 
   #.........................................................................................................
   def reset_parser
+  end
+    
+  #.........................................................................................................
+  def unbind
+    @connection_status = :off_line
+    broadcast_to_delegates(:did_disconnect, self)
   end
   
 #### AgentXmpp::Connection  

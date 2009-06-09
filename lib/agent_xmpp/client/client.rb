@@ -80,7 +80,6 @@ module AgentXmpp
     #.........................................................................................................
     def did_authenticate(client_connection, stanza)
       AgentXmpp.logger.info "AUTHENTICATED"
-      client_connection.send_roster_request
     end
  
     #.........................................................................................................
@@ -94,6 +93,12 @@ module AgentXmpp
     end
 
     #.........................................................................................................
+    def did_start_session(client_connection, stanza)
+      AgentXmpp.logger.info "SESSION STARTED"
+      client_connection.send_roster_request
+    end
+
+    #.........................................................................................................
     # presence
     #.........................................................................................................
     def did_receive_presence(client_connection, presence)
@@ -102,8 +107,8 @@ module AgentXmpp
       if roster.has_key?(from_bare_jid) 
         roster[from_bare_jid.to_s][:resources][from_jid] = {} if roster[from_bare_jid.to_s][:resources][from_jid].nil?
         roster[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
-        client_connection.send_client_version_request(from_jid) if not from_jid.eql?(client_connection.jid.to_s) and presence.type.nil?
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
+        client_connection.send_client_version_request(from_jid) if not from_jid.eql?(client_connection.jid.to_s) and presence.type.nil?
       else
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM JID NOT IN CONTACT LIST: #{from_jid}"        
       end
@@ -113,11 +118,11 @@ module AgentXmpp
     def did_receive_subscribe_request(client_connection, presence)
       from_jid = presence.from.to_s     
       if roster.has_key?(presence.from.bare.to_s ) 
-        client_connection.accept_contact_request(from_jid)  
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
+        client_connection.accept_contact_request(from_jid)  
       else
-        client_connection.reject_contact_request(from_jid)  
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN CONTACT LIST: #{from_jid}"        
+        client_connection.reject_contact_request(from_jid)  
       end
     end
 
@@ -125,8 +130,8 @@ module AgentXmpp
     def did_receive_unsubscribed_request(client_connection, presence)
       from_jid = presence.from.to_s     
       if roster.delete(presence.from.bare.to_s )           
-        client_connection.remove_contact(presence.from)  
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
+        client_connection.remove_contact(presence.from)  
       else
         AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN CONTACT LIST: #{from_jid}"        
       end

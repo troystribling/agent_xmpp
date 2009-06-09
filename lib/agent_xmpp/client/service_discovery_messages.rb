@@ -22,8 +22,7 @@ module AgentXmpp
       iq.query.set_iname(AgentXmpp::AGENT_XMPP_NAME).set_version(AgentXmpp::VERSION).set_os(AgentXmpp::OS_VERSION)
       send(iq)
     end
-    
-    
+        
   #### ServiceDiscoveryMessages
   end
   
