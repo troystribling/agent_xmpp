@@ -38,13 +38,7 @@ class AgentXmpp::Connection
   #.........................................................................................................
   def reset_parser
   end
-    
-  #.........................................................................................................
-  def unbind
-    @connection_status = :off_line
-    broadcast_to_delegates(:did_disconnect, self)
-  end
-  
+      
 #### AgentXmpp::Connection  
 end
 

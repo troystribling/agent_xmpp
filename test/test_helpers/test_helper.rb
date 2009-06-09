@@ -23,8 +23,8 @@ require 'test_client'
 require 'matchers'
 
 #####-------------------------------------------------------------------------------------------------------
-require 'commands'
-require 'roster'
-require 'service_discovery'
-require 'session'
+require 'command_messages'
+require 'roster_messages'
+require 'service_discovery_messages'
+require 'session_messages'
 

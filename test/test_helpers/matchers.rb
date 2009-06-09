@@ -7,3 +7,10 @@ def_matcher :respond_with do |receiver, matcher, args|
   matcher.negative_msg = "Expected response message \"#{expected}\" to not match given message \"#{given}\""
   given.include?(expected)
 end
+
+####------------------------------------------------------------------------------------------------------
+def_matcher :be_called do |receiver, matcher, args|
+  matcher.positive_msg = "Expected client delgate method '#{receiver.last}' to be called"
+  matcher.negative_msg = "Expected client delgate method '#{receiver.last}' to not be called"
+  receiver.first
+end

@@ -31,7 +31,7 @@ module AgentXmpp
         send(iq) do |r|
           if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
             jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)      
-            [session(stanza), broadcast_to_delegates(:did_bind, self, stanza)].flatten
+            session(stanza)
           end
         end
       end                

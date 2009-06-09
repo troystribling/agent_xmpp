@@ -10,13 +10,13 @@ class TestDelegate
         instance_eval <<-do_eval
           def #{meth.to_s}(*args)
             AgentXmpp.logger.info "TEST_DELEGATE #{meth.to_s.upcase}"
-            @#{meth.to_s}_flag = true
+            @#{meth.to_s}_method = true
             []
           end
-          def #{meth.to_s}_flag
-            @#{meth.to_s}_flag
+          def #{meth.to_s}_method
+            [@#{meth.to_s}_method, "#{meth.to_s}"]
           end
-          @#{meth.to_s}_flag = false
+          @#{meth.to_s}_method = false
         do_eval
       end
     end 
