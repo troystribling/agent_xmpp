@@ -3,6 +3,7 @@ module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
   class NotConnected < Exception; end
+  class AuthenticationFailure < Exception; end
 
   #####-------------------------------------------------------------------------------------------------------
   class Connection < EventMachine::Connection
@@ -130,7 +131,6 @@ module AgentXmpp
         if connection_status.eql?(:offline)
           authenticate
         elsif connection_status.eql?(:authenticated)
-          broadcast_to_delegates(:did_authenticate, self, stanza)
           bind(stanza)
         end
       when 'stream'
@@ -138,12 +138,13 @@ module AgentXmpp
         if connection_status.eql?(:offline)
           reset_parser
           @connection_status = :authenticated
+          broadcast_to_delegates(:did_authenticate, self, stanza)
           init_connection(false)
         end
       when 'failure'
         if connection_status.eql?(:offline)
           reset_parser
-          broadcast_to_delegates(:did_not_authenticate, self, stanza)
+          raise AuthenticationFailure, "authentication failed"
         end
       else
         demux_channel(stanza)
@@ -175,6 +176,12 @@ module AgentXmpp
       #### received command
       elsif stanza.type.eql?(:set) and stanza.command.kind_of?(Jabber::Command::IqCommand)
         process_command(stanza)
+      #### bind error
+      elsif stanza.type.eql?(:error) and stanza.bind
+        raise AuthenticationFailure, "resource bind failed"
+      #### session error
+      elsif stanza.type.eql?(:error) and stanza.session
+        raise AuthenticationFailure, "session start failed"
       #### chat message received
       elsif stanza_class.eql?('Jabber::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
         process_chat_message_body(stanza)

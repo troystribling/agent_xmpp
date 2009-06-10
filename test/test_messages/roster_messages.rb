@@ -43,9 +43,9 @@ module RosterMessages
 
     #### sent messages    
     #.........................................................................................................
-    def send_fetch_roster_request(client)
+    def send_get_roster_request(client)
       <<-MSG
-        <iq id='3542' type='get' xmlns='jabber:client'>
+        <iq id='1' type='get' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'/>
         </iq>
       MSG

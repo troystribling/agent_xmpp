@@ -40,9 +40,13 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_authentication_failed(client)
-      "<failure xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>"
-    end
+    def recv_authentication_failure(client)
+      <<-MSG
+        <failure xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
+          <not-authorized/>
+        </failure>
+      MSG
+     end
   
     #.........................................................................................................
     def recv_postauthentication_stream_features(client)
@@ -64,19 +68,42 @@ module SessionMessages
             <jid>#{client.client.jid.to_s}</jid>
           </bind>
         </iq>
+       MSG
+    end
+
+    #.........................................................................................................
+    def recv_bind_failure(client)
+      <<-MSG
+        <iq type='error' id='1>
+          <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
+            <resource>someresource</resource>
+          </bind>
+          <error type='cancel'>
+            <not-allowed xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+          </error>
+        </iq>
       MSG
     end
 
     #.........................................................................................................
-    def recv_bind_failed(client)
+    def recv_session_init_succcess(client)
+      <<-MSG
+        <iq type='result' id='1' xmlns='jabber:client'>
+          <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
+        </iq>
+       MSG
     end
 
     #.........................................................................................................
-    def recv_session_start_succcess(client)
-    end
-
-    #.........................................................................................................
-    def recv_session_start_failed(client)
+    def recv_session_init_failure(client)
+      <<-MSG
+        <iq from='#{client.client.jid.domain}' type='error' id='1'>
+          <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
+          <error type='wait'>
+            <internal-server-error xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+          </error>
+        </iq>
+      MSG
     end
   
     #### sent messages    
@@ -116,7 +143,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_init_presence(client)
+    def send_presence_init(client)
       <<-MSG
         <presence xmlns='jabber:client'>
           <priority>1</priority>

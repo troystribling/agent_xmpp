@@ -2,9 +2,6 @@
 module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
-  class AuthenticationFailure < Exception; end
-  
-  #####-------------------------------------------------------------------------------------------------------
   module SessionMessages
 
     #---------------------------------------------------------------------------------------------------------
@@ -16,7 +13,7 @@ module AgentXmpp
       if stream_mechanisms.include?('PLAIN')
         Jabber::SASL.new(self, 'PLAIN').auth(password)
       else
-        raise AuthenticationFailure, "PLAIN authentication not supported"
+        raise AuthenticationFailure, "PLAIN authentication required"
       end
     end
     
@@ -31,6 +28,7 @@ module AgentXmpp
         send(iq) do |r|
           if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
             jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)      
+            broadcast_to_delegates(:did_bind, self, stanza)
             session(stanza)
           end
         end

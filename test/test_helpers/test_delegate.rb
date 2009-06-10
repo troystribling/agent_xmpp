@@ -28,7 +28,7 @@ class TestDelegate
   delegate_callbacks :did_connect, :did_disconnect, :did_not_connect
 
   #### authentication
-  delegate_callbacks :did_authenticate, :did_not_authenticate, :did_bind, :did_start_session
+  delegate_callbacks :did_authenticate, :did_bind, :did_start_session
 
   #### presence
   delegate_callbacks :did_receive_presence, :did_receive_subscribe_request, :did_receive_unsubscribed_request

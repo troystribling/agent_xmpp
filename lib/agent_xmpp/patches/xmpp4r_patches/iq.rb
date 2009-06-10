@@ -12,6 +12,16 @@ module AgentXmpp
           add(newcommand)
         end
     
+        #.....................................................................................................
+        def bind
+          first_element('bind')
+        end
+    
+        #.....................................................................................................
+        def session
+          first_element('session')
+        end
+    
       #### InstanceMethods
       end 
        
