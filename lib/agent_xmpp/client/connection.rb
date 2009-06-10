@@ -176,12 +176,6 @@ module AgentXmpp
       #### received command
       elsif stanza.type.eql?(:set) and stanza.command.kind_of?(Jabber::Command::IqCommand)
         process_command(stanza)
-      #### bind error
-      elsif stanza.type.eql?(:error) and stanza.bind
-        raise AuthenticationFailure, "resource bind failed"
-      #### session error
-      elsif stanza.type.eql?(:error) and stanza.session
-        raise AuthenticationFailure, "session start failed"
       #### chat message received
       elsif stanza_class.eql?('Jabber::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
         process_chat_message_body(stanza)

@@ -74,7 +74,7 @@ module SessionMessages
     #.........................................................................................................
     def recv_bind_failure(client)
       <<-MSG
-        <iq type='error' id='1>
+        <iq type='error' id='1'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
             <resource>someresource</resource>
           </bind>

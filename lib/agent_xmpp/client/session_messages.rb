@@ -30,6 +30,8 @@ module AgentXmpp
             jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)      
             broadcast_to_delegates(:did_bind, self, stanza)
             session(stanza)
+          elsif r.type.eql?(:error) and r.bind
+            raise AuthenticationFailure, "resource bind failed"
           end
         end
       end                
@@ -44,6 +46,8 @@ module AgentXmpp
         send(iq) do |r|
           if r.type == :result                
             [send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].flatten
+          elsif r.type.eql?(:error) and r.session
+              raise AuthenticationFailure, "session start failed"
           end
         end
       end
