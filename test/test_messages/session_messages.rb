@@ -61,7 +61,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_bind_success(client)
+    def recv_bind_result(client)
       <<-MSG
         <iq id='1' type='result'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
@@ -72,7 +72,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_bind_failure(client)
+    def recv_bind_error(client)
       <<-MSG
         <iq type='error' id='1'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
@@ -86,7 +86,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_session_init_succcess(client)
+    def recv_session_result(client)
       <<-MSG
         <iq type='result' id='1' xmlns='jabber:client'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -95,7 +95,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_session_init_failure(client)
+    def recv_session_failure(client)
       <<-MSG
         <iq from='#{client.client.jid.domain}' type='error' id='1'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -113,7 +113,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_stream_init(client)
+    def send_stream(client)
       "<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='plan-b.ath.cx'>"
     end
 
@@ -123,7 +123,7 @@ module SessionMessages
     end
   
     #.........................................................................................................
-    def send_bind(client)
+    def send_bind_set(client)
       <<-MSG
         <iq id='1' type='set' xmlns='jabber:client'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
@@ -134,7 +134,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_session_init(client)
+    def send_session_set(client)
       <<-MSG
         <iq id='1' type='set' xmlns='jabber:client'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -143,7 +143,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_presence_init(client)
+    def send_init_presence(client)
       <<-MSG
         <presence xmlns='jabber:client'>
           <priority>1</priority>

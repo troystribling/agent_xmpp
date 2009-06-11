@@ -6,18 +6,18 @@ module SystemDiscoveryMessages
     
     #### received messages    
     #.........................................................................................................
-    def recv_client_version_request(client)
+    def recv_client_version_get(client, from)
       <<-MSG
-        <iq from='test@plan-b.ath.cx/troy-ubuntu' to='dev@plan-b.ath.cx/troy-ubuntu' id='4942' type='get'>
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get'>
           <query xmlns='jabber:iq:version'/>
         </iq>
       MSG
     end
 
     #.........................................................................................................
-    def recv_client_version(client)
+    def recv_client_version_result(client, from)
       <<-MSG
-        <iq from='test@plan-b.ath.cx/troy-ubuntu' to='dev@plan-b.ath.cx/troy-ubuntu' id='4436' type='result'>
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='result'>
           <query xmlns='jabber:iq:version'>
             <name>AgentXMPP</name>
             <version>0.0.0</version>
@@ -29,9 +29,9 @@ module SystemDiscoveryMessages
 
     #### sent messages    
     #.........................................................................................................
-    def send_client_version(client)
+    def send_client_version_result(client, to)
       <<-MSG
-        <iq id='4942' to='test@plan-b.ath.cx/troy-ubuntu' type='result' xmlns='jabber:client'>
+        <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <query xmlns='jabber:iq:version'>
             <name>#{AgentXmpp.AGENT_XMPP_NAME}</name>
             <version>#{AgentXmpp.VERSION}</version>
@@ -42,9 +42,9 @@ module SystemDiscoveryMessages
     end
 
     #.........................................................................................................
-    def send_client_version_request(client)
+    def send_client_version_get(client, to)
       <<-MSG
-        <iq id='4436' to='test@plan-b.ath.cx/troy-ubuntu' type='get' xmlns='jabber:client'>
+        <iq id='1' to='#{to}' type='get' xmlns='jabber:client'>
           <query xmlns='jabber:iq:version'/>
         </iq>
       MSG

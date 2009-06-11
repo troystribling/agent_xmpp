@@ -6,44 +6,74 @@ module RosterMessages
     
     #### received messages    
     #.........................................................................................................
-    def recv_roster_success(client)
+    def recv_roster_result(client, roster_jids)
+      subscriptions = roster_jids.inject("") {|s, r| s += "<item subscription='both' jid='#{r}'/>"}
       <<-MSG
-        <iq from='dev@plan-b.ath.cx/troy-ubuntu' to='dev@plan-b.ath.cx/troy-ubuntu' id='3542' type='result'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'>
           <query xmlns='jabber:iq:roster'>
-            <item subscription='both' jid='test@plan-b.ath.cx'/>
+            #{subscriptions}
           </query>
         </iq>
       MSG
     end
 
-    #.........................................................................................................
-    def recv_roster_failed(client)
+    def recv_roster_set(client, roster_jids)
+      subscriptions = roster_jids.inject("") {|s, r| s += "<item subscription='none' jid='#{r}'/>"}
+      <<-MSG
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'>
+          <query xmlns='jabber:iq:roster'>
+            #{subscriptions}
+          </query>
+        </iq>
+      MSG
+    end
+
+    def recv_roster_set_ack(client)
+      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'/>"
     end
 
     #.........................................................................................................
-    def recv_contact_presence(client)
+    def recv_roster_set_subscribe(client, contact_jid)
       <<-MSG
-        <presence from='test@plan-b.ath.cx/troy-ubuntu' to='dev@plan-b.ath.cx/troy-ubuntu'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+          <query xmlns='jabber:iq:roster'>
+            <item ask='subscribe' subscription='none' jid='#{contact_jid}'/>
+          </query>
+        </iq>
+      MSG
+     end
+
+    #.........................................................................................................
+    def recv_presence_self(client)
+      <<-MSG
+        <presence from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}'>
           <priority>1</priority>
         </presence>
       MSG
     end
 
     #.........................................................................................................
-    def recv_subscription_request(client)
+    def recv_presence_available(client, from)
+      <<-MSG
+        <presence from='#{from}' to='#{client.client.jid.to_s}'>
+          <priority>1</priority>
+        </presence>
+      MSG
     end
 
     #.........................................................................................................
-    def recv_subscription_accept(client)
+    def recv_presence_unavailable(client, from)
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='unavailable'/>"
     end
 
     #.........................................................................................................
-    def recv_subscription_decline(client)
+    def recv_presence_subscribe(client, from)
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='subscribe'/>"
     end
 
     #### sent messages    
     #.........................................................................................................
-    def send_get_roster_request(client)
+    def send_roster_get(client)
       <<-MSG
         <iq id='1' type='get' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'/>
@@ -51,17 +81,26 @@ module RosterMessages
       MSG
      end
 
-    #.........................................................................................................
-    def send_subscription_request(client)
-    end
+     #.........................................................................................................
+     def send_roster_set(client, contact_jid)
+       <<-MSG
+        <iq id='1' type='set' xmlns='jabber:client'>
+          <query xmlns='jabber:iq:roster'>
+            <item jid='#{contact_jid}'/>
+          </query>
+        </iq>
+       MSG
+      end
 
-    #.........................................................................................................
-    def send_subscription_accept(client)
-    end
-
-    #.........................................................................................................
-    def send_subscription_decline(client)
-    end
+     #.........................................................................................................
+     def send_presence_subscribe(client, to)
+       "<presence from='#{client.client.jid.to_s}' to='#{to}' type='subscribe'/>"
+     end
+  
+     #.........................................................................................................
+     def send_presence_subscribed(client, to)
+       "<presence from='#{client.client.jid.to_s}' to='#{to}' type='subscribed'/>"
+     end
   
   end
       
