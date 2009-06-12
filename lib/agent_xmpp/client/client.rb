@@ -144,12 +144,13 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ROSTER ITEM"   
       roster_item_jid = roster_item.jid.to_s
       if roster.has_key?(roster_item_jid) 
+        AgentXmpp.logger.info "ACTIVATING CONTACT: #{roster_item_jid}"   
         roster[roster_item_jid][:activated] = true 
         roster[roster_item_jid][:roster_item] = roster_item 
-        AgentXmpp.logger.info "ACTIVATING CONTACT: #{roster_item_jid}"   
+        []
       else
-        client_connection.remove_contact(roster_item.jid)  
         AgentXmpp.logger.info "REMOVING CONTACT: #{roster_item_jid}"   
+        client_connection.remove_contact(roster_item.jid)  
       end
     end
 
@@ -158,15 +159,15 @@ module AgentXmpp
       AgentXmpp.logger.info "REMOVE ROSTER ITEM"   
       roster_item_jid = roster_item.jid.to_s
       if roster.has_key?(roster_item_jid) 
-        roster.delete(roster_item_jid) 
         AgentXmpp.logger.info "REMOVED CONTACT: #{roster_item_jid}"   
+        roster.delete(roster_item_jid) 
       end
     end
 
     #.........................................................................................................
     def did_receive_all_roster_items(client_connection)
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
-      roster.select{|j,r| not r[:activated]}.each do |j,r|
+      roster.select{|j,r| not r[:activated]}.collect do |j,r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
         client_connection.add_contact(Jabber::JID.new(j))  
       end
