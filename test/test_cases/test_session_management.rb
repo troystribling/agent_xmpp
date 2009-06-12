@@ -32,7 +32,7 @@ class TestSessionManagement < Test::Unit::TestCase
     #### start session and request roster
     stream_init_msgs = @client.receiving(SessionMessages.recv_session_result(@client))
     stream_init_msgs.first.should respond_with(SessionMessages.send_init_presence(@client)) 
-    stream_init_msgs.last.should respond_with(RosterMessages.send_get_roster(@client)) 
+    stream_init_msgs.last.should respond_with(RosterMessages.send_roster_get(@client)) 
     TestDelegate.did_start_session_method.should be_called
   
   end

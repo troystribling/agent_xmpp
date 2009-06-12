@@ -5,14 +5,20 @@ class TestClient
   attr_reader :client
 
   #.........................................................................................................
-  def initialize
-    @client = AgentXmpp::Client.new(File.open('test/test_client/test_client.yml') {|yf| YAML::load(yf)})
+  def initialize(config = nil)
+    config ||= File.open('test/test_client/test_client.yml') {|yf| YAML::load(yf)}
+    @client = AgentXmpp::Client.new(config)
     @client.connect
   end
 
   #.........................................................................................................
   def connection
     @client.connection
+  end
+  
+  #.........................................................................................................
+  def roster
+    @client.roster
   end
   
   #.........................................................................................................
