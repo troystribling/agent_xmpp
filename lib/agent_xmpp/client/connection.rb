@@ -39,7 +39,7 @@ module AgentXmpp
     
     #.........................................................................................................
     def broadcast_to_delegates(method, *args)
-      delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}
+      delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}.flatten
     end
     
     #.........................................................................................................
@@ -156,14 +156,10 @@ module AgentXmpp
       stanza_class = stanza.class.to_s
       #### roster update
       if stanza.type == :set and stanza.query.kind_of?(Jabber::Roster::IqQueryRoster)
-        stanza.query.each_element do |i|  
-          method =  case i.subscription
-                    when :remove then :did_remove_roster_item
-                    when :none   then :did_receive_roster_item
-                    when :to     then :did_add_contact
-                    end         
-          broadcast_to_delegates(method, self, i) unless method.nil?
-        end
+        [stanza.query.inject([]) do |r, i|  
+          method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
+          r.push(broadcast_to_delegates(method, self, i))
+        end, broadcast_to_delegates(:did_receive_all_roster_items, self)].flatten
       #### presence subscription request  
       elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('Jabber::Presence')
         broadcast_to_delegates(:did_receive_subscribe_request, self, stanza)
@@ -180,8 +176,7 @@ module AgentXmpp
       elsif stanza_class.eql?('Jabber::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
         process_chat_message_body(stanza)
       else
-        method = ('did_receive_' + /.*::(.*)/.match(stanza_class).to_a.last.downcase).to_sym
-        broadcast_to_delegates(method, self, stanza)
+        broadcast_to_delegates(('did_receive_' + /.*::(.*)/.match(stanza_class).to_a.last.downcase).to_sym, self, stanza)
       end
     end
   

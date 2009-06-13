@@ -25,7 +25,7 @@ module RosterMessages
     #.........................................................................................................
     def recv_roster_set_none(client, roster_jid)
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='set'>
           <query xmlns='jabber:iq:roster'>
             <item subscription='none' jid='#{roster_jid}'/>
           </query>

@@ -5,9 +5,13 @@ class TestDelegate
   class << self
     
     #.........................................................................................................
+    @@callback_methods = []
+    
+    #.........................................................................................................
     def delegate_callbacks(*args)
       args.each do |meth| 
-        instance_eval <<-do_eval
+        @@callback_methods.push(meth)
+        class_eval <<-do_eval
           def #{meth.to_s}(*args)
             AgentXmpp.logger.info "TEST_DELEGATE #{meth.to_s.upcase}"
             @#{meth.to_s}_method = true
@@ -16,7 +20,7 @@ class TestDelegate
           def #{meth.to_s}_method
             [@#{meth.to_s}_method, "#{meth.to_s}"]
           end
-          @#{meth.to_s}_method = false
+          attr_writer :#{meth.to_s}_method
         do_eval
       end
     end 
@@ -25,7 +29,7 @@ class TestDelegate
   
   #---------------------------------------------------------------------------------------------------------
   #### connection
-  delegate_callbacks :did_connect, :did_disconnect, :did_not_connect
+  delegate_callbacks :did_disconnect
 
   #### authentication
   delegate_callbacks :did_authenticate, :did_bind, :did_start_session
@@ -35,10 +39,15 @@ class TestDelegate
 
   #### roster management
   delegate_callbacks :did_receive_roster_item, :did_remove_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_contact, 
-                     :did_remove_contact, :did_add_contact 
+                     :did_remove_contact 
 
   #### service discovery management
   delegate_callbacks :did_receive_client_version_result,:did_receive_client_version_request
+  
+  #---------------------------------------------------------------------------------------------------------
+  def initialize
+    @@callback_methods.each{|m| send("#{m.to_s}_method=".to_sym, false)}
+  end
   
 #### TestDelegate 
 end

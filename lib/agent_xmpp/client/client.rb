@@ -30,14 +30,14 @@ module AgentXmpp
 
     #.........................................................................................................
     def close_connection
-      connection.close_connection_after_writing
       AgentXmpp.logger.info "CLOSE CONNECTION"
+      connection.close_connection_after_writing unless connection.nil?
     end
 
     #.........................................................................................................
     def reconnect
       AgentXmpp.logger.info "RECONNECTING"
-      connection.reconnect(jid.domain, port)
+      connection.reconnect(jid.domain, port) unless connection.nil?
     end
 
     #.........................................................................................................
@@ -47,12 +47,12 @@ module AgentXmpp
 
     #.........................................................................................................
     def add_delegate(delegate)
-      connection.add_delegate(delegate)
+      connection.add_delegate(delegate) unless connection.nil?
     end
 
     #.........................................................................................................
     def remove_delegate(delegate)
-      connection.remove_delegate(delegate)
+      connection.remove_delegate(delegate)  unless connection.nil?
     end
     
     #---------------------------------------------------------------------------------------------------------
@@ -146,11 +146,22 @@ module AgentXmpp
       if roster.has_key?(roster_item_jid) 
         case roster_item.subscription   
         when :none
+          if roster_item.ask.eql?(:subscribe)
+            AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid}"   
+            roster[roster_item_jid][:status] = :ask 
+          else
+            AgentXmpp.logger.info "CONTACT ADDED TO ROSTER: #{roster_item_jid}"   
+            roster[roster_item_jid][:status] = :added 
+          end
         when :to
+          AgentXmpp.logger.info "SUBSCRIBED TO CONTACT PRESENCE: #{roster_item_jid}"   
+          roster[roster_item_jid][:status] = :to 
         when :from
+          AgentXmpp.logger.info "CONTACT SUBSCRIBED TO PRESENCE: #{roster_item_jid}"   
+          roster[roster_item_jid][:status] = :from 
         when :both    
-          AgentXmpp.logger.info "ACTIVATING CONTACT: #{roster_item_jid}"   
-          roster[roster_item_jid][:activated] = true 
+          AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid}"   
+          roster[roster_item_jid][:status] = :both 
           roster[roster_item_jid][:roster_item] = roster_item 
         end
         []
@@ -173,7 +184,7 @@ module AgentXmpp
     #.........................................................................................................
     def did_receive_all_roster_items(client_connection)
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
-      roster.select{|j,r| not r[:activated]}.collect do |j,r|
+      roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
         client_connection.add_contact(Jabber::JID.new(j))  
       end
@@ -188,12 +199,6 @@ module AgentXmpp
     #.........................................................................................................
     def did_remove_contact(client_connection, response, contact_jid)
       AgentXmpp.logger.info "CONTACT REMOVED: #{contact_jid.to_s}"
-      []
-    end
-
-    #.........................................................................................................
-    def did_add_contact(client_connection, roster_item)
-      AgentXmpp.logger.info "CONTACT ADDED: #{roster_item.jid.to_s}"
       []
     end
 

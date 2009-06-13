@@ -6,9 +6,9 @@ module AgentXmpp
 
     #.........................................................................................................
     def initialize(jid, contacts)
-      @items = Hash.new{|hash, key| hash[key] = {:activated => false, :resources => {}}}
+      @items = Hash.new{|hash, key| hash[key] = {:status => :inactive, :resources => {}}}
       contacts.each{|c| @items[c]}
-      @items[jid.bare.to_s] = {:activated => true, :resources => {}}
+      @items[jid.bare.to_s] = {:status => :both, :resources => {}}
     end
 
     #.........................................................................................................

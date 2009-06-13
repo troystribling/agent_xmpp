@@ -33,7 +33,7 @@ module AgentXmpp
     #.........................................................................................................
     def accept_contact_request(contact_jid)
       presence = Jabber::Presence.new.set_type(:subscribed)
-      presence.to = contact_jid      
+      presence.to = contact_jid  
       send(presence)
     end
 

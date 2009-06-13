@@ -20,7 +20,15 @@ class TestClient
   def roster
     @client.roster
   end
-  
+
+  #.........................................................................................................
+  def new_delegate
+    @client.remove_delegate(@delegate) unless @delegate.nil?
+    @delegate = TestDelegate.new
+    @client.add_delegate(@delegate)
+    @delegate
+  end
+    
   #.........................................................................................................
   def receiving(msg)
     prepared_msg = msg.split(/\n/).inject("") {|p, m| p + m.strip}

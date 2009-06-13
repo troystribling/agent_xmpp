@@ -26,7 +26,6 @@ class AgentXmpp::Connection
   def connection_completed
     init_connection
     add_delegate(client)  
-    add_delegate(TestDelegate)    
     broadcast_to_delegates(:did_connect, self)
   end
 
