@@ -7,7 +7,7 @@ module AgentXmpp
     def send_roster_request
       send(Jabber::Iq.new_rosterget) do |r|
         if r.type == :result and r.query.kind_of?(Jabber::Roster::IqQueryRoster)
-          [r.query.elements.collect {|i|  broadcast_to_delegates(:did_receive_roster_item, self, i)}, broadcast_to_delegates(:did_receive_all_roster_items, self)].flatten
+          [r.query.elements.collect{|i| broadcast_to_delegates(:did_receive_roster_item, self, i)}, broadcast_to_delegates(:did_receive_all_roster_items, self)].flatten
         end
       end
     end
@@ -17,7 +17,7 @@ module AgentXmpp
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(contact_jid))
       send(request) do |r|
-        [send(Jabber::Presence.new.set_type(:subscribe).set_to(contact_jid)), broadcast_to_delegates(:did_acknowledge_add_contact, self, r, contact_jid)]
+        [send(Jabber::Presence.new.set_type(:subscribe).set_to(contact_jid)), broadcast_to_delegates(:did_acknowledge_add_contact, self, r, contact_jid)].flatten
       end
     end
 

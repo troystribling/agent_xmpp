@@ -144,9 +144,15 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ROSTER ITEM"   
       roster_item_jid = roster_item.jid.to_s
       if roster.has_key?(roster_item_jid) 
-        AgentXmpp.logger.info "ACTIVATING CONTACT: #{roster_item_jid}"   
-        roster[roster_item_jid][:activated] = true 
-        roster[roster_item_jid][:roster_item] = roster_item 
+        case roster_item.subscription   
+        when :none
+        when :to
+        when :from
+        when :both    
+          AgentXmpp.logger.info "ACTIVATING CONTACT: #{roster_item_jid}"   
+          roster[roster_item_jid][:activated] = true 
+          roster[roster_item_jid][:roster_item] = roster_item 
+        end
         []
       else
         AgentXmpp.logger.info "REMOVING CONTACT: #{roster_item_jid}"   
@@ -176,31 +182,34 @@ module AgentXmpp
     #.........................................................................................................
     def did_acknowledge_add_contact(client_connection, response, contact_jid)
       AgentXmpp.logger.info "CONTACT ADD ACKNOWLEDGED: #{contact_jid.to_s}"
+      []
     end
 
     #.........................................................................................................
     def did_remove_contact(client_connection, response, contact_jid)
       AgentXmpp.logger.info "CONTACT REMOVED: #{contact_jid.to_s}"
+      []
     end
 
     #.........................................................................................................
     def did_add_contact(client_connection, roster_item)
       AgentXmpp.logger.info "CONTACT ADDED: #{roster_item.jid.to_s}"
+      []
     end
 
     #.........................................................................................................
     # service discovery management
     #.........................................................................................................
     def did_receive_client_version_result(client_connection, from, version)
+      AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
       roster[from.bare.to_s][:resources][from.to_s][:version] = version \
         unless roster[from.bare.to_s][:resources][from.to_s].nil?
-      AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
     end
 
     #.........................................................................................................
     def did_receive_client_version_request(client_connection, request)
-      client_connection.send_client_version(request)
       AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
+      client_connection.send_client_version(request)
     end
 
   #### Client

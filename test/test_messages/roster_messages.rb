@@ -17,7 +17,13 @@ module RosterMessages
       MSG
     end
 
-    def recv_roster_set(client, roster_jid)
+    #.........................................................................................................
+    def recv_roster_result_set_ack(client)
+      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'/>"
+    end
+
+    #.........................................................................................................
+    def recv_roster_set_none(client, roster_jid)
       <<-MSG
         <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'>
           <query xmlns='jabber:iq:roster'>
@@ -27,16 +33,34 @@ module RosterMessages
       MSG
     end
 
-    def recv_roster_set_ack(client)
-      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'/>"
-    end
-
     #.........................................................................................................
-    def recv_roster_set_subscribe(client, roster_jid)
+    def recv_roster_set_subscribe_none(client, roster_jid)
       <<-MSG
         <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
           <query xmlns='jabber:iq:roster'>
             <item ask='subscribe' subscription='none' jid='#{roster_jid}'/>
+          </query>
+        </iq>
+      MSG
+     end
+
+     #.........................................................................................................
+     def recv_roster_set_to(client, roster_jid)
+      <<-MSG
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+         <query xmlns='jabber:iq:roster'>
+           <item subscription='to' jid='#{roster_jid}'/>
+         </query>
+        </iq>
+      MSG
+    end
+
+    #.........................................................................................................
+    def recv_roster_set_both(client, roster_jid)
+      <<-MSG
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+          <query xmlns='jabber:iq:roster'>
+            <item subscription='both' jid='#{roster_jid}'/>
           </query>
         </iq>
       MSG
@@ -93,12 +117,12 @@ module RosterMessages
 
      #.........................................................................................................
      def send_presence_subscribe(client, to)
-       "<presence from='#{client.client.jid.to_s}' to='#{to}' type='subscribe'/>"
+       "<presence to='#{to}' type='subscribe' xmlns='jabber:client'/>"
      end
   
      #.........................................................................................................
      def send_presence_subscribed(client, to)
-       "<presence from='#{client.client.jid.to_s}' to='#{to}' type='subscribed'/>"
+       "<presence to='#{to}' type='subscribed' xmlns='jabber:client'/>"
      end
   
   end
