@@ -166,8 +166,8 @@ module AgentXmpp
         end
         []
       else
-        AgentXmpp.logger.info "REMOVING CONTACT: #{roster_item_jid}"   
-        client_connection.remove_contact(roster_item.jid)  
+        AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
+        client_connection.remove_roster_item(roster_item.jid)  
       end
     end
 
@@ -176,9 +176,10 @@ module AgentXmpp
       AgentXmpp.logger.info "REMOVE ROSTER ITEM"   
       roster_item_jid = roster_item.jid.to_s
       if roster.has_key?(roster_item_jid) 
-        AgentXmpp.logger.info "REMOVED CONTACT: #{roster_item_jid}"   
+        AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid}"   
         roster.delete(roster_item_jid) 
       end
+      []
     end
 
     #.........................................................................................................
@@ -186,19 +187,19 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
       roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-        client_connection.add_contact(Jabber::JID.new(j))  
+        client_connection.add_roster_item(Jabber::JID.new(j))  
       end
     end
 
     #.........................................................................................................
-    def did_acknowledge_add_contact(client_connection, response, contact_jid)
-      AgentXmpp.logger.info "CONTACT ADD ACKNOWLEDGED: #{contact_jid.to_s}"
+    def did_acknowledge_add_roster_item(client_connection, response, roster_item_jid)
+      AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDGED: #{roster_item_jid.to_s}"
       []
     end
 
     #.........................................................................................................
-    def did_remove_contact(client_connection, response, contact_jid)
-      AgentXmpp.logger.info "CONTACT REMOVED: #{contact_jid.to_s}"
+    def did_acknowledge_remove_roster_item(client_connection, response, roster_item_jid)
+      AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDGED: #{roster_item_jid.to_s}"
       []
     end
 

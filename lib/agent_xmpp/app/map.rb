@@ -22,7 +22,7 @@ module AgentXmpp
       def connect(path, options = {})
         path.strip!; path.gsub!(/^\//,'')
         path_elements = path.split('/')
-        raise RoutingConnection, "Inavild route connection: #{path}." if path_elements.count < 2 
+        raise AgentXmppError, "Inavild route connection: #{path}." if path_elements.count < 2 
         @routes[path] = {:controller => options[:controller] || path_elements[0], :action => options[:action] || path_elements[1]}
       end
 

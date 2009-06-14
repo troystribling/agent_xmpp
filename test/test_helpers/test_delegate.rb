@@ -38,8 +38,8 @@ class TestDelegate
   delegate_callbacks :did_receive_presence, :did_receive_subscribe_request, :did_receive_unsubscribed_request
 
   #### roster management
-  delegate_callbacks :did_receive_roster_item, :did_remove_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_contact, 
-                     :did_remove_contact 
+  delegate_callbacks :did_receive_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_roster_item, 
+                     :did_remove_roster_item, :did_acknowledge_remove_roster_item
 
   #### service discovery management
   delegate_callbacks :did_receive_client_version_result,:did_receive_client_version_request

@@ -66,6 +66,31 @@ module RosterMessages
       MSG
      end
 
+     #.........................................................................................................
+     def recv_roster_set_remove(client, roster_jid)
+       <<-MSG
+         <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+           <query xmlns='jabber:iq:roster'>
+             <item jid='#{roster_jid}' subscription='remove'/>
+           </query>
+         </iq>
+       MSG
+      end
+
+      #.........................................................................................................
+      def recv_roster_error(client)
+        <<-MSG
+          <iq type='error' id='1'>
+            <query xmlns='jabber:iq:roster'>
+              <item jid='#{roster_jid}'/>
+            </query>
+            <error type='cancel'>
+              <not-allowed xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+            </error>
+          </iq>
+        MSG
+      end
+
     #.........................................................................................................
     def recv_presence_self(client)
       <<-MSG
@@ -105,15 +130,26 @@ module RosterMessages
      end
 
      #.........................................................................................................
-     def send_roster_set(client, roster_jids)
+     def send_roster_set(client, roster_jid)
        <<-MSG
         <iq id='1' type='set' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'>
-            <item jid='#{roster_jids}'/>
+            <item jid='#{roster_jid}'/>
           </query>
         </iq>
        MSG
       end
+
+      #.........................................................................................................
+      def send_roster_set_remove(client, roster_jid)
+        <<-MSG
+         <iq id='1' type='set' xmlns='jabber:client'>
+           <query xmlns='jabber:iq:roster'>
+             <item jid='#{roster_jid}' subscription='remove'/>
+           </query>
+         </iq>
+        MSG
+       end
 
      #.........................................................................................................
      def send_presence_subscribe(client, to)

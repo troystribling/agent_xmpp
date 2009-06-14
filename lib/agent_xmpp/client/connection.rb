@@ -2,10 +2,6 @@
 module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
-  class NotConnected < Exception; end
-  class AuthenticationFailure < Exception; end
-
-  #####-------------------------------------------------------------------------------------------------------
   class Connection < EventMachine::Connection
 
     #---------------------------------------------------------------------------------------------------------
@@ -44,7 +40,7 @@ module AgentXmpp
     
     #.........................................................................................................
     def send(data, &blk)
-      raise NotConnected if error?
+      raise AgentXmppError, 'Not Connected'  if error?
       if block_given? and data.is_a? Jabber::XMPPStanza
         if data.id.nil?
           data.id = Jabber::IdGenerator.instance.generate_id
@@ -144,7 +140,7 @@ module AgentXmpp
       when 'failure'
         if connection_status.eql?(:offline)
           reset_parser
-          raise AuthenticationFailure, "authentication failed"
+          raise AgentXmppError, "authentication failed"
         end
       else
         demux_channel(stanza)

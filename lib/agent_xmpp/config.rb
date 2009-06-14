@@ -10,5 +10,7 @@ module AgentXmpp
     attr_accessor :config_file, :app_path
   end
   
+  class AgentXmppError < Exception; end
+  
 end
 

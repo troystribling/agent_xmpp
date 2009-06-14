@@ -47,7 +47,7 @@ class TestSessionManagement < Test::Unit::TestCase
   
     #### receive pre authentication stream feautues which do not include plain authentication
     lambda{@client.receiving(SessionMessages.recv_preauthentication_stream_features_without_plain_SASL(@client))}.should \
-      raise_error(AgentXmpp::AuthenticationFailure) 
+      raise_error(AgentXmpp::AgentXmppError) 
   end
   
   #.........................................................................................................
@@ -60,7 +60,7 @@ class TestSessionManagement < Test::Unit::TestCase
     #### receive pre authentication stream feautues and mechanisms and authenticate
     @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
       respond_with(SessionMessages.send_plain_authentication(@client)) 
-    lambda{@client.receiving(SessionMessages.recv_authentication_failure(@client))}.should raise_error(AgentXmpp::AuthenticationFailure) 
+    lambda{@client.receiving(SessionMessages.recv_authentication_failure(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
     
   end
   
@@ -80,7 +80,7 @@ class TestSessionManagement < Test::Unit::TestCase
   
     #### bind resource and receive error
     @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_bind_set(@client)) 
-    lambda{@client.receiving(SessionMessages.recv_bind_error(@client))}.should raise_error(AgentXmpp::AuthenticationFailure) 
+    lambda{@client.receiving(SessionMessages.recv_bind_error(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
   
@@ -105,7 +105,7 @@ class TestSessionManagement < Test::Unit::TestCase
       @delegate.did_bind_method.should be_called
     
       #### start session and request roster
-      lambda{@client.receiving(SessionMessages.recv_session_failure(@client))}.should raise_error(AgentXmpp::AuthenticationFailure) 
+      lambda{@client.receiving(SessionMessages.recv_session_failure(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
   

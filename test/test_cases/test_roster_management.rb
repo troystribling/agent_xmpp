@@ -13,7 +13,7 @@ class TestRosterManagement < Test::Unit::TestCase
   end
 
   #.........................................................................................................
-  def test_roster_update(client)
+  def test_receive_roster_item(client)
     delegate = client.new_delegate
     delegate.did_receive_roster_item_method.should_not be_called
     delegate.did_receive_all_roster_items_method.should_not be_called
@@ -60,7 +60,7 @@ class TestRosterManagement < Test::Unit::TestCase
     delegate.did_start_session_method.should be_called
     
     #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
-    test_roster_update(client) do |client|
+    test_receive_roster_item(client) do |client|
       client.roster.values{|v| v[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_roster_result(client, ['dev@nowhere.com'])).should \
         respond_with(RosterMessages.send_roster_set(client, 'troy@nowhere.com'))
@@ -70,26 +70,26 @@ class TestRosterManagement < Test::Unit::TestCase
   
     #### receive roster add ackgnowledgement and send subscription request
     delegate = client.new_delegate
-    delegate.did_acknowledge_add_contact_method.should_not be_called
+    delegate.did_acknowledge_add_roster_item_method.should_not be_called
     client.receiving(RosterMessages.recv_roster_result_set_ack(client)).should \
       respond_with(RosterMessages.send_presence_subscribe(client, 'troy@nowhere.com'))
-    delegate.did_acknowledge_add_contact_method.should be_called
-
+    delegate.did_acknowledge_add_roster_item_method.should be_called
+  
     #### receive roster update with subscribe=none for newly added contact
-    test_roster_update(client) do |client|
+    test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_roster_set_none(client, 'troy@nowhere.com')).should not_respond
       client.roster['troy@nowhere.com'][:status].should be(:added)      
     end
-
+  
     #### receive roster update with subscription=none and ask=subscribe indicating pending susbscription request for newly added contact
-    test_roster_update(client) do |client|
+    test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_roster_set_subscribe_none(client, 'troy@nowhere.com')).should not_respond
       client.roster['troy@nowhere.com'][:status].should be(:ask)      
     end
     
     #### receive roster update with subscription=to indicating that the contact's presence updates will be received 
     #### (i.e. the contact accepted the invite)
-    test_roster_update(client) do |client|
+    test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_roster_set_to(client, 'troy@nowhere.com')).should not_respond
       client.roster['troy@nowhere.com'][:status].should be(:to)
     end
@@ -103,37 +103,79 @@ class TestRosterManagement < Test::Unit::TestCase
     
     #### receive roster update with subscription=both indicating that the contact's presence updates will be received and contact 
     #### will treceive presence updates and activate contact roster item
-    test_roster_update(client) do |client|
+    test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_roster_set_both(client, 'troy@nowhere.com')).should not_respond
       client.roster['troy@nowhere.com'][:status].should be(:both)      
     end
     
   end
-
-  # #.........................................................................................................
-  # should "query server for roster on succesful session start and send an unsubscribe request to roster items returned by query result that are not in configured roster" do
-  # end
-  #   
-  # ####......................................................................................................
-  # context "a client instance" do
-  # 
-  #   #.........................................................................................................
-  #   setup do 
-  #     @client = TestClient.new
-  #   end
-  #   
-  #   #.........................................................................................................
-  #   should "accept self presence message and do nothing" do
-  #   end
-  # 
-  #   #.........................................................................................................
-  #   should "make roster item inactive when unavable presence is received" do
-  #   end
-  # 
-  #   #.........................................................................................................
-  #   should "decline subscription requests which are not in the configured roster" do
-  #   end
-  # 
-  # end
+  
+  #.........................................................................................................
+  should "query server for roster on succesful session start and send an unsubscribe request to roster items returned by query result that are not in the configuration roster" do
+  
+    #### client configured with one contact in roster. 'troy@nowhere.com' will be returned by roster initial query
+    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    client = TestClient.new(config)
+    delegate = client.new_delegate
+      
+    #### session starts and roster is requested
+    bind_resource(client)
+    delegate.did_start_session_method.should_not be_called
+    client.receiving(SessionMessages.recv_session_result(client)).last.should respond_with(RosterMessages.send_roster_get(client)) 
+    delegate.did_start_session_method.should be_called
+    
+    #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
+    test_receive_roster_item(client) do |client|
+      client.roster.values{|v| v[:status].should be(:inactive)}  
+      client.receiving(RosterMessages.recv_roster_result(client, ['dev@nowhere.com', 'troy@nowhere.com'])).should \
+        respond_with(RosterMessages.send_roster_set_remove(client, 'troy@nowhere.com'))
+      client.roster['dev@nowhere.com'][:status].should be(:both)      
+    end
+  
+    #### receive roster remove ackgnowledgement
+    delegate = client.new_delegate
+    delegate.did_acknowledge_remove_roster_item_method.should_not be_called
+    client.receiving(RosterMessages.recv_roster_result_set_ack(client)).should not_respond
+    delegate.did_acknowledge_remove_roster_item_method.should be_called
+  
+    #### recieve roster item remove
+    delegate.did_remove_roster_item_method.should_not be_called
+    delegate.did_receive_all_roster_items_method.should_not be_called
+    client.receiving(RosterMessages.recv_roster_set_remove(client, 'troy@nowhere.com')).should not_respond
+    client.roster.keys.select{|jid| jid.eql?('troy@nowhere.com')}.empty?.should be(true) 
+    delegate.did_remove_roster_item_method.should be_called
+    delegate.did_receive_all_roster_items_method.should be_called
+  
+  end
+    
+  #.........................................................................................................
+  should "remove roster item if a roster add message is received for a roster item not in he configuration roster" do
+  end
+    
+  #.........................................................................................................
+  should "query server for roster on succesful session start and throw an exeception if there is an error retrieving roster" do
+  end
+    
+  ####......................................................................................................
+  context "a client instance" do
+  
+    #.........................................................................................................
+    setup do 
+      @client = TestClient.new
+    end
+    
+    #.........................................................................................................
+    should "receive self presence" do
+    end
+  
+    #.........................................................................................................
+    should "make roster item inactive when unavable presence is received" do
+    end
+  
+    #.........................................................................................................
+    should "decline subscription requests which are not in the configured roster" do
+    end
+  
+  end
 
 end

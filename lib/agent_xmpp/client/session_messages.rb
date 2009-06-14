@@ -13,7 +13,7 @@ module AgentXmpp
       if stream_mechanisms.include?('PLAIN')
         Jabber::SASL.new(self, 'PLAIN').auth(password)
       else
-        raise AuthenticationFailure, "PLAIN authentication required"
+        raise AgentXmppError, "PLAIN authentication required"
       end
     end
     
@@ -31,7 +31,7 @@ module AgentXmpp
             broadcast_to_delegates(:did_bind, self, stanza)
             session(stanza)
           elsif r.type.eql?(:error) and r.bind
-            raise AuthenticationFailure, "resource bind failed"
+            raise AgentXmppError, "resource bind failed"
           end
         end
       end                
@@ -47,7 +47,7 @@ module AgentXmpp
           if r.type == :result                
             [send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].flatten
           elsif r.type.eql?(:error) and r.session
-              raise AuthenticationFailure, "session start failed"
+            raise AgentXmppError, "session start failed"
           end
         end
       end
