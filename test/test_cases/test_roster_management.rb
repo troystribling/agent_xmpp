@@ -13,6 +13,35 @@ class TestRosterManagement < Test::Unit::TestCase
   end
 
   #.........................................................................................................
+  def test_send_roster_request(client, config)
+
+    #### client configured with two contacts in roster
+    delegate = client.new_delegate
+    bind_resource(client)
+  
+    #### session starts and roster is requested
+    delegate.did_start_session_method.should_not be_called
+    client.receiving(SessionMessages.recv_session_result(client)).last.should respond_with(RosterMessages.send_roster_get(client)) 
+    delegate.did_start_session_method.should be_called
+  
+  end
+  
+  #.........................................................................................................
+  def test_init_roster(client, config)
+
+    #### client configured with two contacts in roster
+    test_send_roster_request(client, config)
+    delegate = client.new_delegate
+  
+    #### receive roster request and verify that roster items are activated
+    delegate.did_receive_all_roster_items_method.should_not be_called     
+    client.roster.values{|v| v[:status].should be(:inactive)}      
+    client.receiving(RosterMessages.recv_roster_result(client, config['contacts'])).should not_respond
+    client.roster.values{|v| v[:status].should be(:both)} 
+    delegate.did_receive_all_roster_items_method.should be_called     
+  end
+  
+  #.........................................................................................................
   def test_receive_roster_item(client)
     delegate = client.new_delegate
     delegate.did_receive_roster_item_method.should_not be_called
@@ -22,27 +51,14 @@ class TestRosterManagement < Test::Unit::TestCase
     delegate.did_receive_all_roster_items_method.should be_called     
   end
   
+  ####------------------------------------------------------------------------------------------------------
   #.........................................................................................................
   should "query server for roster on succesful session start and activate configured roster items which match those returned in query result" do
   
-    #### client configured with two contacts in roster
     config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
-    delegate = client.new_delegate
-    bind_resource(client)
-  
-    #### session starts and roster is requested
-    delegate.did_start_session_method.should_not be_called
-    client.receiving(SessionMessages.recv_session_result(client)).last.should respond_with(RosterMessages.send_roster_get(client)) 
-    delegate.did_start_session_method.should be_called
-  
-    #### receive roster request and verify that roster items are activated
-    delegate.did_receive_all_roster_items_method.should_not be_called     
-    client.roster.values{|v| v[:status].should be(:inactive)}      
-    client.receiving(RosterMessages.recv_roster_result(client, config['contacts'])).should not_respond
-    client.roster.values{|v| v[:status].should be(:both)} 
-    delegate.did_receive_all_roster_items_method.should be_called     
-  
+    test_init_roster(client, config)
+    
   end
   
   #.........................................................................................................
@@ -51,13 +67,8 @@ class TestRosterManagement < Test::Unit::TestCase
     #### client configured with two contacts in roster. 'troy@nowhere.com' will not be returned by roster initial query
     config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
+    test_send_roster_request(client, config)
     delegate = client.new_delegate
-      
-    #### session starts and roster is requested
-    bind_resource(client)
-    delegate.did_start_session_method.should_not be_called
-    client.receiving(SessionMessages.recv_session_result(client)).last.should respond_with(RosterMessages.send_roster_get(client)) 
-    delegate.did_start_session_method.should be_called
     
     #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
@@ -68,7 +79,7 @@ class TestRosterManagement < Test::Unit::TestCase
       client.roster['troy@nowhere.com'][:status].should be(:inactive)
     end
   
-    #### receive roster add ackgnowledgement and send subscription request
+    ### receive roster add ackgnowledgement and send subscription request
     delegate = client.new_delegate
     delegate.did_acknowledge_add_roster_item_method.should_not be_called
     client.receiving(RosterMessages.recv_roster_result_set_ack(client)).should \
@@ -116,15 +127,10 @@ class TestRosterManagement < Test::Unit::TestCase
     #### client configured with one contact in roster. 'troy@nowhere.com' will be returned by roster initial query
     config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
+    test_send_roster_request(client, config)
     delegate = client.new_delegate
-      
-    #### session starts and roster is requested
-    bind_resource(client)
-    delegate.did_start_session_method.should_not be_called
-    client.receiving(SessionMessages.recv_session_result(client)).last.should respond_with(RosterMessages.send_roster_get(client)) 
-    delegate.did_start_session_method.should be_called
     
-    #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
+    #### receive roster request and verify that appropriate roster item is activated and remove roster message is sent for 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
       client.roster.values{|v| v[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_roster_result(client, ['dev@nowhere.com', 'troy@nowhere.com'])).should \
@@ -142,40 +148,98 @@ class TestRosterManagement < Test::Unit::TestCase
     delegate.did_remove_roster_item_method.should_not be_called
     delegate.did_receive_all_roster_items_method.should_not be_called
     client.receiving(RosterMessages.recv_roster_set_remove(client, 'troy@nowhere.com')).should not_respond
-    client.roster.keys.select{|jid| jid.eql?('troy@nowhere.com')}.empty?.should be(true) 
+    client.roster.keys.include?('troy@nowhere.com').should be(false) 
     delegate.did_remove_roster_item_method.should be_called
     delegate.did_receive_all_roster_items_method.should be_called
   
   end
     
   #.........................................................................................................
-  should "remove roster item if a roster add message is received for a roster item not in he configuration roster" do
+  should "remove roster item if a roster add message is received for a roster item not in the configuration roster" do
+  
+    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    client = TestClient.new(config)
+    test_init_roster(client, config)
+  
+    #### receive roster request and verify that appropriate roster item is not configured and send remove roster message to 'troy@nowhere.com'
+    test_receive_roster_item(client) do |client|
+      client.roster.values{|v| v[:status].should be(:inactive)}  
+      client.receiving(RosterMessages.recv_roster_set_subscribe_none(client, ['troy@nowhere.com'])).should \
+        respond_with(RosterMessages.send_roster_set_remove(client, 'troy@nowhere.com'))
+      client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    end
+  
+    #### receive roster remove ackgnowledgement
+    delegate = client.new_delegate
+    delegate.did_acknowledge_remove_roster_item_method.should_not be_called
+    client.receiving(RosterMessages.recv_roster_result_set_ack(client)).should not_respond
+    delegate.did_acknowledge_remove_roster_item_method.should be_called
+  
   end
     
   #.........................................................................................................
   should "query server for roster on succesful session start and throw an exeception if there is an error retrieving roster" do
-  end
-    
-  ####......................................................................................................
-  context "a client instance" do
   
-    #.........................................................................................................
-    setup do 
-      @client = TestClient.new
-    end
-    
-    #.........................................................................................................
-    should "receive self presence" do
-    end
+    #### client configured with two contacts in roster
+    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    client = TestClient.new(config)
+    test_send_roster_request(client, config)
+    delegate = client.new_delegate
   
-    #.........................................................................................................
-    should "make roster item inactive when unavable presence is received" do
-    end
-  
-    #.........................................................................................................
-    should "decline subscription requests which are not in the configured roster" do
-    end
+    #### receive roster request and verify that roster items are activated
+    lambda{client.receiving(RosterMessages.recv_roster_error(client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
-
+    
+  #.........................................................................................................
+  should "not respond to errors received in response to a remove roster query" do
+  
+    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    client = TestClient.new(config)
+    test_init_roster(client, config)
+  
+    #### receive roster request and verify that appropriate roster item is not configured and send remove roster message to 'troy@nowhere.com'
+    test_receive_roster_item(client) do |client|
+      client.roster.values{|v| v[:status].should be(:inactive)}  
+      client.receiving(RosterMessages.recv_roster_set_subscribe_none(client, ['troy@nowhere.com'])).should \
+        respond_with(RosterMessages.send_roster_set_remove(client, 'troy@nowhere.com'))
+      client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    end
+  
+    #### receive roster remove ackgnowledgement
+    delegate = client.new_delegate
+    delegate.did_receive_remove_roster_item_error_method.should_not be_called
+    client.receiving(RosterMessages.recv_roster_result_set_error(client)).should not_respond
+    client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    delegate.did_receive_remove_roster_item_error_method.should be_called
+    
+  end
+  
+  #.........................................................................................................
+  should "not respond to errors received in response to an add roster query but should remove roster item from configured list" do
+  
+    #### client configured with two contacts in roster. 'troy@nowhere.com' will not be returned by roster initial query
+    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
+    client = TestClient.new(config)
+    test_send_roster_request(client, config)
+    delegate = client.new_delegate
+    
+    #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
+    test_receive_roster_item(client) do |client|
+      client.roster.values{|v| v[:status].should be(:inactive)}  
+      client.receiving(RosterMessages.recv_roster_result(client, ['dev@nowhere.com'])).should \
+        respond_with(RosterMessages.send_roster_set(client, 'troy@nowhere.com'))
+      client.roster['dev@nowhere.com'][:status].should be(:both)      
+      client.roster['troy@nowhere.com'][:status].should be(:inactive)
+    end
+  
+    ### receive roster add ackgnowledgement and send subscription request
+    delegate = client.new_delegate
+    delegate.did_receive_add_roster_item_error_method.should_not be_called
+    client.receiving(RosterMessages.recv_roster_result_set_error(client)).should not_respond
+    delegate.did_receive_add_roster_item_error_method.should be_called
+    client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    
+  end
+  
 end

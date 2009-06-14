@@ -105,7 +105,7 @@ class TestSessionManagement < Test::Unit::TestCase
       @delegate.did_bind_method.should be_called
     
       #### start session and request roster
-      lambda{@client.receiving(SessionMessages.recv_session_failure(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
+      lambda{@client.receiving(SessionMessages.recv_session_error(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
   

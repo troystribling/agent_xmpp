@@ -12,7 +12,7 @@ end
 def_matcher :not_respond do |receiver, matcher, args|
   matcher.positive_msg = "Expected no responce"
   matcher.negative_msg = "Expected a response"
-  receiver.empty?
+  receiver.nil? || receiver.empty?
 end
 
 ####------------------------------------------------------------------------------------------------------

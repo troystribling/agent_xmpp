@@ -45,7 +45,7 @@ module AgentXmpp
         session.add_namespace stream_features['session']                
         send(iq) do |r|
           if r.type == :result                
-            [send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].flatten
+            [send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].smash
           elsif r.type.eql?(:error) and r.session
             raise AgentXmppError, "session start failed"
           end

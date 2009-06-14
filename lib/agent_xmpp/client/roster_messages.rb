@@ -6,8 +6,9 @@ module AgentXmpp
 
     def send_roster_request
       send(Jabber::Iq.new_rosterget) do |r|
-        if r.type == :result and r.query.kind_of?(Jabber::Roster::IqQueryRoster)
-          [r.query.elements.collect{|i| broadcast_to_delegates(:did_receive_roster_item, self, i)}, broadcast_to_delegates(:did_receive_all_roster_items, self)].flatten
+        if r.type == :result and r.kind_of?(Jabber::Iq)
+          [r.query.elements.collect{|i| broadcast_to_delegates(:did_receive_roster_item, self, i)}, \
+            broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
         elsif r.type.eql?(:error)
           raise AgentXmppError, "roster request failed"
         end
@@ -19,7 +20,13 @@ module AgentXmpp
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(roster_item_jid))
       send(request) do |r|
-        [send(Jabber::Presence.new.set_type(:subscribe).set_to(roster_item_jid)), broadcast_to_delegates(:did_acknowledge_add_roster_item, self, r, roster_item_jid)].flatten
+        if r.type == :result and r.kind_of?(Jabber::Iq)
+          [send(Jabber::Presence.new.set_type(:subscribe).set_to(roster_item_jid)), \
+            broadcast_to_delegates(:did_acknowledge_add_roster_item, self, r, roster_item_jid)].smash
+        elsif r.type.eql?(:error)
+          AgentXmpp.logger.error "ERROR ADDING ROSTER ITEM: #{roster_item_jid}"
+          broadcast_to_delegates(:did_receive_add_roster_item_error, self, r, roster_item_jid)
+        end
       end
     end
 
@@ -28,7 +35,12 @@ module AgentXmpp
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(roster_item_jid, nil, :remove))
       send(request) do |r|
-        broadcast_to_delegates(:did_acknowledge_remove_roster_item, self, r, roster_item_jid)
+        if r.type == :result and r.kind_of?(Jabber::Iq)
+          broadcast_to_delegates(:did_acknowledge_remove_roster_item, self, r, roster_item_jid)
+        elsif r.type.eql?(:error)
+          AgentXmpp.logger.error "ERROR REMOVING ROSTER ITEM: #{roster_item_jid}"
+          broadcast_to_delegates(:did_receive_remove_roster_item_error, self, r, roster_item_jid)
+        end
       end
     end
 

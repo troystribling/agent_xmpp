@@ -26,6 +26,11 @@ module AgentXmpp
           data
         end
         
+        #......................................................................................................
+        def smash
+          self.flatten.compact
+        end
+        
       #### InstanceMethods
       end  
         

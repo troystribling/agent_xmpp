@@ -164,7 +164,7 @@ module AgentXmpp
           roster[roster_item_jid][:status] = :both 
           roster[roster_item_jid][:roster_item] = roster_item 
         end
-        []
+        nil
       else
         AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
         client_connection.remove_roster_item(roster_item.jid)  
@@ -179,7 +179,7 @@ module AgentXmpp
         AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid}"   
         roster.delete(roster_item_jid) 
       end
-      []
+      nil
     end
 
     #.........................................................................................................
@@ -194,13 +194,26 @@ module AgentXmpp
     #.........................................................................................................
     def did_acknowledge_add_roster_item(client_connection, response, roster_item_jid)
       AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDGED: #{roster_item_jid.to_s}"
-      []
+      nil
     end
 
     #.........................................................................................................
     def did_acknowledge_remove_roster_item(client_connection, response, roster_item_jid)
       AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDGED: #{roster_item_jid.to_s}"
-      []
+      nil
+    end
+
+    #.........................................................................................................
+    def did_receive_remove_roster_item_error(client_connection, response, roster_item_jid)
+      AgentXmpp.logger.info "REMOVE ROSTER ITEM RECEIVED ERROR: #{roster_item_jid.to_s}"
+      nil
+    end
+
+    #.........................................................................................................
+    def did_receive_add_roster_item_error(client_connection, response, roster_item_jid)
+      AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid.to_s}"
+      roster.delete(roster_item_jid)
+      nil
     end
 
     #.........................................................................................................

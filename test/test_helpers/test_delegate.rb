@@ -15,7 +15,7 @@ class TestDelegate
           def #{meth.to_s}(*args)
             AgentXmpp.logger.info "TEST_DELEGATE #{meth.to_s.upcase}"
             @#{meth.to_s}_method = true
-            []
+            nil
           end
           def #{meth.to_s}_method
             [@#{meth.to_s}_method, "#{meth.to_s}"]
@@ -39,7 +39,8 @@ class TestDelegate
 
   #### roster management
   delegate_callbacks :did_receive_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_roster_item, 
-                     :did_remove_roster_item, :did_acknowledge_remove_roster_item
+                     :did_remove_roster_item, :did_acknowledge_remove_roster_item, :did_receive_remove_roster_item_error,
+                     :did_receive_add_roster_item_error
 
   #### service discovery management
   delegate_callbacks :did_receive_client_version_result,:did_receive_client_version_request

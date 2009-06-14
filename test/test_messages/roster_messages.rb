@@ -23,6 +23,11 @@ module RosterMessages
     end
 
     #.........................................................................................................
+    def recv_roster_result_set_error(client)
+      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='error'/>"
+    end
+
+    #.........................................................................................................
     def recv_roster_set_none(client, roster_jid)
       <<-MSG
         <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='set'>
@@ -82,7 +87,7 @@ module RosterMessages
         <<-MSG
           <iq type='error' id='1'>
             <query xmlns='jabber:iq:roster'>
-              <item jid='#{roster_jid}'/>
+              <item jid='somejid'/>
             </query>
             <error type='cancel'>
               <not-allowed xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>

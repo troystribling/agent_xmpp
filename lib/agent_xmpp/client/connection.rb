@@ -35,12 +35,12 @@ module AgentXmpp
     
     #.........................................................................................................
     def broadcast_to_delegates(method, *args)
-      delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}.flatten
+      delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}.smash
     end
     
     #.........................................................................................................
     def send(data, &blk)
-      raise AgentXmppError, 'Not Connected'  if error?
+      raise AgentXmppError, 'not connected'  if error?
       if block_given? and data.is_a? Jabber::XMPPStanza
         if data.id.nil?
           data.id = Jabber::IdGenerator.instance.generate_id
@@ -155,7 +155,7 @@ module AgentXmpp
         [stanza.query.inject([]) do |r, i|  
           method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
           r.push(broadcast_to_delegates(method, self, i))
-        end, broadcast_to_delegates(:did_receive_all_roster_items, self)].flatten
+        end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
       #### presence subscription request  
       elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('Jabber::Presence')
         broadcast_to_delegates(:did_receive_subscribe_request, self, stanza)
