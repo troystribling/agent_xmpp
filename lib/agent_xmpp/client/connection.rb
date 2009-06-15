@@ -8,6 +8,7 @@ module AgentXmpp
     include Parser
     include SessionMessages
     include RosterMessages
+    include PresenceMessages
     include ServiceDiscoveryMessages
     #---------------------------------------------------------------------------------------------------------
 
