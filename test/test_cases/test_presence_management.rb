@@ -40,31 +40,55 @@ class TestPresenceManagement < Test::Unit::TestCase
       
     #.........................................................................................................
     should "update presence status for an existing resource" do
+      first_presence
+      @delegate = @client.new_delegate
+      @delegate.did_receive_presence_method.should_not be_called
+      @client.roster['troy@nowhere.com'][:resources]['troy@nowhere.com/home'][:presence].type.should be_nil # nil presence type=available
+      @client.receiving(PresenceMessages.recv_presence_unavailable(@client, 'troy@nowhere.com/home')).should not_respond
+      @delegate.did_receive_presence_method.should be_called
+      @client.roster['troy@nowhere.com'][:resources]['troy@nowhere.com/home'][:presence].type.should be(:unavailable)   
     end
      
     #.........................................................................................................
     should "maintain multiple presence status entries for a roster item with jid in configiured roster" do
+      first_presence
+      @delegate = @client.new_delegate
+      @delegate.did_receive_presence_method.should_not be_called
+      @client.roster['troy@nowhere.com'][:resources]['troy@nowhere.com/work'].should be_nil
+      @client.receiving(PresenceMessages.recv_presence_unavailable(@client, 'troy@nowhere.com/work')).should not_respond
+      @delegate.did_receive_presence_method.should be_called
+      @client.roster['troy@nowhere.com'][:resources]['troy@nowhere.com/work'][:presence].should_not be_nil  
+      @client.roster['troy@nowhere.com'][:resources]['troy@nowhere.com/home'][:presence].should_not be_nil  
     end
      
     #.........................................................................................................
     should "ignore presence messages from jids not in configured roster" do
+      @client.roster.keys.include?('noone@nowhere.com').should be(false)
+      @delegate.did_receive_presence_method.should_not be_called
+      @client.receiving(PresenceMessages.recv_presence_available(@client, 'noone@nowhere.com/here')).should not_respond
+      @delegate.did_receive_presence_method.should be_called
+      @client.roster.keys.include?('noone@nowhere.com').should be(false)
     end
       
     #.........................................................................................................
     should "accept subscription requests from jids which are in the configured roster" do
+      @client.roster.keys.include?('troy@nowhere.com').should be(true)
       @delegate.did_receive_subscribe_request_method.should_not be_called
       @client.receiving(PresenceMessages.recv_presence_subscribe(@client, 'troy@nowhere.com')).should \
         respond_with(PresenceMessages.send_presence_subscribed(@client, 'troy@nowhere.com'))
       @client.receiving(PresenceMessages.recv_presence_subscribed(@client, 'troy@nowhere.com')).should not_respond
       @delegate.did_receive_subscribe_request_method.should be_called
+      @client.roster.keys.include?('troy@nowhere.com').should be(true)
     end
     
     #.........................................................................................................
     should "decline subscription requests from jids which are not in the configured roster" do
+      @client.roster.keys.include?('noone@nowhere.com').should be(false)
       @delegate.did_receive_subscribe_request_method.should_not be_called
       @client.receiving(PresenceMessages.recv_presence_subscribe(@client, 'noone@nowhere.com')).should \
         respond_with(PresenceMessages.send_presence_unsubscribed(@client, 'noone@nowhere.com'))
       @delegate.did_receive_subscribe_request_method.should be_called
+      @client.roster.keys.include?('noone@nowhere.com').should be(false)
     end
     
   end
