@@ -35,7 +35,8 @@ class TestDelegate
   delegate_callbacks :did_authenticate, :did_bind, :did_start_session
 
   #### presence
-  delegate_callbacks :did_receive_presence, :did_receive_subscribe_request, :did_receive_unsubscribed_request
+  delegate_callbacks :did_receive_presence, :did_receive_subscribe_request, :did_receive_unsubscribed_request,
+                     :did_accept_subscription
 
   #### roster management
   delegate_callbacks :did_receive_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_roster_item, 

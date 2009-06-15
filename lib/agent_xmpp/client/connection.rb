@@ -159,6 +159,9 @@ module AgentXmpp
       #### presence subscription request  
       elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('Jabber::Presence')
         broadcast_to_delegates(:did_receive_subscribe_request, self, stanza)
+      #### presence subscription accepted  
+      elsif stanza.type.eql?(:subscribed) and stanza_class.eql?('Jabber::Presence')
+        broadcast_to_delegates(:did_accept_subscription, self, stanza)
       #### presence unsubscribe 
       elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('Jabber::Presence')
         broadcast_to_delegates(:did_receive_unsubscribed_request, self, stanza)

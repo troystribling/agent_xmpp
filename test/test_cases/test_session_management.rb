@@ -8,7 +8,7 @@ class TestSessionManagement < Test::Unit::TestCase
   def setup
     @client = TestClient.new
     @delegate = @client.new_delegate
- end
+  end
   
   #.........................................................................................................
   should "authenticate with PLAIN SASL authentication when stream features includes PLAIN authentication" do

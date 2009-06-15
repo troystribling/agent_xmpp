@@ -110,7 +110,8 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
         client_connection.send_client_version_request(from_jid) if not from_jid.eql?(client_connection.jid.to_s) and presence.type.nil?
       else
-        AgentXmpp.logger.info "RECEIVED PRESENCE FROM JID NOT IN CONTACT LIST: #{from_jid}"        
+        AgentXmpp.logger.info "RECEIVED PRESENCE FROM JID NOT IN CONTACT LIST: #{from_jid}" 
+        nil       
       end
     end
 
@@ -133,8 +134,16 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
         client_connection.remove_contact(presence.from)  
       else
-        AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN CONTACT LIST: #{from_jid}"        
+        AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN CONTACT LIST: #{from_jid}"   
+        nil     
       end
+    end
+
+    #.........................................................................................................
+    def did_accept_subscription(client_connection, presence)
+      from_jid = presence.from.to_s     
+      AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{from_jid}" 
+      nil       
     end
 
     #.........................................................................................................
