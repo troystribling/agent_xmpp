@@ -144,12 +144,12 @@ module AgentXmpp
           raise AgentXmppError, "authentication failed"
         end
       else
-        demux_channel(stanza)
+        demux_stanza(stanza)
       end
     end
     
     #.........................................................................................................
-    def demux_channel(stanza)
+    def demux_stanza(stanza)
       stanza_class = stanza.class.to_s
       #### roster update
       if stanza.type == :set and stanza.query.kind_of?(Jabber::Roster::IqQueryRoster)
