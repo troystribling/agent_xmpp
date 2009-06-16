@@ -34,12 +34,12 @@ class TestPresenceManagement < Test::Unit::TestCase
     end
     
     #.........................................................................................................
-    should "on receipt of first presence message from jid, create presence status for resource and send client version request to jid for roster items with jids in configured roster" do
+    should "on receipt of first presence message from jid and if jid is in configured roster, create presence status entry in configured roster item record for resource and send client version request to jid" do
       first_presence
     end
       
     #.........................................................................................................
-    should "update presence status for an existing resource" do
+    should "update presence status for an existing resource entry for roster item with jid in the configured roster" do
       first_presence
       @delegate = @client.new_delegate
       @delegate.did_receive_presence_method.should_not be_called
@@ -50,7 +50,7 @@ class TestPresenceManagement < Test::Unit::TestCase
     end
      
     #.........................................................................................................
-    should "maintain multiple presence status entries for a roster item with jid in configiured roster" do
+    should "maintain multiple presence status entries for a roster item with jid in configured roster" do
       first_presence
       @delegate = @client.new_delegate
       @delegate.did_receive_presence_method.should_not be_called
@@ -63,7 +63,7 @@ class TestPresenceManagement < Test::Unit::TestCase
      
     #.........................................................................................................
     should "ignore presence messages from jids not in configured roster" do
-      @client.roster.keys.include?('noone@nowhere.com').should be(false)
+      @client.roster.has_key?('noone@nowhere.com').should be(false)
       @delegate.did_receive_presence_method.should_not be_called
       @client.receiving(PresenceMessages.recv_presence_available(@client, 'noone@nowhere.com/here')).should not_respond
       @delegate.did_receive_presence_method.should be_called

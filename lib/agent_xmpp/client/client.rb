@@ -108,9 +108,10 @@ module AgentXmpp
         roster[from_bare_jid.to_s][:resources][from_jid] = {} if roster[from_bare_jid.to_s][:resources][from_jid].nil?
         roster[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
-        client_connection.send_client_version_request(from_jid) if not from_jid.eql?(client_connection.jid.to_s) and presence.type.nil?
+        client_connection.send_client_version_request(from_jid) \
+          if not from_jid.eql?(client_connection.jid.to_s) and presence.type.nil?
       else
-        AgentXmpp.logger.info "RECEIVED PRESENCE FROM JID NOT IN CONTACT LIST: #{from_jid}" 
+        AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
         nil       
       end
     end
@@ -122,7 +123,7 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
         client_connection.accept_contact_request(from_jid)  
       else
-        AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN CONTACT LIST: #{from_jid}"        
+        AgentXmpp.logger.warn "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN ROSTER: #{from_jid}"        
         client_connection.reject_contact_request(from_jid)  
       end
     end
@@ -134,7 +135,7 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
         client_connection.remove_contact(presence.from)  
       else
-        AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN CONTACT LIST: #{from_jid}"   
+        AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
         nil     
       end
     end
@@ -229,15 +230,24 @@ module AgentXmpp
     # service discovery management
     #.........................................................................................................
     def did_receive_client_version_result(client_connection, from, version)
-      AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
-      roster[from.bare.to_s][:resources][from.to_s][:version] = version \
-        unless roster[from.bare.to_s][:resources][from.to_s].nil?
+      if roster.has_key?(from.bare.to_s)
+        AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
+        roster[from.bare.to_s][:resources][from.to_s][:version] = version
+      else
+        AgentXmpp.logger.warn "RECEIVED CLIENT VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
+      end        
+      nil
     end
 
     #.........................................................................................................
     def did_receive_client_version_request(client_connection, request)
-      AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
-      client_connection.send_client_version(request)
+      if roster.has_key?(request.from.bare.to_s)
+        AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
+        client_connection.send_client_version(request)
+      else
+        AgentXmpp.logger.warn "RECEIVED CLIENT VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
+        nil
+      end
     end
 
   #### Client

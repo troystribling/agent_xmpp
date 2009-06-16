@@ -33,9 +33,9 @@ module SystemDiscoveryMessages
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <query xmlns='jabber:iq:version'>
-            <name>#{AgentXmpp.AGENT_XMPP_NAME}</name>
-            <version>#{AgentXmpp.VERSION}</version>
-            <os>#{AgentXmpp.OS_VERSION}</os>
+            <name>#{AgentXmpp::AGENT_XMPP_NAME}</name>
+            <version>#{AgentXmpp::VERSION}</version>
+            <os>#{AgentXmpp::OS_VERSION}</os>
           </query>
         </iq>
       MSG

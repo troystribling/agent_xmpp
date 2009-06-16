@@ -111,7 +111,7 @@ class TestRosterManagement < Test::Unit::TestCase
     delegate.did_remove_roster_item_method.should_not be_called
     delegate.did_receive_all_roster_items_method.should_not be_called
     client.receiving(RosterMessages.recv_roster_set_remove(client, 'troy@nowhere.com')).should not_respond
-    client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    client.roster.has_key?('troy@nowhere.com').should be(false) 
     delegate.did_remove_roster_item_method.should be_called
     delegate.did_receive_all_roster_items_method.should be_called
   
@@ -129,7 +129,7 @@ class TestRosterManagement < Test::Unit::TestCase
       client.roster.values{|v| v[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_roster_set_subscribe_none(client, ['troy@nowhere.com'])).should \
         respond_with(RosterMessages.send_roster_set_remove(client, 'troy@nowhere.com'))
-      client.roster.keys.include?('troy@nowhere.com').should be(false) 
+      client.roster.has_key?('troy@nowhere.com').should be(false) 
     end
   
     #### receive roster remove ackgnowledgement
@@ -166,14 +166,14 @@ class TestRosterManagement < Test::Unit::TestCase
       client.roster.values{|v| v[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_roster_set_subscribe_none(client, ['troy@nowhere.com'])).should \
         respond_with(RosterMessages.send_roster_set_remove(client, 'troy@nowhere.com'))
-      client.roster.keys.include?('troy@nowhere.com').should be(false) 
+      client.roster.has_key?('troy@nowhere.com').should be(false) 
     end
   
     #### receive roster remove ackgnowledgement
     delegate = client.new_delegate
     delegate.did_receive_remove_roster_item_error_method.should_not be_called
     client.receiving(RosterMessages.recv_roster_result_set_error(client)).should not_respond
-    client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    client.roster.has_key?('troy@nowhere.com').should be(false) 
     delegate.did_receive_remove_roster_item_error_method.should be_called
     
   end
@@ -201,7 +201,7 @@ class TestRosterManagement < Test::Unit::TestCase
     delegate.did_receive_add_roster_item_error_method.should_not be_called
     client.receiving(RosterMessages.recv_roster_result_set_error(client)).should not_respond
     delegate.did_receive_add_roster_item_error_method.should be_called
-    client.roster.keys.include?('troy@nowhere.com').should be(false) 
+    client.roster.has_key?('troy@nowhere.com').should be(false) 
     
   end
   
