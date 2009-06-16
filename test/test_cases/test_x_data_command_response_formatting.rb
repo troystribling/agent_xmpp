@@ -2,14 +2,22 @@
 require 'test_helper'
 
 ##############################################################################################################
-class TestCommandProcessing < Test::Unit::TestCase
+class TestXDataCommandResponseFormatting < Test::Unit::TestCase
 
   #.........................................................................................................
-  should "respond to a command node with no request parameters routed to a controller method" do
+  should "is supported for scalars" do
   end
 
   #.........................................................................................................
-  should "throw an exception if command node is not routed to a controller method" do
+  should "is supported for arrays of scalars" do
+  end
+
+  #.........................................................................................................
+  should "is supported for hashes" do
+  end
+
+  #.........................................................................................................
+  should "is supported for arrays of hashes" do
   end
 
 end
