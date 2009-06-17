@@ -10,6 +10,7 @@ module AgentXmpp
     include RosterMessages
     include PresenceMessages
     include ServiceDiscoveryMessages
+    include ApplicationMessages
     #---------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------------------------------------
@@ -89,8 +90,11 @@ module AgentXmpp
       unless command.x.nil? 
         params = {:xmlns => command.x.namespace, :action => command.action, :to => stanza.from.to_s, 
           :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
-        AgentXmpp.logger.info "RECEIVED COMMAND: #{command.node}, FROM: #{stanza.from.to_s}"
+        AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
         Routing::Routes.invoke_command_response(self, params)
+      else
+        AgentXmpp.logger.warn "RECEIVED COMMAND WITHOUT X PAYLOAD FOR NODE: #{command.node}, FROM: #{stanza.from.to_s}"
+        error_x_payload_not_specified(params)
       end
     end
 

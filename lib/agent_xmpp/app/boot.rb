@@ -54,6 +54,8 @@ module AgentXmpp
         Dir.pwd
       end
       
+      ####....................................................................................................
+      # application deligate methods
       #.......................................................................................................
       def before_config_load(&blk)
          define_meta_class_method(:call_before_config_load, &blk)
@@ -73,7 +75,12 @@ module AgentXmpp
       def after_app_load(&blk)
          define_meta_class_method(:call_after_app_load, &blk)
       end
-          
+
+      #.......................................................................................................
+      def restarting_server(&blk)
+         define_meta_class_method(:call_restarting_server, &blk)
+      end
+                    
     ####......................................................................................................
     private
 
