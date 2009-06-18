@@ -35,11 +35,6 @@ module AgentXmpp
       error(params, 'item-not-found', 'no route for specified command node')
     end
 
-    #.........................................................................................................
-    def error_x_payload_not_specified(params)
-      error(params, 'bad-request', 'payload namespace not specified')
-    end
-    
   ####........................................................................................................
   private
     
@@ -51,9 +46,7 @@ module AgentXmpp
     iq.command << Jabber::ErrorResponse.new(condition, text)
     send(iq)
   end
-  
-    
-    
+          
   #### RequestMessages
   end
   
