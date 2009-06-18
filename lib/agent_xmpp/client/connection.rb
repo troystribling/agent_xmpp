@@ -16,6 +16,8 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
     attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive                
     #---------------------------------------------------------------------------------------------------------
+    alias_method :send_to_method, :send
+    #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
     def initialize(client, jid, password, port=5222)
@@ -61,8 +63,8 @@ module AgentXmpp
       @keepalive = EventMachine::PeriodicTimer.new(60) do 
         send_data("\n")
       end
-      add_delegate(client)      
-      AgentXmpp::Boot.call_after_connection_completed(self) if AgentXmpp::Boot.respond_to?(:call_after_connection_completed)
+      add_delegate(client) 
+      AgentXmpp::Boot.call_if_implemented(:call_after_connection_completed, self)     
       broadcast_to_delegates(:did_connect, self)
     end
 
@@ -87,15 +89,10 @@ module AgentXmpp
     #.........................................................................................................
     def process_command(stanza)
       command = stanza.command
-      unless command.x.nil? 
-        params = {:xmlns => command.x.namespace, :action => command.action, :to => stanza.from.to_s, 
-          :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
-        AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-        Routing::Routes.invoke_command_response(self, params)
-      else
-        AgentXmpp.logger.warn "RECEIVED COMMAND WITHOUT X PAYLOAD FOR NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-        error_x_payload_not_specified(params)
-      end
+      params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
+        :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
+      AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
+      Routing::Routes.invoke_command_response(self, params)
     end
 
     #---------------------------------------------------------------------------------------------------------

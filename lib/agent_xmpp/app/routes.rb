@@ -34,16 +34,19 @@ module AgentXmpp
               controller_class = eval("#{route[:controller].classify}Controller")
             rescue NameError
               AgentXmpp.logger.error "ROUTING ERROR: #{route[:controller].classify}Controller does not exist for route {:controller => '#{route[:controller]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
+              connection.error_no_route(params)
             else   
               controler_instance = controller_class.new       
               if controler_instance.respond_to?(route[:action])
                 controler_instance.handle_request(connection, route[:action], params)
               else
                 AgentXmpp.logger.error "ROUTING ERROR: no action on #{controller_class.to_s} for route {:controller => '#{route[:controller]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
+                connection.error_no_route(params)
               end
             end
           else
             AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
+            connection.error_no_route(params)
           end
         end
 

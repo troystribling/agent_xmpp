@@ -2,7 +2,7 @@
 require 'test_helper'
 
 ##############################################################################################################
-class TestRequestProcessing < Test::Unit::TestCase
+class TestApplicationMessageProcessing < Test::Unit::TestCase
 
   #.........................................................................................................
   should "respond to a command node with no request parameters routed to a controller method" do
@@ -13,15 +13,23 @@ class TestRequestProcessing < Test::Unit::TestCase
   end
 
   #.........................................................................................................
-  should "return error if x block namespace specifying result payload is not specified" do
-  end
-
-  #.........................................................................................................
-  should "return error if x block namespace specifying result payload is not supported" do
-  end
-
-  #.........................................................................................................
   should "respond to a received message with message body reversed" do
+  end
+
+  #.........................................................................................................
+  should "respond to requests with scalars" do
+  end
+
+  #.........................................................................................................
+  should "respond to requests with arrays of scalars" do
+  end
+
+  #.........................................................................................................
+  should "respond to requests with hashes" do
+  end
+
+  #.........................................................................................................
+  should "respond to requests with arrays of hashes" do
   end
 
 end

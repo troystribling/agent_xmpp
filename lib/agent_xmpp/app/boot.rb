@@ -35,14 +35,14 @@ module AgentXmpp
         AgentXmpp.logger.info "CONFIGURATION FILE: #{AgentXmpp.config_file}"
 
         ####..............
-        call_before_config_load if AgentXmpp::Boot.respond_to?(:call_before_config_load)
+        call_if_implemented(:call_before_config_load)
         load(add_path('config'), {:exclude => [add_path('config/boot')], :ordered_load => AgentXmpp::Boot.config_load_order})
 
         ####..............
-        call_before_app_load if AgentXmpp::Boot.respond_to?(:call_before_app_load)
+        call_if_implemented(:call_before_app_load)
         load(add_path('app/models'), {:ordered_load => AgentXmpp::Boot.app_load_order})
         load(add_path('app/controllers'))
-        call_after_app_load if AgentXmpp::Boot.respond_to?(:call_after_app_load)
+        call_if_implemented(:call_after_app_load)
 
         ####..............
         AgentXmpp::Client.new(File.open(AgentXmpp.config_file) {|yf| YAML::load(yf)}).connect
@@ -56,6 +56,11 @@ module AgentXmpp
       
       ####....................................................................................................
       # application deligate methods
+      #.......................................................................................................
+      def call_if_implemented(method, *args)
+        send(method, *args) if respond_to?(method)
+      end
+      
       #.......................................................................................................
       def before_config_load(&blk)
          define_meta_class_method(:call_before_config_load, &blk)
