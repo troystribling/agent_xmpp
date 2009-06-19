@@ -15,7 +15,7 @@ module AgentXmpp
         #.....................................................................................................
         def add_field_with_value(var, value)
           field = Jabber::Dataforms::XDataField.new(var)
-          field.value = value
+          field.values = value
           self << field
         end
     
@@ -103,8 +103,8 @@ module Jabber
     
       #.....................................................................................................
       def add_field_with_value(var, value)
-        field = Jabber::Dataforms::XDataField.new(var)
-        field.value = value
+        field = Jabber::Dataforms::XDataField.new(var)        
+        field.values = value
         self << field
       end
           

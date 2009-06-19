@@ -81,6 +81,25 @@ module ApplicationMessages
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='hash_array' xmlns='http://jabber.org/protocol/commands'>
             <x xmlns='jabber:x:data'>
+              <field var='attr1'>
+                <value>val11</value>
+                <value>val11</value>
+              </field>
+              <field var='attr2'>
+                <value>val12</value>
+              </field>
+            </x>
+          </command>
+        </iq>
+      MSG
+     end
+
+    #.........................................................................................................
+    def send_x_data_array_hash_result(client, to)
+      <<-MSG
+        <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
+          <command node='array_hash' xmlns='http://jabber.org/protocol/commands'>
+            <x xmlns='jabber:x:data'>
               <reported>
                 <field var='attr1'/>
                 <field var='attr2'/>
@@ -114,6 +133,49 @@ module ApplicationMessages
         </iq>
       MSG
      end
+
+     #.........................................................................................................
+     def send_x_data_array_hash_array_result(client, to)
+       <<-MSG
+         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
+           <command node='array_hash_array' xmlns='http://jabber.org/protocol/commands'>
+             <x xmlns='jabber:x:data'>
+               <reported>
+                 <field var='attr1'/>
+                 <field var='attr2'/>
+               </reported>
+               <item>
+                 <field var='attr1'>
+                   <value>val11</value>
+                   <value>val11</value>
+                 </field>
+                 <field var='attr2'>
+                   <value>val12</value>
+                 </field>
+               </item>
+               <item>
+                 <field var='attr1'>
+                   <value>val21</value>
+                   <value>val21</value>
+                 </field>
+                 <field var='attr2'>
+                   <value>val22</value>
+                 </field>
+               </item>
+               <item>
+                 <field var='attr1'>
+                   <value>val31</value>
+                   <value>val31</value>
+                 </field>
+                 <field var='attr2'>
+                   <value>val32</value>
+                 </field>
+               </item>
+             </x>
+           </command>
+         </iq>
+       MSG
+      end
 
     #.........................................................................................................
     def send_routing_error(client, node, to)
