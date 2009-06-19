@@ -15,18 +15,19 @@ module ApplicationMessages
     end
 
     #.........................................................................................................
-    def recv_namespace_not_specified_execute(client, from)
-    end
-
-    #.........................................................................................................
-    def recv_namespace_not_supported_execute(client, node, from)
+    def recv_message(client, from)
+      <<-MSG
+        <message from='#{from}' to='#{client.client.jid.to_s}' type='chat'>
+          <body>fuck you</body>
+        </message>
+      MSG
     end
 
     #### sent messages    
     #.........................................................................................................
-    def sent_x_data_scalar_result(client, to)
+    def send_x_data_scalar_result(client, to)
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{to}' id='1' type='result' xmlns='jabber:client'>
+        <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='scalar' xmlns='http://jabber.org/protocol/commands'>
             <x xmlns='jabber:x:data'>
               <field>
@@ -39,25 +40,104 @@ module ApplicationMessages
     end
 
     #.........................................................................................................
-    def sent_x_data_hash_result(client, to)
+    def send_x_data_hash_result(client, to)
+      <<-MSG
+        <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
+          <command node='hash' xmlns='http://jabber.org/protocol/commands'>
+            <x xmlns='jabber:x:data'>
+              <field var='attr1'>
+                <value>val1</value>
+              </field>
+              <field var='attr2'>
+                <value>val2</value>
+              </field>
+            </x>
+          </command>
+        </iq>
+      MSG
+     end
+
+    #.........................................................................................................
+    def send_x_data_scalar_array_result(client, to)
+      <<-MSG
+        <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
+          <command node='scalar_array' xmlns='http://jabber.org/protocol/commands'>
+            <x xmlns='jabber:x:data'>
+              <field>
+                <value>val1</value>
+                <value>val2</value>
+                <value>val3</value>
+                <value>val4</value>
+              </field>
+            </x>
+          </command>
+        </iq>
+      MSG
     end
 
     #.........................................................................................................
-    def sent_x_data_scalar_array_result(client, to)
-    end
+    def send_x_data_hash_array_result(client, to)
+      <<-MSG
+        <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
+          <command node='hash_array' xmlns='http://jabber.org/protocol/commands'>
+            <x xmlns='jabber:x:data'>
+              <reported>
+                <field var='attr1'/>
+                <field var='attr2'/>
+              </reported>
+              <item>
+                <field var='attr1'>
+                  <value>val11</value>
+                </field>
+                <field var='attr2'>
+                  <value>val12</value>
+                </field>
+              </item>
+              <item>
+                <field var='attr1'>
+                  <value>val21</value>
+                </field>
+                <field var='attr2'>
+                  <value>val22</value>
+                </field>
+              </item>
+              <item>
+                <field var='attr1'>
+                  <value>val31</value>
+                </field>
+                <field var='attr2'>
+                  <value>val32</value>
+                </field>
+              </item>
+            </x>
+          </command>
+        </iq>
+      MSG
+     end
 
     #.........................................................................................................
-    def sent_x_data_hash_array_result(client, to)
+    def send_routing_error(client, node, to)
+      <<-MSG
+        <iq id='1' to='#{to}' type='error' xmlns='jabber:client'>
+          <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'>
+            <error code='404' type='cancel'>
+              <item-not-found xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+              <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>no route for specified command node</text>
+            </error>
+          </command>
+        </iq>
+      MSG
     end
-
+       
     #.........................................................................................................
-    def sent_routing_error(client, to)
+    def send_message(client, to)
+      <<-MSG
+        <message to='#{to}' type='chat' xmlns='jabber:client'>
+          <body>uoy kcuf</body>
+        </message>
+       MSG
     end
-  
-    #.........................................................................................................
-    def sent_namespace_not_supported_error(client, to)
-    end
-     
+       
   end
       
 end

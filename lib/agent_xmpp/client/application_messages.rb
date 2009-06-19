@@ -19,7 +19,7 @@ module AgentXmpp
     def response_message_chat(payload, params)
       message = Jabber::Message.new(params[:from], payload)
       message.type = :chat
-      send(message)      
+      send(message)  
     end
  
     ####......................................................................................................

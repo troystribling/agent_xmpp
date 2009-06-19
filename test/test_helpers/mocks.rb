@@ -61,3 +61,20 @@ class AgentXmpp::Client
     
 #### AgentXmpp::Client  
 end
+
+##############################################################################################################
+module AgentXmpp
+  
+  #####-------------------------------------------------------------------------------------------------------
+  class Controller
+
+    #.........................................................................................................
+    def respond_to(&blk)      
+      View.new(connection, format, params).add_payload_to_container(blk.call(@result_for_blk.call))
+    end
+        
+  #### Controller
+  end
+
+#### AgentXmpp
+end

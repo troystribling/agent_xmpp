@@ -28,7 +28,7 @@ module AgentXmpp
           route_path = "#{params[:node]}/#{params[:action]}"
           field_path = fields(params)
           route_path += "/#{field_path}" unless field_path.nil? 
-          route = map[route_path]
+          route = map.command_routes[route_path]
           unless route.nil?
             begin
               controller_class = eval("#{route[:controller].classify}Controller")
@@ -57,6 +57,7 @@ module AgentXmpp
             controller_class = eval("#{route[:controller].classify}Controller")
           rescue NameError
             AgentXmpp.logger.error "ROUTING ERROR: #{params[:node].classify}Controller inavlid for node:#{params[:node]} action:#{params[:action]}."
+            connection.error_no_route(params)
           else          
             controller_class.new.handle_request(connection, route[:action], params)
           end

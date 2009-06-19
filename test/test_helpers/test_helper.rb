@@ -25,7 +25,7 @@ require 'matchers'
 require 'test_case_extensions'
 
 #####-------------------------------------------------------------------------------------------------------
-require 'command_messages'
+require 'application_messages'
 require 'roster_messages'
 require 'service_discovery_messages'
 require 'session_messages'

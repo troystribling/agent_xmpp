@@ -31,10 +31,13 @@ class TestClient
     attr_accessor :client
     
     #.........................................................................................................
-    def command_no_xmlns(args) 
-      iq = Jabber::Iq.new(:set, args[:to])
-      iq.query = Jabber::Command::IqCommand.new(args[:node], :execute)
-      send_command(iq)
+    def message(args) 
+      msg = Jabber::Message.new(args[:to], args[:body])
+      msg.type = :chat
+      define_meta_class_method(:did_receive_all_roster_items) do |client_connection|
+        client_connection.send(msg)
+      end
+      AgentXmpp::Boot.boot
     end
 
     #.........................................................................................................
@@ -48,7 +51,7 @@ class TestClient
     def send_command(iq)
       define_meta_class_method(:did_receive_all_roster_items) do |client_connection|
         client_connection.send(iq) do |r|
-          puts "COMMAND RESPONSE: #{r.to_s}"
+          puts "RESPONSE: #{r.to_s}"
           sleep(2.0)
           EventMachine::stop_event_loop
         end
