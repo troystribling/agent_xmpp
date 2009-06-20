@@ -67,8 +67,8 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def after_connection_completed(&blk)
-         define_meta_class_method(:call_after_connection_completed, &blk)
+      def after_connected(&blk)
+         define_meta_class_method(:call_after_connected, &blk)
       end
 
       #.......................................................................................................

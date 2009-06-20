@@ -21,14 +21,14 @@ AgentXmpp::Boot.after_app_load do
 end
 
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp::Boot.after_connection_completed do |connection|
+AgentXmpp::Boot.after_connected do |pipe|
 
-  AgentXmpp.logger.info "AgentXmpp::BootApp.after_connection_completed"
+  AgentXmpp.logger.info "AgentXmpp::BootApp.after_connected"
 
 end
 
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp::Boot.restarting_server do |client|
+AgentXmpp::Boot.restarting_server do |pipe|
 
   AgentXmpp.logger.info "AgentXmpp::BootApp.restarting_server"
 

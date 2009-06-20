@@ -14,7 +14,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "authenticate with PLAIN SASL authentication when stream features includes PLAIN authentication" do
   
     #### connect to server. this actually happens when client is connected here callbacks and message support are verified 
-    @client.client.connection.init_connection.should \
+    @client.client.message_pipe.init_connection(@client.client.jid).should \
       respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
@@ -42,7 +42,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when stream features do not include PLAIN authentication" do
   
     #### connect to server. this actually happens when client is connected here callbacks and message support are verified 
-    @client.client.connection.init_connection.should \
+    @client.client.message_pipe.init_connection(@client.client.jid).should \
       respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
   
     #### receive pre authentication stream feautues which do not include plain authentication
@@ -54,7 +54,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when authentication fails" do
     
     #### connect to server. this actually happens when client is connected here callbacks and message support are verified 
-    @client.client.connection.init_connection.should \
+    @client.client.message_pipe.init_connection(@client.client.jid).should \
       respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
@@ -68,7 +68,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when bind fails" do
   
     #### connect to server. this actually happens when client is connected here callbacks and message support are verified 
-    @client.client.connection.init_connection.should \
+    @client.client.message_pipe.init_connection(@client.client.jid).should \
       respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
@@ -88,7 +88,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when steam start fails" do
   
       #### connect to server. this actually happens when client is connected here callbacks and message support are verified 
-      @client.client.connection.init_connection.should \
+      @client.client.message_pipe.init_connection(@client.client.jid).should \
         respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
     
       #### receive pre authentication stream feautues and mechanisms and authenticate

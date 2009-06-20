@@ -19,37 +19,37 @@ class TestApplicationMessageProcessing < Test::Unit::TestCase
   end
   
   #.........................................................................................................
-  should "respond to requests with scalars" do
+  should "respond to requests with scalars in jabber:x:data format" do
     @client.receiving(ApplicationMessages.recv_command_execute(@client, 'scalar', 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_x_data_scalar_result(@client, 'dev@nowhere.com'))
   end
   
   #.........................................................................................................
-  should "respond to requests with arrays of scalars" do
+  should "respond to requests with arrays of scalars in jabber:x:data format" do
     @client.receiving(ApplicationMessages.recv_command_execute(@client, 'scalar_array', 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_x_data_scalar_array_result(@client, 'dev@nowhere.com'))
   end
   
   #.........................................................................................................
-  should "respond to requests with hashes" do
+  should "respond to requests with hashes in jabber:x:data format" do
     @client.receiving(ApplicationMessages.recv_command_execute(@client, 'hash', 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_x_data_hash_result(@client, 'dev@nowhere.com'))
   end
   
   #.........................................................................................................
-  should "respond to requests with arrays of hashes" do
+  should "respond to requests with arrays of hashes in jabber:x:data format" do
     @client.receiving(ApplicationMessages.recv_command_execute(@client, 'array_hash', 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_x_data_array_hash_result(@client, 'dev@nowhere.com'))
   end
   
   #.........................................................................................................
-  should "respond to requests with hashes of arrays" do
+  should "respond to requests with hashes of arrays in jabber:x:data format" do
     @client.receiving(ApplicationMessages.recv_command_execute(@client, 'hash_array', 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_x_data_hash_array_result(@client, 'dev@nowhere.com'))
   end
   
   #.........................................................................................................
-  should "respond to requests with arrays of hashes of arrays" do
+  should "respond to requests with arrays of hashes of arrays in jabber:x:data format" do
     @client.receiving(ApplicationMessages.recv_command_execute(@client, 'array_hash_array', 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_x_data_array_hash_array_result(@client, 'dev@nowhere.com'))
   end

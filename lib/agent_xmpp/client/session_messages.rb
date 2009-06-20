@@ -9,9 +9,9 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
     
     #.........................................................................................................
-    def authenticate
+    def authenticate(pipe)
       if stream_mechanisms.include?('PLAIN')
-        Jabber::SASL.new(self, 'PLAIN').auth(password)
+        Jabber::SASL.new(self, 'PLAIN').auth(pipe.password)
       else
         raise AgentXmppError, "PLAIN authentication required"
       end
@@ -54,7 +54,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def init_connection(starting=true)
+    def init_connection(jid, starting = true)
       result = []
       result.push(send("<?xml version='1.0' ?>")) if starting
       result.push(send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
