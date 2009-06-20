@@ -39,7 +39,9 @@ class TestClient
       doc.add_namespace('jabber:client') if doc.namespace('').to_s.eql?('')
       doc = Jabber::XMPPStanza::import(doc) 
     end
-    client.connection.receive(doc)
+    result = client.connection.receive(doc)
+puts "RESULT: #{result}"
+result    
   end
 
 end

@@ -38,6 +38,9 @@ task :uninstall do
 end
 
 #####-------------------------------------------------------------------------------------------------------
+task :default => [:test]
+
+#####-------------------------------------------------------------------------------------------------------
 require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << ['test/test_cases', 'test/test_helpers', 'test/test_messages']

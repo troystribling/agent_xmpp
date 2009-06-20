@@ -1,15 +1,14 @@
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp::Boot.after_connection_completed do |connection|
+AgentXmpp::Boot.after_connected do |pipe|
 
-  connection.add_delegate(TestClient)
+  pipe.add_delegate(TestClient)
   AgentXmpp.logger.info "AgentXmpp::BootApp.after_connection_completed"
 
 end
 
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp::Boot.restarting_server do |client|
+AgentXmpp::Boot.restarting_server do |pipe|
 
   AgentXmpp.logger.info "AgentXmpp::BootApp.restarting_server"
-  break
 
 end

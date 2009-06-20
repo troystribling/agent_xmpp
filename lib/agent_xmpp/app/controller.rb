@@ -5,7 +5,7 @@ module AgentXmpp
   class Controller
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :format, :params, :connection
+    attr_reader :format, :params, :pipe
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
@@ -15,9 +15,9 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
     # handle request
     #.........................................................................................................
-    def handle_request(connection, action, params)
+    def handle_request(pipe, action, params)
       @params = params
-      @connection = connection
+      @pipe = pipe
       @format = Format.new(params[:xmlns])
       send(action)
     end
@@ -31,9 +31,9 @@ module AgentXmpp
     def respond_to(&blk)
       View.send(:define_method, :respond_to, &blk)
       View.send(:define_method, :result_callback) do |*result|
-        add_payload_to_container(respond_to(result))
+        pipe.send(add_payload_to_container(respond_to(result)).message)
       end
-      EventMachine.defer(@result_for_blk, View.new(connection, format, params).method(:result_callback).to_proc)
+      EventMachine.defer(@result_for_blk, View.new(pipe, format, params).method(:result_callback).to_proc)
     end
         
   #### Controller

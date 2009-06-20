@@ -14,7 +14,7 @@ module AgentXmpp
     #.........................................................................................................
     def connect
       EventMachine.run do
-        @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, port)
+        @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, message_pipe, port)
       end
     end
     
@@ -49,8 +49,8 @@ class TestClient
 
     #.........................................................................................................
     def send_command(iq)
-      define_meta_class_method(:did_receive_all_roster_items) do |client_connection|
-        client_connection.send(iq) do |r|
+      define_meta_class_method(:did_receive_all_roster_items) do |pipe|
+        pipe.send(iq) do |r|
           puts "RESPONSE: #{r.to_s}"
           sleep(2.0)
           EventMachine::stop_event_loop

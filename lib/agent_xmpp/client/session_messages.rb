@@ -11,7 +11,7 @@ module AgentXmpp
     #.........................................................................................................
     def authenticate(pipe)
       if stream_mechanisms.include?('PLAIN')
-        Jabber::SASL.new(self, 'PLAIN').auth(pipe.password)
+        Resp(Jabber::SASL.new('PLAIN').auth(pipe.jid, pipe.password))
       else
         raise AgentXmppError, "PLAIN authentication required"
       end
@@ -25,11 +25,10 @@ module AgentXmpp
         bind.add_namespace(stream_features['bind'])                
         resource = bind.add REXML::Element.new('resource')
         resource.text = jid.resource
-        send(iq) do |r|
+        Resp(iq) do |r|
           if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
-            jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)      
-            broadcast_to_delegates(:did_bind, self, stanza)
-            session(stanza)
+            jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)                  
+            [session(stanza), broadcast_to_delegates(:did_bind, self, stanza)].smash
           elsif r.type.eql?(:error) and r.bind
             raise AgentXmppError, "resource bind failed"
           end
@@ -43,9 +42,9 @@ module AgentXmpp
         iq = Jabber::Iq.new(:set)
         session = iq.add REXML::Element.new('session')
         session.add_namespace stream_features['session']                
-        send(iq) do |r|
+        Resp(iq) do |r|
           if r.type == :result                
-            [send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].smash
+            [Resp(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].smash
           elsif r.type.eql?(:error) and r.session
             raise AgentXmppError, "session start failed"
           end
@@ -55,9 +54,9 @@ module AgentXmpp
 
     #.........................................................................................................
     def init_connection(jid, starting = true)
-      result = []
-      result.push(send("<?xml version='1.0' ?>")) if starting
-      result.push(send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
+      msg = []
+      msg.push(Resp("<?xml version='1.0' ?>")) if starting
+      msg.push(Resp("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
     end
     
     #.........................................................................................................

@@ -1,5 +1,5 @@
 require 'agent_xmpp/client/parser'
-require 'agent_xmpp/client/message'
+require 'agent_xmpp/client/response'
 require 'agent_xmpp/client/roster_messages'
 require 'agent_xmpp/client/service_discovery_messages'
 require 'agent_xmpp/client/presence_messages'

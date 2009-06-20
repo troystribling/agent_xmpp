@@ -110,7 +110,6 @@ module AgentXmpp
           if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
       else
         AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
-        nil       
       end
     end
 
@@ -134,7 +133,6 @@ module AgentXmpp
         pipe.remove_contact(presence.from)  
       else
         AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
-        nil     
       end
     end
 
@@ -142,7 +140,6 @@ module AgentXmpp
     def did_accept_subscription(pipe, presence)
       from_jid = presence.from.to_s     
       AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{from_jid}" 
-      nil       
     end
 
     #.........................................................................................................
@@ -172,7 +169,6 @@ module AgentXmpp
           roster[roster_item_jid][:status] = :both 
           roster[roster_item_jid][:roster_item] = roster_item 
         end
-        nil
       else
         AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
         pipe.remove_roster_item(roster_item.jid)  
@@ -187,7 +183,6 @@ module AgentXmpp
         AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid}"   
         roster.delete(roster_item_jid) 
       end
-      nil
     end
 
     #.........................................................................................................
@@ -202,26 +197,22 @@ module AgentXmpp
     #.........................................................................................................
     def did_acknowledge_add_roster_item(pipe, response, roster_item_jid)
       AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDGED: #{roster_item_jid.to_s}"
-      nil
     end
 
     #.........................................................................................................
     def did_acknowledge_remove_roster_item(pipe, response, roster_item_jid)
       AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDGED: #{roster_item_jid.to_s}"
-      nil
     end
 
     #.........................................................................................................
     def did_receive_remove_roster_item_error(pipe, response, roster_item_jid)
       AgentXmpp.logger.info "REMOVE ROSTER ITEM RECEIVED ERROR: #{roster_item_jid.to_s}"
-      nil
     end
 
     #.........................................................................................................
     def did_receive_add_roster_item_error(pipe, response, roster_item_jid)
       AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid.to_s}"
       roster.delete(roster_item_jid)
-      nil
     end
 
     #.........................................................................................................
@@ -234,7 +225,6 @@ module AgentXmpp
       else
         AgentXmpp.logger.warn "RECEIVED CLIENT VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
       end        
-      nil
     end
 
     #.........................................................................................................
@@ -244,7 +234,6 @@ module AgentXmpp
         pipe.send_client_version(request)
       else
         AgentXmpp.logger.warn "RECEIVED CLIENT VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
-        nil
       end
     end
 

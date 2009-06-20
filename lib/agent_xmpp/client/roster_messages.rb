@@ -5,7 +5,7 @@ module AgentXmpp
   module RosterMessages
 
     def send_roster_request
-      send(Jabber::Iq.new_rosterget) do |r|
+      Resp(Jabber::Iq.new_rosterget) do |r|
         if r.type == :result and r.kind_of?(Jabber::Iq)
           [r.query.elements.collect{|i| broadcast_to_delegates(:did_receive_roster_item, self, i)}, \
             broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
@@ -19,9 +19,9 @@ module AgentXmpp
     def add_roster_item(roster_item_jid)
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(roster_item_jid))
-      send(request) do |r|
+      Resp(request) do |r|
         if r.type == :result and r.kind_of?(Jabber::Iq)
-          [send(Jabber::Presence.new.set_type(:subscribe).set_to(roster_item_jid)), \
+          [Resp(Jabber::Presence.new.set_type(:subscribe).set_to(roster_item_jid)), \
             broadcast_to_delegates(:did_acknowledge_add_roster_item, self, r, roster_item_jid)].smash
         elsif r.type.eql?(:error)
           AgentXmpp.logger.error "ERROR ADDING ROSTER ITEM: #{roster_item_jid}"
@@ -34,7 +34,7 @@ module AgentXmpp
     def remove_roster_item(roster_item_jid)
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(roster_item_jid, nil, :remove))
-      send(request) do |r|
+      Resp(request) do |r|
         if r.type == :result and r.kind_of?(Jabber::Iq)
           broadcast_to_delegates(:did_acknowledge_remove_roster_item, self, r, roster_item_jid)
         elsif r.type.eql?(:error)

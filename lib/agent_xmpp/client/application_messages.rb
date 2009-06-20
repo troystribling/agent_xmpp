@@ -12,14 +12,14 @@ module AgentXmpp
       iq.id = params[:id] unless params[:id].nil?
       iq.command = Jabber::Command::IqCommand.new(params[:node], 'completed')
       iq.command << payload
-      send(iq)      
+      Resp(iq)      
     end
 
     #.........................................................................................................
     def response_message_chat(payload, params)
       message = Jabber::Message.new(params[:from], payload)
       message.type = :chat
-      send(message)  
+      Resp(message)  
     end
  
     ####......................................................................................................
@@ -44,7 +44,7 @@ module AgentXmpp
     iq.id = params[:id] unless params[:id].nil?
     iq.command = Jabber::Command::IqCommand.new(params[:node], params[:action])
     iq.command << Jabber::ErrorResponse.new(condition, text)
-    send(iq)
+    Resp(iq)
   end
           
   #### RequestMessages

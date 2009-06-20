@@ -56,7 +56,7 @@ module AgentXmpp
     #.........................................................................................................
     def send(data, &blk)
       raise AgentXmppError, 'not connected'  unless connected?
-      if block_given? and data.is_a? Jabber::XMPPStanza
+      if block_given? and data.kind_of?(Jabber::XMPPStanza)
         if data.id.nil?
           data.id = Jabber::IdGenerator.instance.generate_id
         end
@@ -97,19 +97,21 @@ module AgentXmpp
     #.........................................................................................................
     def receive(stanza)
       AgentXmpp.logger.info "RECV: #{stanza.to_s}"
-      response = if stanza.kind_of?(Jabber::XMPPStanza) and stanza.id and blk = id_callbacks[stanza.id]
-                  id_callbacks.delete(stanza.id)
-                  blk.call(stanza)
-                else
-                  process_stanza(stanza)
-                end           
+      if stanza.kind_of?(Jabber::XMPPStanza) and stanza.id and blk = id_callbacks[stanza.id]
+        id_callbacks.delete(stanza.id)
+        blk.call(stanza)
+      else
+        process_stanza(stanza)
+      end.stuff_a.inject([]) do |m, r| 
+        r.kind_of?(AgentXmpp::Response) ? m.push(send(r.message, &r.responds_with)) : m
+      end
     end
 
     #.........................................................................................................
     def connection_completed
-      init_connection(jid)
       AgentXmpp::Boot.call_if_implemented(:call_after_connected, self)     
       broadcast_to_delegates(:did_connect, self)
+      init_connection(jid).collect{|m| send(m)}
     end
 
     #.........................................................................................................
