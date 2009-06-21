@@ -4,7 +4,7 @@ module AgentXmpp
   #####-------------------------------------------------------------------------------------------------------
   module RosterMessages
 
-    def get_roster
+    def get_query_roster
       Resp(Jabber::Iq.new_rosterget) do |r|
         if r.type == :result and r.kind_of?(Jabber::Iq)
           [r.query.elements.collect{|i| broadcast_to_delegates(:did_receive_roster_item, self, i)}, \
@@ -16,7 +16,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def set_roster(roster_item_jid)
+    def set_query_roster(roster_item_jid)
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(roster_item_jid))
       Resp(request) do |r|
@@ -31,7 +31,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def set_roster_remove(roster_item_jid)
+    def set_query_roster_remove(roster_item_jid)
       request = Jabber::Iq.new_rosterset
       request.query.add(Jabber::Roster::RosterItem.new(roster_item_jid, nil, :remove))
       Resp(request) do |r|

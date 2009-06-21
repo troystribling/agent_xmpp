@@ -35,12 +35,12 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_authentication_success(client)
+    def recv_auth_success(client)
       "<success xmlns='urn:ietf:params:xml:ns:xmpp-sasl'/>"
     end
 
     #.........................................................................................................
-    def recv_authentication_failure(client)
+    def recv_auth_failure(client)
       <<-MSG
         <failure xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>
           <not-authorized/>
@@ -61,7 +61,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_bind_result(client)
+    def recv_iq_result_bind(client)
       <<-MSG
         <iq id='1' type='result'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
@@ -72,7 +72,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_session_result(client)
+    def recv_iq_result_session(client)
       <<-MSG
         <iq type='result' id='1' xmlns='jabber:client'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -81,7 +81,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_bind_error(client)
+    def recv_error_bind(client)
       <<-MSG
         <iq type='error' id='1'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
@@ -95,7 +95,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def recv_session_error(client)
+    def recv_error_session(client)
       <<-MSG
         <iq from='#{client.client.jid.domain}' type='error' id='1'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -118,12 +118,12 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_plain_authentication(client)
+    def send_auth_plain(client)
       "<auth mechanism='PLAIN' xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>"
     end
   
     #.........................................................................................................
-    def send_bind_set(client)
+    def send_iq_set_bind(client)
       <<-MSG
         <iq id='1' type='set' xmlns='jabber:client'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
@@ -134,7 +134,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_session_set(client)
+    def send_iq_set_session(client)
       <<-MSG
         <iq id='1' type='set' xmlns='jabber:client'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
@@ -143,7 +143,7 @@ module SessionMessages
     end
 
     #.........................................................................................................
-    def send_init_presence(client)
+    def send_presence_init(client)
       <<-MSG
         <presence xmlns='jabber:client'>
           <priority>1</priority>

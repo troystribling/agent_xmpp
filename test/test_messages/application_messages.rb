@@ -6,7 +6,7 @@ module ApplicationMessages
     
     #### received messages    
     #.........................................................................................................
-    def recv_command_execute(client, node, from)
+    def recv_iq_set_command_execute(client, node, from)
       <<-MSG
         <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='set'>
           <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'/>
@@ -15,7 +15,7 @@ module ApplicationMessages
     end
 
     #.........................................................................................................
-    def recv_message(client, from)
+    def recv_message_chat(client, from)
       <<-MSG
         <message from='#{from}' to='#{client.client.jid.to_s}' type='chat'>
           <body>fuck you</body>
@@ -25,7 +25,7 @@ module ApplicationMessages
 
     #### sent messages    
     #.........................................................................................................
-    def send_x_data_scalar_result(client, to)
+    def send_iq_result_command_x_data_scalar(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='scalar' xmlns='http://jabber.org/protocol/commands'>
@@ -40,7 +40,7 @@ module ApplicationMessages
     end
 
     #.........................................................................................................
-    def send_x_data_hash_result(client, to)
+    def send_iq_result_command_x_data_hash(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='hash' xmlns='http://jabber.org/protocol/commands'>
@@ -58,7 +58,7 @@ module ApplicationMessages
      end
 
     #.........................................................................................................
-    def send_x_data_scalar_array_result(client, to)
+    def send_iq_result_command_x_data_scalar_array(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='scalar_array' xmlns='http://jabber.org/protocol/commands'>
@@ -76,7 +76,7 @@ module ApplicationMessages
     end
 
     #.........................................................................................................
-    def send_x_data_hash_array_result(client, to)
+    def send_iq_result_command_x_data_hash_array(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='hash_array' xmlns='http://jabber.org/protocol/commands'>
@@ -95,7 +95,7 @@ module ApplicationMessages
      end
 
     #.........................................................................................................
-    def send_x_data_array_hash_result(client, to)
+    def send_iq_result_command_x_data_array_hash(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <command node='array_hash' xmlns='http://jabber.org/protocol/commands'>
@@ -135,7 +135,7 @@ module ApplicationMessages
      end
 
      #.........................................................................................................
-     def send_x_data_array_hash_array_result(client, to)
+     def send_iq_result_command_x_data_array_hash_array(client, to)
        <<-MSG
          <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
            <command node='array_hash_array' xmlns='http://jabber.org/protocol/commands'>
@@ -178,7 +178,7 @@ module ApplicationMessages
       end
 
     #.........................................................................................................
-    def send_routing_error(client, node, to)
+    def send_error_command_routing(client, node, to)
       <<-MSG
         <iq id='1' to='#{to}' type='error' xmlns='jabber:client'>
           <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'>
@@ -192,7 +192,7 @@ module ApplicationMessages
     end
        
     #.........................................................................................................
-    def send_message(client, to)
+    def send_message_chat(client, to)
       <<-MSG
         <message to='#{to}' type='chat' xmlns='jabber:client'>
           <body>uoy kcuf</body>

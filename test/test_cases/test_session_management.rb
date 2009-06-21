@@ -20,20 +20,20 @@ class TestSessionManagement < Test::Unit::TestCase
     #### receive pre authentication stream feautues and mechanisms and authenticate
     @delegate.did_authenticate_method.should_not be_called
     @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
-      respond_with(SessionMessages.send_plain_authentication(@client)) 
-    @client.receiving(SessionMessages.recv_authentication_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
+      respond_with(SessionMessages.send_auth_plain(@client)) 
+    @client.receiving(SessionMessages.recv_auth_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
     @delegate.did_authenticate_method.should be_called
   
     #### bind resource
     @delegate.did_bind_method.should_not be_called
-    @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_bind_set(@client)) 
-    @client.receiving(SessionMessages.recv_bind_result(@client)).should respond_with(SessionMessages.send_session_set(@client)) 
+    @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_iq_set_bind(@client)) 
+    @client.receiving(SessionMessages.recv_iq_result_bind(@client)).should respond_with(SessionMessages.send_iq_set_session(@client)) 
     @delegate.did_bind_method.should be_called
   
     #### start session and request roster
     @delegate.did_start_session_method.should_not be_called
-    @client.receiving(SessionMessages.recv_session_result(@client)).should \
-      respond_with(SessionMessages.send_init_presence(@client), RosterMessages.send_roster_get(@client)) 
+    @client.receiving(SessionMessages.recv_iq_result_session(@client)).should \
+      respond_with(SessionMessages.send_presence_init(@client), RosterMessages.send_iq_get_query_roster(@client)) 
     @delegate.did_start_session_method.should be_called
   
   end
@@ -57,8 +57,8 @@ class TestSessionManagement < Test::Unit::TestCase
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
     @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
-      respond_with(SessionMessages.send_plain_authentication(@client)) 
-    lambda{@client.receiving(SessionMessages.recv_authentication_failure(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
+      respond_with(SessionMessages.send_auth_plain(@client)) 
+    lambda{@client.receiving(SessionMessages.recv_auth_failure(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
     
   end
   
@@ -71,13 +71,13 @@ class TestSessionManagement < Test::Unit::TestCase
     #### receive pre authentication stream feautues and mechanisms and authenticate
     @delegate.did_authenticate_method.should_not be_called
     @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
-      respond_with(SessionMessages.send_plain_authentication(@client)) 
-    @client.receiving(SessionMessages.recv_authentication_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
+      respond_with(SessionMessages.send_auth_plain(@client)) 
+    @client.receiving(SessionMessages.recv_auth_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
     @delegate.did_authenticate_method.should be_called
   
     #### bind resource and receive error
-    @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_bind_set(@client)) 
-    lambda{@client.receiving(SessionMessages.recv_bind_error(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
+    @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_iq_set_bind(@client)) 
+    lambda{@client.receiving(SessionMessages.recv_error_bind(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
   
@@ -90,18 +90,18 @@ class TestSessionManagement < Test::Unit::TestCase
       #### receive pre authentication stream feautues and mechanisms and authenticate
       @delegate.did_authenticate_method.should_not be_called
       @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
-        respond_with(SessionMessages.send_plain_authentication(@client)) 
-      @client.receiving(SessionMessages.recv_authentication_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
+        respond_with(SessionMessages.send_auth_plain(@client)) 
+      @client.receiving(SessionMessages.recv_auth_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
       @delegate.did_authenticate_method.should be_called
     
       #### bind resource
       @delegate.did_bind_method.should_not be_called
-      @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_bind_set(@client)) 
-      @client.receiving(SessionMessages.recv_bind_result(@client)).should respond_with(SessionMessages.send_session_set(@client)) 
+      @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_iq_set_bind(@client)) 
+      @client.receiving(SessionMessages.recv_iq_result_bind(@client)).should respond_with(SessionMessages.send_iq_set_session(@client)) 
       @delegate.did_bind_method.should be_called
     
       #### start session and request roster
-      lambda{@client.receiving(SessionMessages.recv_session_error(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
+      lambda{@client.receiving(SessionMessages.recv_error_session(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
   

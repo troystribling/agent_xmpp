@@ -19,7 +19,7 @@ class TestPresenceManagement < Test::Unit::TestCase
       @client.roster['troy@nowhere.com'][:resources].should be_empty
       @delegate.did_receive_presence_method.should_not be_called
       @client.receiving(PresenceMessages.recv_presence_available(@client, 'troy@nowhere.com/home')).should \
-        respond_with(SystemDiscoveryMessages.send_client_version_get(@client, 'troy@nowhere.com/home'))
+        respond_with(SystemDiscoveryMessages.send_iq_get_query_version(@client, 'troy@nowhere.com/home'))
       @delegate.did_receive_presence_method.should be_called
       @client.roster['troy@nowhere.com'][:resources]['troy@nowhere.com/home'][:presence].should_not be_nil
     end
@@ -87,8 +87,8 @@ class TestPresenceManagement < Test::Unit::TestCase
     @client.roster.has_key?('troy@nowhere.com').should be(true)
     @delegate.did_receive_presence_unsubscribed_method.should_not be_called
     @client.receiving(PresenceMessages.recv_presence_unsubscribed(@client, 'troy@nowhere.com')).should \
-      respond_with(RosterMessages.send_roster_set_remove(@client, 'troy@nowhere.com'))
-    @client.receiving(RosterMessages.recv_roster_result_set_ack(@client)).should not_respond
+      respond_with(RosterMessages.send_iq_set_query_roster_remove(@client, 'troy@nowhere.com'))
+    @client.receiving(RosterMessages.recv_iq_result_query_roster_ack(@client)).should not_respond
     @delegate.did_receive_presence_unsubscribed_method.should be_called
     @client.roster.has_key?('troy@nowhere.com').should be(false)
   end

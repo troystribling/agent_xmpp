@@ -6,7 +6,7 @@ module SystemDiscoveryMessages
     
     #### received messages    
     #.........................................................................................................
-    def recv_client_version_get(client, from)
+    def recv_iq_get_query_version(client, from)
       <<-MSG
         <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get'>
           <query xmlns='jabber:iq:version'/>
@@ -15,7 +15,7 @@ module SystemDiscoveryMessages
     end
 
     #.........................................................................................................
-    def recv_client_version_result(client, from)
+    def recv_iq_result_query_version(client, from)
       <<-MSG
         <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='result'>
           <query xmlns='jabber:iq:version'>
@@ -29,7 +29,7 @@ module SystemDiscoveryMessages
 
     #### sent messages    
     #.........................................................................................................
-    def send_client_version_result(client, to)
+    def send_iq_result_query_version(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
           <query xmlns='jabber:iq:version'>
@@ -42,7 +42,7 @@ module SystemDiscoveryMessages
     end
 
     #.........................................................................................................
-    def send_client_version_get(client, to)
+    def send_iq_get_query_version(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='get' xmlns='jabber:client'>
           <query xmlns='jabber:iq:version'/>

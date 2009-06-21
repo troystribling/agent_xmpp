@@ -93,7 +93,7 @@ module AgentXmpp
     #.........................................................................................................
     def did_start_session(pipe, stanza)
       AgentXmpp.logger.info "SESSION STARTED"
-      pipe.get_roster
+      pipe.get_query_roster
     end
 
     #.........................................................................................................
@@ -118,10 +118,10 @@ module AgentXmpp
       from_jid = presence.from.to_s     
       if roster.has_key?(presence.from.bare.to_s ) 
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
-        pipe.subscribed_presence(from_jid)  
+        pipe.presence_subscribed(from_jid)  
       else
         AgentXmpp.logger.warn "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN ROSTER: #{from_jid}"        
-        pipe.unsubscribed_presence(from_jid)  
+        pipe.presence_unsubscribed(from_jid)  
       end
     end
 
@@ -130,7 +130,7 @@ module AgentXmpp
       from_jid = presence.from.to_s     
       if roster.delete(presence.from.bare.to_s )           
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
-        pipe.set_roster_remove(presence.from)  
+        pipe.set_query_roster_remove(presence.from)  
       else
         AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
       end
@@ -171,7 +171,7 @@ module AgentXmpp
         end
       else
         AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
-        pipe.set_roster_remove(roster_item.jid)  
+        pipe.set_query_roster_remove(roster_item.jid)  
       end
     end
 
@@ -190,7 +190,7 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
       roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-        pipe.set_roster(Jabber::JID.new(j))  
+        pipe.set_query_roster(Jabber::JID.new(j))  
       end
     end
 
