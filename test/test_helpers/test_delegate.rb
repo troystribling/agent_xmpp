@@ -35,8 +35,8 @@ class TestDelegate
   delegate_callbacks :did_authenticate, :did_bind, :did_start_session
 
   #### presence
-  delegate_callbacks :did_receive_presence, :did_receive_subscribe, :did_receive_unsubscribed,
-                     :did_receive_subscribed
+  delegate_callbacks :did_receive_presence, :did_receive_presence_subscribe, :did_receive_presence_unsubscribed,
+                     :did_receive_presence_subscribed
 
   #### roster management
   delegate_callbacks :did_receive_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_roster_item, 
@@ -44,7 +44,7 @@ class TestDelegate
                      :did_receive_add_roster_item_error
 
   #### service discovery management
-  delegate_callbacks :did_receive_client_version_result,:did_receive_client_version_request
+  delegate_callbacks :did_receive_client_version_result,:did_receive_client_version_get
   
   #---------------------------------------------------------------------------------------------------------
   def initialize

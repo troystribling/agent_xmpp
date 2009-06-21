@@ -114,7 +114,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def did_receive_subscribe(pipe, presence)
+    def did_receive_presence_subscribe(pipe, presence)
       from_jid = presence.from.to_s     
       if roster.has_key?(presence.from.bare.to_s ) 
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
@@ -126,7 +126,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def did_receive_unsubscribed(pipe, presence)
+    def did_receive_presence_unsubscribed(pipe, presence)
       from_jid = presence.from.to_s     
       if roster.delete(presence.from.bare.to_s )           
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
@@ -137,7 +137,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def did_receive_subscribed(pipe, presence)
+    def did_receive_presence_subscribed(pipe, presence)
       from_jid = presence.from.to_s     
       AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{from_jid}" 
     end
@@ -228,7 +228,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def did_receive_client_version_request(pipe, request)
+    def did_receive_client_version_get(pipe, request)
       if roster.has_key?(request.from.bare.to_s)
         AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
         pipe.result_client_version(request)

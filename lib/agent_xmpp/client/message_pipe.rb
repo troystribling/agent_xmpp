@@ -169,16 +169,16 @@ module AgentXmpp
         end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
       #### presence subscription request  
       elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('Jabber::Presence')
-        broadcast_to_delegates(:did_receive_subscribe, self, stanza)
+        broadcast_to_delegates(:did_receive_presence_subscribe, self, stanza)
       #### presence subscription accepted  
       elsif stanza.type.eql?(:subscribed) and stanza_class.eql?('Jabber::Presence')
-        broadcast_to_delegates(:did_receive_subscribed, self, stanza)
+        broadcast_to_delegates(:did_receive_presence_subscribed, self, stanza)
       #### presence unsubscribe 
       elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('Jabber::Presence')
-        broadcast_to_delegates(:did_receive_unsubscribed, self, stanza)
+        broadcast_to_delegates(:did_receive_presence_unsubscribed, self, stanza)
       #### client version request
       elsif stanza.type.eql?(:get) and stanza.query.kind_of?(Jabber::Version::IqQueryVersion)
-        broadcast_to_delegates(:did_receive_client_version_request, self, stanza)
+        broadcast_to_delegates(:did_receive_client_version_get, self, stanza)
       #### received command
       elsif stanza.type.eql?(:set) and stanza.command.kind_of?(Jabber::Command::IqCommand)
         process_command(stanza)

@@ -17,7 +17,7 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
   
     #.........................................................................................................
     setup do
-      @delegate.did_receive_client_version_request_method.should_not be_called
+      @delegate.did_receive_client_version_get_method.should_not be_called
       @delegate.did_receive_client_version_result_method.should_not be_called
       @client.receiving(PresenceMessages.recv_presence_available(@client, 'troy@nowhere.com/home')).should \
         respond_with(SystemDiscoveryMessages.send_client_version_get(@client, 'troy@nowhere.com/home'))
@@ -37,17 +37,17 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
     should "respond to client version requests from that jid" do
       @client.receiving(SystemDiscoveryMessages.recv_client_version_get(@client, 'troy@nowhere.com/home')).should \
         respond_with(SystemDiscoveryMessages.send_client_version_result(@client, 'troy@nowhere.com/home'))
-      @delegate.did_receive_client_version_request_method.should be_called
+      @delegate.did_receive_client_version_get_method.should be_called
     end
 
   end
     
   #.........................................................................................................
   should "not respond to client version requests from jids not in configured roster" do
-    @delegate.did_receive_client_version_result_method.should_not be_called
+    @delegate.did_receive_client_version_get_method.should_not be_called
     @client.roster.has_key?('noone@nowhere.com').should be(false)
     @client.receiving(SystemDiscoveryMessages.recv_client_version_get(@client, 'noone@nowhere.com/nothing')).should not_respond
-    @delegate.did_receive_client_version_request_method.should be_called
+    @delegate.did_receive_client_version_get_method.should be_called
   end
     
 end

@@ -70,10 +70,10 @@ class TestRosterManagement < Test::Unit::TestCase
     
     #### receive subscribe request from contact and accept
     delegate = client.new_delegate
-    delegate.did_receive_subscribe_request_method.should_not be_called
+    delegate.did_receive_presence_subscribe_method.should_not be_called
     client.receiving(PresenceMessages.recv_presence_subscribe(client, 'troy@nowhere.com')).should \
       respond_with(PresenceMessages.send_presence_subscribed(client, 'troy@nowhere.com'))
-    delegate.did_receive_subscribe_request_method.should be_called
+    delegate.did_receive_presence_subscribe_method.should be_called
     
     #### receive roster update with subscription=both indicating that the contact's presence updates will be received and contact 
     #### will treceive presence updates and activate contact roster item

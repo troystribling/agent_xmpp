@@ -72,43 +72,43 @@ class TestPresenceManagement < Test::Unit::TestCase
   #.........................................................................................................
   should "accept subscription requests from jids which are in the configured roster" do
     @client.roster.has_key?('troy@nowhere.com').should be(true)
-    @delegate.did_receive_subscribe_method.should_not be_called
-    @delegate.did_receive_subscribed_method.should_not be_called
+    @delegate.did_receive_presence_subscribe_method.should_not be_called
+    @delegate.did_receive_presence_subscribed_method.should_not be_called
     @client.receiving(PresenceMessages.recv_presence_subscribe(@client, 'troy@nowhere.com')).should \
       respond_with(PresenceMessages.send_presence_subscribed(@client, 'troy@nowhere.com'))
     @client.receiving(PresenceMessages.recv_presence_subscribed(@client, 'troy@nowhere.com')).should not_respond
-    @delegate.did_receive_subscribe_method.should be_called
-    @delegate.did_receive_subscribed_method.should be_called
+    @delegate.did_receive_presence_subscribe_method.should be_called
+    @delegate.did_receive_presence_subscribed_method.should be_called
     @client.roster.has_key?('troy@nowhere.com').should be(true)
   end
   
   #.........................................................................................................
   should "remove roster item with jid from configured roster when an unsubscribe resquest is recieved" do
     @client.roster.has_key?('troy@nowhere.com').should be(true)
-    @delegate.did_receive_unsubscribed_method.should_not be_called
+    @delegate.did_receive_presence_unsubscribed_method.should_not be_called
     @client.receiving(PresenceMessages.recv_presence_unsubscribed(@client, 'troy@nowhere.com')).should \
       respond_with(RosterMessages.send_roster_set_remove(@client, 'troy@nowhere.com'))
     @client.receiving(RosterMessages.recv_roster_result_set_ack(@client)).should not_respond
-    @delegate.did_receive_unsubscribed_method.should be_called
+    @delegate.did_receive_presence_unsubscribed_method.should be_called
     @client.roster.has_key?('troy@nowhere.com').should be(false)
   end
     
   #.........................................................................................................
   should "do nothing when an unsubscribe resquest is recieved from a jid not in the configured roster" do
     @client.roster.has_key?('you@nowhere.com').should be(false)
-    @delegate.did_receive_unsubscribed_method.should_not be_called
+    @delegate.did_receive_presence_unsubscribed_method.should_not be_called
     @client.receiving(PresenceMessages.recv_presence_unsubscribed(@client, 'you@nowhere.com')).should not_respond
-    @delegate.did_receive_unsubscribed_method.should be_called
+    @delegate.did_receive_presence_unsubscribed_method.should be_called
     @client.roster.has_key?('you@nowhere.com').should be(false)
   end
     
   #.........................................................................................................
   should "decline subscription requests from jids which are not in the configured roster" do
     @client.roster.has_key?('noone@nowhere.com').should be(false)
-    @delegate.did_receive_subscribe_method.should_not be_called
+    @delegate.did_receive_presence_subscribe_method.should_not be_called
     @client.receiving(PresenceMessages.recv_presence_subscribe(@client, 'noone@nowhere.com')).should \
       respond_with(PresenceMessages.send_presence_unsubscribed(@client, 'noone@nowhere.com'))
-    @delegate.did_receive_subscribe_method.should be_called
+    @delegate.did_receive_presence_subscribe_method.should be_called
     @client.roster.has_key?('noone@nowhere.com').should be(false)
   end
   
