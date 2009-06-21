@@ -17,7 +17,7 @@ module AgentXmpp
            
     #.........................................................................................................
     def add_payload_to_container(payload)
-      meth = "response_#{format.xmlns.gsub(/:/, "_")}".to_sym
+      meth = "result_#{format.xmlns.gsub(/:/, "_")}".to_sym
       if pipe.respond_to?(meth) 
         pipe.send_to_method(meth, payload, params) 
       else

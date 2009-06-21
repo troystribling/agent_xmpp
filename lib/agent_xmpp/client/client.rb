@@ -93,7 +93,7 @@ module AgentXmpp
     #.........................................................................................................
     def did_start_session(pipe, stanza)
       AgentXmpp.logger.info "SESSION STARTED"
-      pipe.send_roster_request
+      pipe.get_roster
     end
 
     #.........................................................................................................
@@ -106,7 +106,7 @@ module AgentXmpp
         roster[from_bare_jid.to_s][:resources][from_jid] = {} if roster[from_bare_jid.to_s][:resources][from_jid].nil?
         roster[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
-        pipe.send_client_version_request(from_jid) \
+        pipe.get_client_version(from_jid) \
           if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
       else
         AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
@@ -114,30 +114,30 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def did_receive_subscribe_request(pipe, presence)
+    def did_receive_subscribe(pipe, presence)
       from_jid = presence.from.to_s     
       if roster.has_key?(presence.from.bare.to_s ) 
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
-        pipe.accept_contact_request(from_jid)  
+        pipe.subscribed_presence(from_jid)  
       else
         AgentXmpp.logger.warn "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN ROSTER: #{from_jid}"        
-        pipe.reject_contact_request(from_jid)  
+        pipe.unsubscribed_presence(from_jid)  
       end
     end
 
     #.........................................................................................................
-    def did_receive_unsubscribed_request(pipe, presence)
+    def did_receive_unsubscribed(pipe, presence)
       from_jid = presence.from.to_s     
       if roster.delete(presence.from.bare.to_s )           
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
-        pipe.remove_contact(presence.from)  
+        pipe.set_roster_remove(presence.from)  
       else
         AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
       end
     end
 
     #.........................................................................................................
-    def did_accept_subscription(pipe, presence)
+    def did_receive_subscribed(pipe, presence)
       from_jid = presence.from.to_s     
       AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{from_jid}" 
     end
@@ -171,7 +171,7 @@ module AgentXmpp
         end
       else
         AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
-        pipe.remove_roster_item(roster_item.jid)  
+        pipe.set_roster_remove(roster_item.jid)  
       end
     end
 
@@ -190,7 +190,7 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
       roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-        pipe.add_roster_item(Jabber::JID.new(j))  
+        pipe.set_roster(Jabber::JID.new(j))  
       end
     end
 
@@ -231,7 +231,7 @@ module AgentXmpp
     def did_receive_client_version_request(pipe, request)
       if roster.has_key?(request.from.bare.to_s)
         AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
-        pipe.send_client_version(request)
+        pipe.result_client_version(request)
       else
         AgentXmpp.logger.warn "RECEIVED CLIENT VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
       end

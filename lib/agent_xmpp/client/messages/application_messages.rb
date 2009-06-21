@@ -5,9 +5,9 @@ module AgentXmpp
   module ApplicationMessages
     
     ####......................................................................................................
-    # response mesages
+    # result mesages
     #.........................................................................................................
-    def response_jabber_x_data(payload, params)
+    def result_jabber_x_data(payload, params)
       iq = Jabber::Iq.new(:result, params[:from])
       iq.id = params[:id] unless params[:id].nil?
       iq.command = Jabber::Command::IqCommand.new(params[:node], 'completed')
@@ -16,7 +16,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def response_message_chat(payload, params)
+    def result_message_chat(payload, params)
       message = Jabber::Message.new(params[:from], payload)
       message.type = :chat
       Resp(message)  

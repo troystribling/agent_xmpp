@@ -4,7 +4,7 @@ module AgentXmpp
   #####-------------------------------------------------------------------------------------------------------
   module ServiceDiscoveryMessages
 
-    def send_client_version_request(contact_jid)
+    def get_client_version(contact_jid)
       iq = Jabber::Iq.new(:get, contact_jid)
       iq.query = Jabber::Version::IqQueryVersion.new
       Resp(iq) do |r|
@@ -15,7 +15,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def send_client_version(request)
+    def result_client_version(request)
       iq = Jabber::Iq.new(:result, request.from.to_s)
       iq.id = request.id unless request.id.nil?
       iq.query = Jabber::Version::IqQueryVersion.new

@@ -38,6 +38,11 @@ module PresenceMessages
       "<presence from='#{from}' to='#{client.client.jid.to_s}' type='subscribed'/>"
     end
     
+    #.........................................................................................................
+    def recv_presence_unsubscribed(client, from)
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='unsubscribed'/>"
+    end
+        
     #### sent messages    
     #.........................................................................................................
     def send_presence_subscribe(client, to)
