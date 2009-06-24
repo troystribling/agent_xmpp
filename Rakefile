@@ -26,12 +26,6 @@ rescue LoadError
   abort "jeweler is not available. In order to run test, you must: sudo gem install technicalpickles-jeweler --source=http://gems.github.com"
 end
 
-
-#####-------------------------------------------------------------------------------------------------------
-task :install => :build do
-  %x[gem install pkg/agent_xmpp-#{AgentXmpp::VERSION}]
-end
-
 #####-------------------------------------------------------------------------------------------------------
 task :uninstall do
   %x[gem uninstall agent_xmpp]

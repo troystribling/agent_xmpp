@@ -6,7 +6,7 @@ class TestClient
 
   #.........................................................................................................
   def initialize(config = nil)
-    config ||= File.open('test/test_app/config/test_agent.yml') {|yf| YAML::load(yf)}
+    config ||= File.open('test/test_app/agent_xmpp.yml') {|yf| YAML::load(yf)}
     @client = AgentXmpp::Client.new(config)
     @client.connect
   end
@@ -39,9 +39,7 @@ class TestClient
       doc.add_namespace('jabber:client') if doc.namespace('').to_s.eql?('')
       doc = Jabber::XMPPStanza::import(doc) 
     end
-    result = client.connection.receive(doc)
-puts "RESULT: #{result}"
-result    
+    client.connection.receive(doc)
   end
 
 end

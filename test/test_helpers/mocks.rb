@@ -54,8 +54,8 @@ module AgentXmpp
   class Controller
 
     #.........................................................................................................
-    def respond_to(&blk)      
-      View.new(pipe, format, params).add_payload_to_container(blk.call(@result_for_blk.call))
+    def handle_request     
+      request_callback(request)
     end
         
   #### Controller

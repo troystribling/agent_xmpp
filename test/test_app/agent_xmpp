@@ -1,9 +1,0 @@
-#!/usr/bin/env ruby
-
-$:.unshift('lib')
-require 'rubygems'
-require 'agent_xmpp'
-
-AgentXmpp.app_path = 'test/test_app'
-AgentXmpp.config_file = 'config/test_agent.yml'
-AgentXmpp::Boot.boot

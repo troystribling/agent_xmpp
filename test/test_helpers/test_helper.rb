@@ -33,6 +33,4 @@ require 'presence_messages'
 
 #####-------------------------------------------------------------------------------------------------------
 AgentXmpp.app_path = 'test/test_app'
-AgentXmpp.config_file = 'config/test_agent.yml'
-AgentXmpp::Boot.boot
 

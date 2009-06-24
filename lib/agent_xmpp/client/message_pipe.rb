@@ -86,17 +86,17 @@ module AgentXmpp
       params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
         :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
       AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-      Routing::Routes.invoke_command_response(self, params)
+      Controller.new(self, params).invoke_command
     end
 
     #---------------------------------------------------------------------------------------------------------
-    # process messages
+    # process chat messages
     #.........................................................................................................
     def process_chat_message_body(stanza)
       params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, \
         :body => stanza.body}
       AgentXmpp.logger.info "RECEIVED MESSAGE BODY: #{stanza.body}"
-      Routing::Routes.invoke_chat_response(self, params)
+      Controller.new(self, params).invoke_chat
     end
 
     #---------------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def connection_completed
-      AgentXmpp::Boot.call_if_implemented(:call_after_connected, self)     
+      Boot.call_if_implemented(:call_after_connected, self)     
       broadcast_to_delegates(:did_connect, self)
       init_connection(jid).collect{|m| send(m)}
     end

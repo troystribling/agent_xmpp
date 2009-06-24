@@ -6,7 +6,6 @@ module AgentXmpp
     
     #.......................................................................................................
     @config_load_order = []
-    @app_load_order = []
     
     ####......................................................................................................
     class << self
@@ -23,28 +22,19 @@ module AgentXmpp
         AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
         raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
         begin
-          require add_path('config/boot')
+          require add_path('boot')
         rescue LoadError
-          AgentXmpp.logger.info "config/boot.rb not given"
+          AgentXmpp.logger.info "boot.rb not given"
         end
 
         ####..............
         AgentXmpp.logger.info "STARTING AgentXmpp"
-        AgentXmpp.logger.info "APPLICATION PATH: #{AgentXmpp.config_file}"
+        AgentXmpp.logger.info "APPLICATION PATH: #{AgentXmpp.app_path}"
         AgentXmpp.logger.info "LOG FILE: #{AgentXmpp.log_file.kind_of?(String) ? AgentXmpp.log_file : "STDOUT"}"
         AgentXmpp.logger.info "CONFIGURATION FILE: #{AgentXmpp.config_file}"
 
         ####..............
-        call_if_implemented(:call_before_config_load)
-        load(add_path('config'), {:exclude => [add_path('config/boot')], :ordered_load => AgentXmpp::Boot.config_load_order})
-
-        ####..............
-        call_if_implemented(:call_before_app_load)
-        load(add_path('app/models'), {:ordered_load => AgentXmpp::Boot.app_load_order})
-        load(add_path('app/controllers'))
-        call_if_implemented(:call_after_app_load)
-
-        ####..............
+        call_if_implemented(:call_before_start)
         AgentXmpp::Client.new(File.open(AgentXmpp.config_file) {|yf| YAML::load(yf)}).connect
         
       end
@@ -62,23 +52,13 @@ module AgentXmpp
       end
       
       #.......................................................................................................
-      def before_config_load(&blk)
+      def before_start(&blk)
          define_meta_class_method(:call_before_config_load, &blk)
       end
 
       #.......................................................................................................
       def after_connected(&blk)
          define_meta_class_method(:call_after_connected, &blk)
-      end
-
-      #.......................................................................................................
-      def before_app_load(&blk)
-         define_meta_class_method(:call_before_app_load, &blk)
-      end
-
-      #.......................................................................................................
-      def after_app_load(&blk)
-         define_meta_class_method(:call_after_app_load, &blk)
       end
 
       #.......................................................................................................

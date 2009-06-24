@@ -1,9 +1,10 @@
+##############################################################################################################
 $:.unshift('lib')
 require 'rubygems'
 require 'agent_xmpp'
 
+#####-------------------------------------------------------------------------------------------------------
 AgentXmpp.app_path = 'test/test_client'
-AgentXmpp.config_file = 'config/test_client.yml'
 
 ##############################################################################################################
 module AgentXmpp
@@ -51,9 +52,7 @@ class TestClient
     def send_command(iq)
       define_meta_class_method(:did_receive_all_roster_items) do |pipe|
         pipe.send(iq) do |r|
-          puts "RESPONSE: #{r.to_s}"
-          sleep(2.0)
-          EventMachine::stop_event_loop
+          puts "\nRESPONSE: #{r.to_s}"
         end
       end
       AgentXmpp::Boot.boot
@@ -64,6 +63,6 @@ class TestClient
 #### TestClientManger  
 end
 
-##############################################################################################################
+#####-------------------------------------------------------------------------------------------------------
 $t = TestClient
 

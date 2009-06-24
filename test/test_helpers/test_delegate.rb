@@ -12,15 +12,15 @@ class TestDelegate
       args.each do |meth| 
         @@callback_methods.push(meth)
         class_eval <<-do_eval
-          def #{meth.to_s}(*args)
+          def #{meth}(*args)
             AgentXmpp.logger.info "TEST_DELEGATE #{meth.to_s.upcase}"
-            @#{meth.to_s}_method = true
+            @#{meth}_method = true
             nil
           end
-          def #{meth.to_s}_method
-            [@#{meth.to_s}_method, "#{meth.to_s}"]
+          def #{meth}_method
+            [@#{meth}_method, "#{meth.to_s}"]
           end
-          attr_writer :#{meth.to_s}_method
+          attr_writer :#{meth}_method
         do_eval
       end
     end 
