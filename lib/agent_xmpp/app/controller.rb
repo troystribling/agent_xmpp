@@ -42,11 +42,11 @@ module AgentXmpp
 
     #.......................................................................................................
      def invoke_command
-       route = find_route
+       route = command_route
        unless route.nil?
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |*result|
-           pipe.send_resp(add_payload_to_container(result.to_x_data))
+           add_payload_to_container(result.to_x_data)
          end
          handle_request
        else
@@ -57,7 +57,7 @@ module AgentXmpp
 
      #.......................................................................................................
      def invoke_chat
-       route = map.chat_route
+       route = chat_route
        unless route.nil?
          define_meta_class_method(:request, &route[:blk])
        else
@@ -66,7 +66,7 @@ module AgentXmpp
          end
        end
        define_meta_class_method(:request_callback) do |*result|
-         pipe.send_resp(add_payload_to_container(result))
+         add_payload_to_container(result)
        end
        handle_request
      end
@@ -82,7 +82,7 @@ module AgentXmpp
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
       if pipe.respond_to?(meth) 
-        pipe.send_to_method(meth, payload, params) 
+        pipe.send_resp(pipe.send_to_method(meth, payload, params)) 
       else
         AgentXmpp.logger.error /
           "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
@@ -91,8 +91,13 @@ module AgentXmpp
     end
     
     #.........................................................................................................
-    def find_route 
+    def command_route 
       (BaseController.routes[params[:action]] || []).select{|r| r[:path].eql?(params[:node].to_s)}.first
+    end
+
+    #.........................................................................................................
+    def chat_route 
+      nil
     end
     
         
