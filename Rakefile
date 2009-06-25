@@ -20,7 +20,6 @@ require 'jeweler'
     gem.add_dependency('rake', '>= 0.8.3')
     gem.add_dependency('eventmachine',                      '= 0.12.6')
     gem.add_dependency('troystribling-evma_xmlpushparser',  '= 0.0.1')
-    gem.add_dependency('xmpp4r',                            '= 0.4')
   end
 rescue LoadError
   abort "jeweler is not available. In order to run test, you must: sudo gem install technicalpickles-jeweler --source=http://gems.github.com"

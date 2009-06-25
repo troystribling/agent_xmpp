@@ -78,8 +78,8 @@ module AgentXmpp
         File.join(AgentXmpp.app_path, dir)
       end
     
+    #### self
     end
-    ####......................................................................................................
 
   #### Boot
   end

@@ -82,8 +82,10 @@ module Jabber
   class IdGenerator
 
     #.........................................................................................................
-    def generate_id
-      1
+    class << self
+      
+      def generate_id; 1; end
+      
     end
 
   #### IdGenerator

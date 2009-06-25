@@ -58,7 +58,7 @@ module AgentXmpp
       raise AgentXmppError, 'not connected'  unless connected?
       if block_given? and data.kind_of?(Jabber::XMPPStanza)
         if data.id.nil?
-          data.id = Jabber::IdGenerator.instance.generate_id
+          data.id = Jabber::IdGenerator.generate_id
         end
         @id_callbacks[data.id] = blk
       end
