@@ -20,18 +20,22 @@ module AgentXmpp
         AgentXmpp.log_file = add_path(AgentXmpp.log_file) if AgentXmpp.log_file.kind_of?(String)
         AgentXmpp.config_file = add_path(AgentXmpp.config_file)
         AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
-        raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
-        begin
-          require add_path('boot')
-        rescue LoadError
-          AgentXmpp.logger.info "boot.rb not given"
-        end
 
         ####..............
         AgentXmpp.logger.info "STARTING AgentXmpp"
         AgentXmpp.logger.info "APPLICATION PATH: #{AgentXmpp.app_path}"
         AgentXmpp.logger.info "LOG FILE: #{AgentXmpp.log_file.kind_of?(String) ? AgentXmpp.log_file : "STDOUT"}"
         AgentXmpp.logger.info "CONFIGURATION FILE: #{AgentXmpp.config_file}"
+
+        ####..............
+        raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
+        begin
+          require add_path('boot')
+        rescue LoadError
+          AgentXmpp.logger.info "boot.rb not given"
+        else
+          AgentXmpp.logger.info "boot.rb loaded"
+        end
 
         ####..............
         call_if_implemented(:call_before_start)
@@ -53,7 +57,7 @@ module AgentXmpp
       
       #.......................................................................................................
       def before_start(&blk)
-         define_meta_class_method(:call_before_config_load, &blk)
+         define_meta_class_method(:call_before_start, &blk)
       end
 
       #.......................................................................................................
@@ -74,21 +78,6 @@ module AgentXmpp
         File.join(AgentXmpp.app_path, dir)
       end
     
-      #.......................................................................................................
-      def load(path, options = {})
-        exclude_files = options[:exclude] || []
-        ordered_files = options[:ordered_load] || []
-        ordered_files.each{|f| require f}
-        Find.find(path) do |file_path|
-          if file_match = /(.*)\.rb$/.match(file_path)
-            file = file_match.captures.last
-            unless exclude_files.include?(file) and ordered_files.include?(file)
-              require file 
-            end
-          end
-        end
-      end
-      
     end
     ####......................................................................................................
 

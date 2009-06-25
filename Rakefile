@@ -2,7 +2,7 @@
 $:.unshift('lib')
 require 'rubygems'
 require 'rake'
-require 'agent_xmpp'
+require 'agent_xmpp/config'
 
 #####-------------------------------------------------------------------------------------------------------
 task :default => :test

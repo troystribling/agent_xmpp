@@ -11,7 +11,7 @@ module AgentXmpp
     #.........................................................................................................
     def authenticate(pipe)
       if stream_mechanisms.include?('PLAIN')
-        Resp(Jabber::SASL.new('PLAIN').auth(pipe.jid, pipe.password))
+        Send(Jabber::SASL.new('PLAIN').auth(pipe.jid, pipe.password))
       else
         raise AgentXmppError, "PLAIN authentication required"
       end
@@ -25,7 +25,7 @@ module AgentXmpp
         bind.add_namespace(stream_features['bind'])                
         resource = bind.add REXML::Element.new('resource')
         resource.text = jid.resource
-        Resp(iq) do |r|
+        Send(iq) do |r|
           if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
             jid = Jabber::JID.new(full_jid.text) unless jid.to_s.eql?(full_jid.text)                  
             [session(stanza), broadcast_to_delegates(:did_bind, self, stanza)].smash
@@ -42,9 +42,9 @@ module AgentXmpp
         iq = Jabber::Iq.new(:set)
         session = iq.add REXML::Element.new('session')
         session.add_namespace stream_features['session']                
-        Resp(iq) do |r|
+        Send(iq) do |r|
           if r.type == :result                
-            [Resp(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].smash
+            [Send(Jabber::Presence.new(nil, nil, 1)), broadcast_to_delegates(:did_start_session, self, stanza)].smash
           elsif r.type.eql?(:error) and r.session
             raise AgentXmppError, "session start failed"
           end
@@ -55,8 +55,8 @@ module AgentXmpp
     #.........................................................................................................
     def init_connection(jid, starting = true)
       msg = []
-      msg.push(Resp("<?xml version='1.0' ?>")) if starting
-      msg.push(Resp("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
+      msg.push(Send("<?xml version='1.0' ?>")) if starting
+      msg.push(Send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
     end
     
     #.........................................................................................................

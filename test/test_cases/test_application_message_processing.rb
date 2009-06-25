@@ -60,17 +60,5 @@ class TestApplicationMessageProcessing < Test::Unit::TestCase
       respond_with(ApplicationMessages.send_error_command_routing(@client, 'no_route', 'dev@nowhere.com'))
   end
   
-  #.........................................................................................................
-  should "return error if command node route does not map to a controller" do
-    @client.receiving(ApplicationMessages.recv_iq_set_command_execute(@client, 'no_action', 'dev@nowhere.com')).should \
-      respond_with(ApplicationMessages.send_error_command_routing(@client, 'no_action', 'dev@nowhere.com'))
-  end
-  
-  #.........................................................................................................
-  should "return error if command node route does not map to an action" do
-    @client.receiving(ApplicationMessages.recv_iq_set_command_execute(@client, 'no_controller', 'dev@nowhere.com')).should \
-      respond_with(ApplicationMessages.send_error_command_routing(@client, 'no_controller', 'dev@nowhere.com'))
-  end
-
 end
 

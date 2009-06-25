@@ -8,14 +8,14 @@ module AgentXmpp
     def presence_subscribed(contact_jid)
       presence = Jabber::Presence.new.set_type(:subscribed)
       presence.to = contact_jid  
-      Resp(presence)
+      Send(presence)
     end
 
     #.........................................................................................................
     def presence_unsubscribed(contact_jid)
       presence = Jabber::Presence.new.set_type(:unsubscribed)
       presence.to = contact_jid      
-      Resp(presence)
+      Send(presence)
     end
     
   #### RosterMessages
