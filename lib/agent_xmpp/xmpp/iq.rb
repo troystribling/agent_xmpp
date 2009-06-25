@@ -111,6 +111,22 @@ module Jabber
       first_element("command")
     end
 
+    #.....................................................................................................
+    def command=(newcommand)
+      delete_elements(newcommand.name)
+      add(newcommand)
+    end
+
+    #.....................................................................................................
+    def bind
+      first_element('bind')
+    end
+
+    #.....................................................................................................
+    def session
+      first_element('session')
+    end
+
     ##
     # Create a new Iq stanza with an unspecified query child
     # (<query/> has no namespace)

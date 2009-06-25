@@ -97,7 +97,20 @@ module Jabber
         add(XDataInstructions.new(i))
       end
 
-    end
+      #.....................................................................................................
+      def <<(child)
+        add(child)
+        self
+      end
+
+      #.....................................................................................................
+      def add_field_with_value(var, value)
+        field = Jabber::Dataforms::XDataField.new(var)
+        field.values = value
+        self << field
+      end
+
+  end
 
 
     ##
@@ -288,6 +301,61 @@ module Jabber
     # The <reported/> element, can contain XDataField elements
     class XDataReported < XMPPElement
       name_xmlns 'reported', 'jabber:x:data'
+
+      #.....................................................................................................
+      def fields(including_hidden=false)
+        fields = []
+        each_element do |xe|
+          if xe.kind_of?(Jabber::Dataforms::XDataField) and (including_hidden or (xe.type != :hidden and xe.type != :fixed))
+            fields << xe
+          end
+        end
+        fields
+      end
+
+      #.....................................................................................................
+      def <<(child)
+        add(child)
+        self
+      end
+
+      #.....................................................................................................
+      def add_field(var)
+        self << Jabber::Dataforms::XDataField.new(var)
+      end
     end
+  
+    class XDataItem < XMPPElement
+
+      #.....................................................................................................
+      name_xmlns 'item', 'jabber:x:data'
+
+      #.....................................................................................................
+      def fields(including_hidden=false)
+        fields = []
+        each_element do |xe|
+          if xe.kind_of?(Jabber::Dataforms::XDataField) and (including_hidden or (xe.type != :hidden and xe.type != :fixed))
+            fields << xe
+          end
+        end
+        fields
+      end
+
+      #.....................................................................................................
+      def <<(child)
+        add(child)
+        self
+      end
+
+      #.....................................................................................................
+      def add_field_with_value(var, value)
+        field = Jabber::Dataforms::XDataField.new(var)        
+        field.values = value
+        self << field
+      end
+
+    #### XDataItem
+    end 
+  
   end
 end

@@ -151,6 +151,11 @@ module Jabber
         first_element('actions')
       end
 
+      #.....................................................................................................
+      def <<(child)
+        add(child)
+      end
+
     end
   end
 end

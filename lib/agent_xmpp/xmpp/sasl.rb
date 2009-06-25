@@ -11,26 +11,26 @@ module Jabber
   module SASL
     NS_SASL = 'urn:ietf:params:xml:ns:xmpp-sasl'
 
-    ##
-    # Factory function to obtain a SASL helper for the specified mechanism
-    def SASL.new(stream, mechanism)
+    #.....................................................................................................
+    def SASL.new(mechanism)
       case mechanism
         when 'DIGEST-MD5'
-          DigestMD5.new(stream)
+          DigestMD5.new
         when 'PLAIN'
-          Plain.new(stream)
+          Plain.new
         when 'ANONYMOUS'
-          Anonymous.new(stream)
+          Anonymous.new
         else
-          raise "Unknown SASL mechanism: #{mechanism}"
+          raise AgentXmppError "Unknown SASL mechanism: #{mechanism}"
       end
     end
 
     ##
     # SASL mechanism base class (stub)
     class Base
-      def initialize(stream)
-        @stream = stream
+
+      #.....................................................................................................
+      def initialize
       end
 
       private
@@ -46,25 +46,19 @@ module Jabber
       def generate_nonce
         Digest::MD5.hexdigest(Time.new.to_f.to_s)
       end
+      
     end
 
     ##
     # SASL PLAIN authentication helper (RFC2595)
     class Plain < Base
-      ##
-      # Authenticate via sending password in clear-text
-      def auth(password)
-        auth_text = "#{@stream.jid.strip}\x00#{@stream.jid.node}\x00#{password}"
-        error = nil
-        @stream.send(generate_auth('PLAIN', Base64::encode64(auth_text).gsub(/\s/, ''))) { |reply|
-          if reply.name != 'success'
-            error = reply.first_element(nil).name
-          end
-          true
-        }
 
-        raise error if error
+      #.....................................................................................................
+      def auth(jid, password)
+        auth_text = "#{jid.strip}\x00#{jid.node}\x00#{password}"
+        generate_auth('PLAIN', Base64::encode64(auth_text).gsub(/\s/, ''))
       end
+
     end
 
     ##
