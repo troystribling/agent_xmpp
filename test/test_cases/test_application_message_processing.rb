@@ -13,7 +13,7 @@ class TestApplicationMessageProcessing < Test::Unit::TestCase
   end
 
   #.........................................................................................................
-  should "respond to a received message with body text reversed" do
+  should "respond to a received message with agent version information if no chat route is specified" do
     @client.receiving(ApplicationMessages.recv_message_chat(@client, 'dev@nowhere.com')).should \
       respond_with(ApplicationMessages.send_message_chat(@client, 'dev@nowhere.com'))
   end

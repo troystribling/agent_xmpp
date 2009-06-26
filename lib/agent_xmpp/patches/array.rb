@@ -8,18 +8,18 @@ module AgentXmpp
 
         #......................................................................................................
         def to_x_data(type = 'result')
-          data = Jabber::Dataforms::XData.new(type)
+          data = Xmpp::Dataforms::XData.new(type)
           if first.instance_of?(Hash)
-            reported = Jabber::Dataforms::XDataReported.new
+            reported = Xmpp::Dataforms::XDataReported.new
             first.each_key {|var| reported.add_field(var.to_s)}
             data << reported
             each do |fields|
-              item = Jabber::Dataforms::XDataItem.new
+              item = Xmpp::Dataforms::XDataItem.new
               fields.each{|var, value| item.add_field_with_value(var.to_s, value.kind_of?(Array) ? value.collect{|v| v.to_s} : [value.to_s])}
               data << item
             end
           else
-            field = Jabber::Dataforms::XDataField.new
+            field = Xmpp::Dataforms::XDataField.new
             field.values = map {|v| v.to_s}
             data << field
           end

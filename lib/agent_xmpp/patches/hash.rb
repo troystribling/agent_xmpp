@@ -8,7 +8,7 @@ module AgentXmpp
 
         #.......................................................................................................
         def to_x_data(type = 'result')
-          inject(Jabber::Dataforms::XData.new(type)) do |data, field| 
+          inject(Xmpp::Dataforms::XData.new(type)) do |data, field| 
             val = field.last
             data.add_field_with_value(field.first.to_s, val.kind_of?(Array) ? val.collect{|v| v.to_s} : [val.to_s])
           end

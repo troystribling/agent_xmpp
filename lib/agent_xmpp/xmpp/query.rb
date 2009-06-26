@@ -1,13 +1,18 @@
-# =XMPP4R - XMPP Library for Ruby
-# License:: Ruby's license (see the LICENSE file) or GNU GPL, at your option.
-# Website::http://home.gna.org/xmpp4r/
+# Original from XMPP4R - XMPP Library for Ruby Website::http://home.gna.org/xmpp4r/
+##############################################################################################################
+module AgentXmpp
 
-module Jabber
-  ##
-  # A class used to build/parse IQ Query requests/responses
-  #
-  class IqQuery < XMPPElement
-    name_xmlns 'query'
-    force_xmlns true
+  #####-------------------------------------------------------------------------------------------------------
+  module Xmpp
+
+    #####-------------------------------------------------------------------------------------------------------
+    class IqQuery < XMPPElement
+      name_xmlns 'query'
+      force_xmlns true
+    end
+    
+  #### XMPP
   end
+
+#### AgentXmpp
 end

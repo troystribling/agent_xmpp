@@ -28,8 +28,8 @@ module ApplicationMessages
     def send_iq_result_command_x_data_scalar(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='scalar' xmlns='http://jabber.org/protocol/commands'>
-            <x xmlns='jabber:x:data'>
+          <command node='scalar' action='completed' xmlns='http://jabber.org/protocol/commands'>
+            <x type='result' xmlns='jabber:x:data'>
               <field>
                 <value>scalar</value>
               </field>
@@ -43,8 +43,8 @@ module ApplicationMessages
     def send_iq_result_command_x_data_hash(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='hash' xmlns='http://jabber.org/protocol/commands'>
-            <x xmlns='jabber:x:data'>
+          <command node='hash' action='completed' xmlns='http://jabber.org/protocol/commands'>
+            <x type='result' xmlns='jabber:x:data'>
               <field var='attr1'>
                 <value>val1</value>
               </field>
@@ -61,8 +61,8 @@ module ApplicationMessages
     def send_iq_result_command_x_data_scalar_array(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='scalar_array' xmlns='http://jabber.org/protocol/commands'>
-            <x xmlns='jabber:x:data'>
+          <command node='scalar_array' action='completed' xmlns='http://jabber.org/protocol/commands'>
+            <x type='result' xmlns='jabber:x:data'>
               <field>
                 <value>val1</value>
                 <value>val2</value>
@@ -79,8 +79,8 @@ module ApplicationMessages
     def send_iq_result_command_x_data_hash_array(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='hash_array' xmlns='http://jabber.org/protocol/commands'>
-            <x xmlns='jabber:x:data'>
+          <command node='hash_array' action='completed' xmlns='http://jabber.org/protocol/commands'>
+            <x type='result' xmlns='jabber:x:data'>
               <field var='attr1'>
                 <value>val11</value>
                 <value>val11</value>
@@ -98,8 +98,8 @@ module ApplicationMessages
     def send_iq_result_command_x_data_array_hash(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='array_hash' xmlns='http://jabber.org/protocol/commands'>
-            <x xmlns='jabber:x:data'>
+          <command node='array_hash' action='completed' xmlns='http://jabber.org/protocol/commands'>
+            <x type='result' xmlns='jabber:x:data'>
               <reported>
                 <field var='attr1'/>
                 <field var='attr2'/>
@@ -138,8 +138,8 @@ module ApplicationMessages
      def send_iq_result_command_x_data_array_hash_array(client, to)
        <<-MSG
          <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-           <command node='array_hash_array' xmlns='http://jabber.org/protocol/commands'>
-             <x xmlns='jabber:x:data'>
+           <command node='array_hash_array' action='completed' xmlns='http://jabber.org/protocol/commands'>
+             <x type='result' xmlns='jabber:x:data'>
                <reported>
                  <field var='attr1'/>
                  <field var='attr2'/>
@@ -195,7 +195,7 @@ module ApplicationMessages
     def send_message_chat(client, to)
       <<-MSG
         <message to='#{to}' type='chat' xmlns='jabber:client'>
-          <body>uoy kcuf</body>
+          <body>#{AgentXmpp::AGENT_XMPP_NAME} #{AgentXmpp::VERSION}, #{AgentXmpp::OS_VERSION}</body>
         </message>
        MSG
     end

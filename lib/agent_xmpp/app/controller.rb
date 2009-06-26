@@ -62,7 +62,7 @@ module AgentXmpp
          define_meta_class_method(:request, &route[:blk])
        else
          define_meta_class_method(:request) do
-           params[:body].reverse
+           "#{AgentXmpp::AGENT_XMPP_NAME} #{AgentXmpp::VERSION}, #{AgentXmpp::OS_VERSION}"
          end
        end
        define_meta_class_method(:request_callback) do |result|

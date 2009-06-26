@@ -8,7 +8,7 @@ module AgentXmpp
 
         #.......................................................................................................
         def to_x_data(type = 'result')
-          Jabber::Dataforms::XData.new(type).add_field_with_value(nil, to_s)
+          Xmpp::Dataforms::XData.new(type).add_field_with_value(nil, to_s)
         end
   
         #.......................................................................................................

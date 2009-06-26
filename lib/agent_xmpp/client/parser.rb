@@ -49,8 +49,8 @@ module AgentXmpp
     def process
       @current.add_namespace(@streamns) if @current.namespace('').to_s.eql?('')
       begin
-        stanza = Jabber::XMPPStanza::import(@current)
-      rescue Jabber::NoNameXmlnsRegistered
+        stanza = Xmpp::XMPPStanza::import(@current)
+      rescue Xmpp::NoNameXmlnsRegistered
         stanza = @current
       end
       if @current.xpath.eql?('stream:stream')

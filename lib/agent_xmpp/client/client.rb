@@ -13,8 +13,8 @@ module AgentXmpp
       @password = config['password']
       @port = config['port'] || 5222
       resource = config['resource'] || Socket.gethostname
-      @jid = Jabber::JID.new("#{config['jid']}/#{resource}")
-      @roster = Roster.new(@jid, config['contacts'])
+      @jid = Xmpp::JID.new("#{config['jid']}/#{resource}")
+      @roster = RosterModel.new(@jid, config['contacts'])
       @message_pipe = MessagePipe.new(self)
       message_pipe.add_delegate(self) 
     end
@@ -190,7 +190,7 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
       roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-        pipe.set_query_roster(Jabber::JID.new(j))  
+        pipe.set_query_roster(Xmpp::JID.new(j))  
       end
     end
 

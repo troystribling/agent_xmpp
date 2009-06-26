@@ -33,7 +33,7 @@ class TestClient
     
     #.........................................................................................................
     def message(args) 
-      msg = Jabber::Message.new(args[:to], args[:body])
+      msg = AgentXmpp::Xmpp::Message.new(args[:to], args[:body])
       msg.type = :chat
       define_meta_class_method(:did_receive_all_roster_items) do |client_connection|
         client_connection.send(msg)
@@ -43,8 +43,8 @@ class TestClient
 
     #.........................................................................................................
     def command_x_data(args) 
-      iq = Jabber::Iq.new(:set, args[:to])
-      iq.query = Jabber::Command::IqCommand.new(args[:node], :execute)
+      iq = AgentXmpp::Xmpp::Iq.new(:set, args[:to])
+      iq.query = AgentXmpp::Xmpp::Command::IqCommand.new(args[:node], :execute)
       send_command(iq)
     end
 
@@ -60,7 +60,7 @@ class TestClient
     
   end
   
-#### TestClientManger  
+#### TestClient  
 end
 
 #####-------------------------------------------------------------------------------------------------------

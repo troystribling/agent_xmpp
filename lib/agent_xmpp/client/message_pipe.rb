@@ -56,9 +56,9 @@ module AgentXmpp
     #.........................................................................................................
     def send(data, &blk)
       raise AgentXmppError, 'not connected'  unless connected?
-      if block_given? and data.kind_of?(Jabber::XMPPStanza)
+      if block_given? and data.kind_of?(Xmpp::XMPPStanza)
         if data.id.nil?
-          data.id = Jabber::IdGenerator.generate_id
+          data.id = Xmpp::IdGenerator.generate_id
         end
         @id_callbacks[data.id] = blk
       end
@@ -104,7 +104,7 @@ module AgentXmpp
     #.........................................................................................................
     def receive(stanza)
       AgentXmpp.logger.info "RECV: #{stanza.to_s}"
-      result = if stanza.kind_of?(Jabber::XMPPStanza) and stanza.id and blk = id_callbacks[stanza.id]
+      result = if stanza.kind_of?(Xmpp::XMPPStanza) and stanza.id and blk = id_callbacks[stanza.id]
                  id_callbacks.delete(stanza.id)
                  blk.call(stanza)
                else
@@ -162,28 +162,28 @@ module AgentXmpp
     def demux_stanza(stanza)
       stanza_class = stanza.class.to_s
       #### roster update
-      if stanza.type == :set and stanza.query.kind_of?(Jabber::Roster::IqQueryRoster)
+      if stanza.type == :set and stanza.query.kind_of?(AgentXmpp::Xmpp::Roster::IqQueryRoster)
         [stanza.query.inject([]) do |r, i|  
           method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
           r.push(broadcast_to_delegates(method, self, i))
         end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
       #### presence subscription request  
-      elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('Jabber::Presence')
+      elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
         broadcast_to_delegates(:did_receive_presence_subscribe, self, stanza)
       #### presence subscription accepted  
-      elsif stanza.type.eql?(:subscribed) and stanza_class.eql?('Jabber::Presence')
+      elsif stanza.type.eql?(:subscribed) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
         broadcast_to_delegates(:did_receive_presence_subscribed, self, stanza)
       #### presence unsubscribe 
-      elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('Jabber::Presence')
+      elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
         broadcast_to_delegates(:did_receive_presence_unsubscribed, self, stanza)
       #### client version request
-      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(Jabber::Version::IqQueryVersion)
+      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::Version::IqQueryVersion)
         broadcast_to_delegates(:did_receive_client_version_get, self, stanza)
       #### received command
-      elsif stanza.type.eql?(:set) and stanza.command.kind_of?(Jabber::Command::IqCommand)
+      elsif stanza.type.eql?(:set) and stanza.command.kind_of?(AgentXmpp::Xmpp::Command::IqCommand)
         process_command(stanza)
       #### chat message received
-      elsif stanza_class.eql?('Jabber::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
+      elsif stanza_class.eql?('AgentXmpp::Xmpp::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
         process_chat_message_body(stanza)
       else
         broadcast_to_delegates(('did_receive_' + /.*::(.*)/.match(stanza_class).to_a.last.downcase).to_sym, self, stanza)

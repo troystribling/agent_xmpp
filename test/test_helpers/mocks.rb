@@ -52,23 +52,15 @@ module AgentXmpp
 
   #####-------------------------------------------------------------------------------------------------------
   class Controller
-
-    #.........................................................................................................
     def handle_request  
-      request_callback(request).collect{|m| Send(Jabber::XMPPStanza::import(REXML::Document.new(m).root))}
+      request_callback(request).collect{|m| Send(Xmpp::XMPPStanza::import(REXML::Document.new(m).root))}
     end
-        
-  #### Controller
   end
 
   #####-------------------------------------------------------------------------------------------------------
-  class Boot
-  
-    #.........................................................................................................
+  class Boot  
     def self.boot     
-    end
-        
-  #### Boot
+    end        
   end
 
 #### AgentXmpp
@@ -76,20 +68,12 @@ end
 
 
 ##############################################################################################################
-module Jabber
-
-  #####-------------------------------------------------------------------------------------------------------
-  class IdGenerator
-
-    #.........................................................................................................
-    class << self
-      
-      def generate_id; 1; end
-      
+module AgentXmpp
+  module Xmpp
+    class IdGenerator
+      class << self
+        def generate_id; 1; end
+      end
     end
-
-  #### IdGenerator
   end
-
-#### Jabber  
 end
