@@ -36,7 +36,6 @@ module AgentXmpp
             end
           end
         end
-
         raise NoNameXmlnsRegistered.new(klass)
       end
 

@@ -5,15 +5,11 @@ module AgentXmpp
   class MessagePipe
 
     #---------------------------------------------------------------------------------------------------------
-    include SessionMessages
     include RosterMessages
-    include PresenceMessages
-    include ServiceDiscoveryMessages
-    include ApplicationMessages
     #---------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader   :connection_status, :delegates, :id_callbacks, :client               
+    attr_reader   :connection_status, :delegates, :id_callbacks, :client, :stream_features, :stream_mechanisms             
     attr_accessor :connection               
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
@@ -31,6 +27,11 @@ module AgentXmpp
     #.........................................................................................................
     def jid
       client.jid
+    end
+
+    #.........................................................................................................
+    def jid=(jid)
+      client.jid = jid
     end
 
     #.........................................................................................................
@@ -126,19 +127,17 @@ module AgentXmpp
       broadcast_to_delegates(:did_disconnect, self)
     end
     
-  #---------------------------------------------------------------------------------------------------------
-  protected
-  #---------------------------------------------------------------------------------------------------------
+  private
 
     #.........................................................................................................
     def process_stanza(stanza)
       case stanza.name
       when 'features'
-        set_stream_features(stanza)
+        set_stream_features_and_mechanisms(stanza)
         if connection_status.eql?(:offline)
-          authenticate(self)
+          Xmpp::SASL.authenticate(stream_mechanisms, self)
         elsif connection_status.eql?(:authenticated)
-          bind(stanza)
+          Xmpp::Iq.bind(stanza, self)
         end
       when 'stream'
       when 'success'
@@ -177,10 +176,10 @@ module AgentXmpp
       elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
         broadcast_to_delegates(:did_receive_presence_unsubscribed, self, stanza)
       #### client version request
-      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::Version::IqQueryVersion)
+      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqVersion)
         broadcast_to_delegates(:did_receive_client_version_get, self, stanza)
       #### received command
-      elsif stanza.type.eql?(:set) and stanza.command.kind_of?(AgentXmpp::Xmpp::Command::IqCommand)
+      elsif stanza.type.eql?(:set) and stanza.command.kind_of?(AgentXmpp::Xmpp::IqCommand)
         process_command(stanza)
       #### chat message received
       elsif stanza_class.eql?('AgentXmpp::Xmpp::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
@@ -190,6 +189,25 @@ module AgentXmpp
       end
     end
   
+    #.........................................................................................................
+    def set_stream_features_and_mechanisms(stanza)
+      @stream_features, @stream_mechanisms = {}, []
+      stanza.elements.each do |e|
+        if e.name == 'mechanisms' and e.namespace == 'urn:ietf:params:xml:ns:xmpp-sasl'
+          e.each_element('mechanism') {|mech| @stream_mechanisms.push(mech.text)}
+        else
+          @stream_features[e.name] = e.namespace
+        end
+      end
+    end
+  
+    #.........................................................................................................
+    def init_connection(jid, starting = true)
+      msg = []
+      msg.push(Send("<?xml version='1.0' ?>")) if starting
+      msg.push(Send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
+    end
+          
   #### MessagePipe
   end
 

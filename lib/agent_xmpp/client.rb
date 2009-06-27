@@ -1,4 +1,3 @@
-require 'agent_xmpp/client/parser'
 require 'agent_xmpp/client/response'
 require 'agent_xmpp/client/message_pipe'
 require 'agent_xmpp/client/connection'

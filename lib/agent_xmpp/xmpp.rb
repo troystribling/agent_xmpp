@@ -15,4 +15,4 @@ require 'agent_xmpp/xmpp/version'
 require 'agent_xmpp/xmpp/roster'
 
 require 'agent_xmpp/xmpp/data'
-require 'agent_xmpp/xmpp/errors'
+require 'agent_xmpp/xmpp/error_response'

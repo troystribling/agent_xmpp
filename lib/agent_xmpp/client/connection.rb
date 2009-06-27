@@ -5,18 +5,18 @@ module AgentXmpp
   class Connection < EventMachine::Connection
 
     #---------------------------------------------------------------------------------------------------------
-    include Parser
+    include EventMachine::XmlPushParser
     #---------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive, :message_pipe               
+    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive, :pipe               
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
-    def initialize(client, jid, password, message_pipe, port=5222)
-      @client, @jid, @password, @message_pipe, @port = client, jid, password, message_pipe, port
+    def initialize(client, jid, password, pipe, port=5222)
+      @client, @jid, @password, @pipe, @port = client, jid, password, pipe, port
       @connection_status = :offline;
-      @message_pipe.connection = self
+      @pipe.connection = self
     end
     
     #---------------------------------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ module AgentXmpp
       @keepalive = EventMachine::PeriodicTimer.new(60) do 
         send_data("\n")
       end
-      message_pipe.connection_completed
+      pipe.connection_completed
     end
 
     #.........................................................................................................
@@ -40,14 +40,63 @@ module AgentXmpp
         @keepalive.cancel
         @keepalive = nil
       end
-      message_pipe.unbind
+      pipe.unbind
     end
 
     #---------------------------------------------------------------------------------------------------------
-    # AgentXmpp::Parser callbacks
+    # EventMachine::XmlPushParser callbacks
+    #.........................................................................................................
+  	def start_document
+  	end
+  
+    #.........................................................................................................
+    def start_element(name, attrs)
+      e = REXML::Element.new(name)
+      e.add_attributes(attrs)      
+      @current = @current.nil? ? e : @current.add_element(e)  
+      if @current.xpath == 'stream:stream'
+        process
+        @current = nil
+      end
+    end
+  
+    #.........................................................................................................
+    def end_element(name)
+      if @current.parent
+        @current = @current.parent
+      else
+        process
+        @current = nil
+      end
+    end
+
+    #.........................................................................................................
+    def characters(text)
+      @current.text = @current.text.to_s + text if @current
+    end
+    
+    #.........................................................................................................
+    def error(*args)
+      AgentXmpp.logger.error *args
+    end
+
+    #.........................................................................................................
+    def process
+      @current.add_namespace(@streamns) if @current.namespace('').to_s.eql?('')
+      begin
+        stanza = Xmpp::XMPPStanza::import(@current)
+      rescue Xmpp::NoNameXmlnsRegistered
+        stanza = @current
+      end
+      if @current.xpath.eql?('stream:stream')
+        @streamns = @current.namespace('') if @current.namespace('')
+      end
+      receive(stanza) if respond_to?(:receive)
+    end
+  
     #.........................................................................................................
     def receive(stanza)
-      message_pipe.receive(stanza)
+      pipe.receive(stanza)
     end
   
   #### Connection

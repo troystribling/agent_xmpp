@@ -15,7 +15,7 @@ module AgentXmpp
     #.........................................................................................................
     def connect
       EventMachine.run do
-        @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, message_pipe, port)
+        @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, pipe, port)
       end
     end
     

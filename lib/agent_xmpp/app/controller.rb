@@ -51,7 +51,7 @@ module AgentXmpp
          handle_request
        else
          AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
-         pipe.error_no_route(params)
+         Xmpp::ErrorResponse.no_route(params)
        end
      end
 
@@ -76,20 +76,34 @@ module AgentXmpp
       EventMachine.defer(method(:request).to_proc, method(:request_callback).to_proc)
     end
 
+    #.........................................................................................................
+    # add payloads
+    #.........................................................................................................
+    def result_jabber_x_data(params, payload)
+      Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload)
+    end
+
+    #.........................................................................................................
+    def result_message_chat(params, payload)
+      Xmpp::Message.chat(params[:from], payload)
+    end
+        
   private
     
     #.........................................................................................................
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
-      if pipe.respond_to?(meth) 
-        pipe.send_resp(pipe.send_to_method(meth, payload, params)) 
+      if respond_to?(meth) 
+        pipe.send_resp(send(meth, params, payload)) 
       else
-        AgentXmpp.logger.error /
+        AgentXmpp.logger.error \
           "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
-        pipe.error_unsupported_payload(params)
+        Xmpp::ErrorResponse.unsupported_payload(params)
       end
     end
     
+    #.........................................................................................................
+    # routes
     #.........................................................................................................
     def command_route 
       (BaseController.routes[params[:action]] || []).select{|r| r[:path].eql?(params[:node].to_s)}.first
@@ -100,7 +114,6 @@ module AgentXmpp
       nil
     end
     
-        
   #### BaseController
   end
 

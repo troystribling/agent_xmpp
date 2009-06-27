@@ -11,20 +11,35 @@ module AgentXmpp
       #.....................................................................................................
       NS_SASL = 'urn:ietf:params:xml:ns:xmpp-sasl'
 
-      #.....................................................................................................
-      def SASL.new(mechanism)
-        case mechanism
-          when 'DIGEST-MD5'
-            DigestMD5.new
-          when 'PLAIN'
-            Plain.new
-          when 'ANONYMOUS'
-            Anonymous.new
-          else
-            raise AgentXmppError "Unknown SASL mechanism: #{mechanism}"
+      #####-------------------------------------------------------------------------------------------------------
+      class << self
+        
+        #.....................................................................................................
+        def new(mechanism)
+          case mechanism
+            when 'DIGEST-MD5'
+              DigestMD5.new
+            when 'PLAIN'
+              Plain.new
+            when 'ANONYMOUS'
+              Anonymous.new
+            else
+              raise AgentXmppError "Unknown SASL mechanism: #{mechanism}"
+          end
         end
-      end
+      
+        #.........................................................................................................
+        def authenticate(stream_mechanisms, pipe)
+          if stream_mechanisms.include?('PLAIN')
+            Send(new('PLAIN').auth(pipe.jid, pipe.password))
+          else
+            raise AgentXmppError, "PLAIN authentication required"
+          end
+        end
 
+      #### self
+      end
+    
       #####-------------------------------------------------------------------------------------------------------
       class Base
 

@@ -8,6 +8,26 @@ module AgentXmpp
     #####-------------------------------------------------------------------------------------------------------
     class Presence < XMPPStanza
 
+      #####-------------------------------------------------------------------------------------------------------
+      class << self
+        
+        #.........................................................................................................
+        def accept_subscription_request(contact_jid)
+          presence = Xmpp::Presence.new.set_type(:subscribed)
+          presence.to = contact_jid  
+          Send(presence)
+        end
+
+        #.........................................................................................................
+        def decline_subscription_request(contact_jid)
+          presence = Xmpp::Presence.new.set_type(:unsubscribed)
+          presence.to = contact_jid      
+          Send(presence)
+        end
+        
+      #### self
+      end
+      
       #.......................................................................................................
       name_xmlns 'presence', 'jabber:client'
       force_xmlns true
@@ -22,40 +42,6 @@ module AgentXmpp
         set_show(show) if show
         set_status(status) if status
         set_priority(priority) if priority
-      end
-
-      #.......................................................................................................
-      def type
-        case super
-          when 'error' then :error
-          when 'probe' then :probe
-          when 'subscribe' then :subscribe
-          when 'subscribed' then :subscribed
-          when 'unavailable' then :unavailable
-          when 'unsubscribe' then :unsubscribe
-          when 'unsubscribed' then :unsubscribed
-          else nil
-        end
-      end
-
-      #.......................................................................................................
-      def type=(val)
-        case val
-          when :error then super('error')
-          when :probe then super('probe')
-          when :subscribe then super('subscribe')
-          when :subscribed then super('subscribed')
-          when :unavailable then super('unavailable')
-          when :unsubscribe then super('unsubscribe')
-          when :unsubscribed then super('unsubscribed')
-          else super(nil)
-        end
-      end
-
-      #.......................................................................................................
-      def set_type(val)
-        self.type = val
-        self
       end
 
       #.......................................................................................................

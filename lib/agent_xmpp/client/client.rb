@@ -5,7 +5,8 @@ module AgentXmpp
   class Client
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :jid, :port, :password, :roster, :connection, :message_pipe
+    attr_reader :port, :password, :roster, :connection, :pipe
+    attr_accessor :jid
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
@@ -15,17 +16,17 @@ module AgentXmpp
       resource = config['resource'] || Socket.gethostname
       @jid = Xmpp::JID.new("#{config['jid']}/#{resource}")
       @roster = RosterModel.new(@jid, config['contacts'])
-      @message_pipe = MessagePipe.new(self)
-      message_pipe.add_delegate(self) 
+      @pipe = MessagePipe.new(self)
+      pipe.add_delegate(self) 
     end
 
     #.........................................................................................................
     def connect
       while (true)
         EventMachine.run do
-          @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, message_pipe, port)
+          @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, pipe, port)
         end
-        Boot.call_if_implemented(:call_restarting_server, message_pipe)     
+        Boot.call_if_implemented(:call_restarting_server, pipe)     
         sleep(10.0)
         AgentXmpp.logger.warn "RESTARTING SERVER"
       end
@@ -45,12 +46,12 @@ module AgentXmpp
 
     #.........................................................................................................
     def add_delegate(delegate)
-      message_pipe.add_delegate(delegate)
+      pipe.add_delegate(delegate)
     end
 
     #.........................................................................................................
     def remove_delegate(delegate)
-      message_pipe.remove_delegate(delegate)
+      pipe.remove_delegate(delegate)
     end
     
     #---------------------------------------------------------------------------------------------------------
@@ -106,8 +107,7 @@ module AgentXmpp
         roster[from_bare_jid.to_s][:resources][from_jid] = {} if roster[from_bare_jid.to_s][:resources][from_jid].nil?
         roster[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
-        pipe.get_client_version(from_jid) \
-          if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
+        Xmpp::IqVersion.get_peer_client_version(from_jid, pipe) if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
       else
         AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
       end
@@ -118,10 +118,10 @@ module AgentXmpp
       from_jid = presence.from.to_s     
       if roster.has_key?(presence.from.bare.to_s ) 
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
-        pipe.presence_subscribed(from_jid)  
+        Xmpp::Presence.accept_subscription_request(from_jid)  
       else
         AgentXmpp.logger.warn "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN ROSTER: #{from_jid}"        
-        pipe.presence_unsubscribed(from_jid)  
+        Xmpp::Presence.decline_subscription_request(from_jid)  
       end
     end
 
@@ -231,7 +231,7 @@ module AgentXmpp
     def did_receive_client_version_get(pipe, request)
       if roster.has_key?(request.from.bare.to_s)
         AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
-        pipe.result_client_version(request)
+        Xmpp::IqVersion.respond_to_client_version_request(request, pipe)
       else
         AgentXmpp.logger.warn "RECEIVED CLIENT VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
       end

@@ -40,7 +40,7 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def to= (v)
+      def to=(v)
         add_attribute('to', v ? v.to_s : nil)
       end
 
@@ -56,7 +56,7 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def from= (v)
+      def from=(v)
         add_attribute('from', v ? v.to_s : nil)
       end
 
@@ -72,7 +72,7 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def id= (v)
+      def id=(v)
         add_attribute('id', v.to_s)
       end
 
@@ -84,17 +84,18 @@ module AgentXmpp
 
       #.......................................................................................................
       def type
-        (a = attribute('type')).nil? ? a : a.value
+        stanza_type = attributes['type']
+        stanza_type.nil? ? nil : stanza_type.to_sym
       end
 
       #.......................................................................................................
-      def type= (v)
-        add_attribute('type', v)
+      def type=(t)
+        attributes['type'] = t.to_s
       end
 
       #.......................................................................................................
-      def set_type(v)
-        add_attribute('type', v)
+      def set_type(t)
+        self.type = t
         self
       end
       

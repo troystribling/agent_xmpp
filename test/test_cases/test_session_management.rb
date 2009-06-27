@@ -14,7 +14,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "authenticate with PLAIN SASL authentication when stream features includes PLAIN authentication" do
   
     #### connect to server
-    @client.client.message_pipe.connection_completed.should \
+    @client.client.pipe.connection_completed.should \
       respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
@@ -42,7 +42,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when stream features do not include PLAIN authentication" do
   
     #### connect to server
-    @client.client.message_pipe.connection_completed
+    @client.client.pipe.connection_completed
   
     #### receive pre authentication stream feautues which do not include plain authentication
     lambda{@client.receiving(SessionMessages.recv_preauthentication_stream_features_without_plain_SASL(@client))}.should \
@@ -53,7 +53,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when authentication fails" do
     
     #### connect to server
-    @client.client.message_pipe.connection_completed
+    @client.client.pipe.connection_completed
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
     @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
@@ -66,7 +66,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when bind fails" do
   
     #### connect to server
-    @client.client.message_pipe.connection_completed
+    @client.client.pipe.connection_completed
   
     #### receive pre authentication stream feautues and mechanisms and authenticate
     @delegate.did_authenticate_method.should_not be_called
@@ -85,7 +85,7 @@ class TestSessionManagement < Test::Unit::TestCase
   should "raise exception when steam start fails" do
   
       #### connect to server
-      @client.client.message_pipe.connection_completed
+      @client.client.pipe.connection_completed
     
       #### receive pre authentication stream feautues and mechanisms and authenticate
       @delegate.did_authenticate_method.should_not be_called

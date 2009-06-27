@@ -16,6 +16,34 @@ module AgentXmpp
     class ErrorResponse < XMPPElement
 
       #####-------------------------------------------------------------------------------------------------------
+      class << self
+        
+        def unsupported_payload(params)
+          error(params, 'bad-request', 'unsupported payload')
+        end
+
+
+        #.........................................................................................................
+        def no_route(params)
+          error(params, 'item-not-found', 'no route for specified command node')
+        end
+
+      ####........................................................................................................
+      private
+
+        #.........................................................................................................
+        def error(params, condition, text)
+          iq = Xmpp::Iq.new(:error, params[:from])
+          iq.id = params[:id] unless params[:id].nil?
+          iq.command = Xmpp::IqCommand.new(params[:node], params[:action])
+          iq.command << Xmpp::ErrorResponse.new(condition, text)
+          Send(iq)
+        end
+      
+      #### self
+      end
+
+      #####-------------------------------------------------------------------------------------------------------
       name_xmlns 'error'
 
       #.......................................................................................................
@@ -32,11 +60,9 @@ module AgentXmpp
               errorcode = code
             end
           }
-
           if errortype.nil? || errorcode.nil?
             raise ArgumentError, "Unknown error condition when initializing ErrorReponse"
           end
-
           super()
           set_error(errorcondition)
           set_type(errortype)

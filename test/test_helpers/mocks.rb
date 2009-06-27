@@ -19,7 +19,7 @@ module AgentXmpp
     end
 
     def connection_completed
-      message_pipe.connection_completed
+      pipe.connection_completed
     end
 
     #.........................................................................................................
@@ -39,7 +39,7 @@ module AgentXmpp
   
     #.........................................................................................................
     def connect
-      @connection = AgentXmpp::Connection.new(self, jid, password, message_pipe, port)    
+      @connection = AgentXmpp::Connection.new(self, jid, password, pipe, port)    
     end
 
     #.........................................................................................................
