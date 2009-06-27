@@ -8,7 +8,7 @@ module AgentXmpp
 
         #.......................................................................................................
         def to_x_data(type = 'result')
-          Xmpp::Dataforms::XData.new(type).add_field_with_value(nil, to_s)
+          Xmpp::XData.new(type).add_field_with_value(nil, to_s)
         end
   
         #.......................................................................................................

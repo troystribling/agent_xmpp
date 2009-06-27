@@ -6,7 +6,7 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class X < XMPPElement
+    class X < Element
       name_xmlns 'x'
       force_xmlns true
     end
@@ -16,7 +16,7 @@ module AgentXmpp
 
       #.......................................................................................................
       def x(wanted_xmlns=nil)
-        if wanted_xmlns.kind_of? Class and wanted_xmlns.ancestors.include? XMPPElement
+        if wanted_xmlns.kind_of? Class and wanted_xmlns.ancestors.include? Element
           wanted_xmlns = wanted_xmlns.new.namespace
         end
           each_element('x') { |x|

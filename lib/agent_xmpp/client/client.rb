@@ -94,7 +94,7 @@ module AgentXmpp
     #.........................................................................................................
     def did_start_session(pipe, stanza)
       AgentXmpp.logger.info "SESSION STARTED"
-      pipe.get_query_roster
+      Xmpp::IqRoster.get(pipe)
     end
 
     #.........................................................................................................
@@ -107,7 +107,7 @@ module AgentXmpp
         roster[from_bare_jid.to_s][:resources][from_jid] = {} if roster[from_bare_jid.to_s][:resources][from_jid].nil?
         roster[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
         AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
-        Xmpp::IqVersion.get_peer_client_version(from_jid, pipe) if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
+        Xmpp::IqVersion.request(from_jid, pipe) if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
       else
         AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
       end
@@ -118,10 +118,10 @@ module AgentXmpp
       from_jid = presence.from.to_s     
       if roster.has_key?(presence.from.bare.to_s ) 
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
-        Xmpp::Presence.accept_subscription_request(from_jid)  
+        Xmpp::Presence.accept(from_jid)  
       else
         AgentXmpp.logger.warn "RECEIVED SUBSCRIBE REQUEST FROM JID NOT IN ROSTER: #{from_jid}"        
-        Xmpp::Presence.decline_subscription_request(from_jid)  
+        Xmpp::Presence.decline(from_jid)  
       end
     end
 
@@ -130,7 +130,7 @@ module AgentXmpp
       from_jid = presence.from.to_s     
       if roster.delete(presence.from.bare.to_s )           
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
-        pipe.set_query_roster_remove(presence.from)  
+        Xmpp::IqRoster.remove(presence.from, pipe)  
       else
         AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
       end
@@ -171,7 +171,7 @@ module AgentXmpp
         end
       else
         AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
-        pipe.set_query_roster_remove(roster_item.jid)  
+        Xmpp::IqRoster.remove(roster_item.jid, pipe)  
       end
     end
 
@@ -190,7 +190,7 @@ module AgentXmpp
       AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
       roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
         AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-        pipe.set_query_roster(Xmpp::JID.new(j))  
+        Xmpp::IqRoster.add(Xmpp::JID.new(j), pipe)  
       end
     end
 
@@ -231,7 +231,7 @@ module AgentXmpp
     def did_receive_client_version_get(pipe, request)
       if roster.has_key?(request.from.bare.to_s)
         AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
-        Xmpp::IqVersion.respond_to_client_version_request(request, pipe)
+        Xmpp::IqVersion.respond(request, pipe)
       else
         AgentXmpp.logger.warn "RECEIVED CLIENT VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
       end

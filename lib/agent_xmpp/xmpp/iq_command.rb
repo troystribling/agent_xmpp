@@ -102,11 +102,6 @@ module AgentXmpp
         first_element('actions')
       end
 
-      #.....................................................................................................
-      def <<(child)
-        add(child)
-      end
-
     #### IqCommand
     end
 

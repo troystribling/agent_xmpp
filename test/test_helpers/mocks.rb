@@ -53,7 +53,7 @@ module AgentXmpp
   #####-------------------------------------------------------------------------------------------------------
   class Controller
     def handle_request  
-      request_callback(request).collect{|m| Send(Xmpp::XMPPStanza::import(REXML::Document.new(m).root))}
+      request_callback(request).collect{|m| Send(Xmpp::Stanza::import(REXML::Document.new(m).root))}
     end
   end
 

@@ -64,7 +64,7 @@ module REXML
     end
 
     #.......................................................................................................
-   def delete_elements(element)
+    def delete_elements(element)
       while(delete_element(element)) do end
     end
 

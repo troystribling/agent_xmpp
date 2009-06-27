@@ -6,7 +6,7 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class IqQuery < XMPPElement
+    class IqQuery < Element
       name_xmlns 'query'
       force_xmlns true
     end

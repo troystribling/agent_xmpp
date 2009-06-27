@@ -6,10 +6,10 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class XMPPStanza < XMPPElement
+    class Stanza < Element
 
       #.......................................................................................................
-      def XMPPStanza.answer(xmppstanza, import=true)
+      def Stanza.answer(xmppstanza, import=true)
         x = xmppstanza.class.new
         if import
           x.import(xmppstanza)
@@ -27,7 +27,7 @@ module AgentXmpp
 
       #.......................................................................................................
       def answer(import=true)
-        XMPPStanza.answer(self, import)
+        Stanza.answer(self, import)
       end
 
       #.......................................................................................................

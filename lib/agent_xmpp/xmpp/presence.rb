@@ -6,20 +6,20 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class Presence < XMPPStanza
+    class Presence < Stanza
 
       #####-------------------------------------------------------------------------------------------------------
       class << self
         
         #.........................................................................................................
-        def accept_subscription_request(contact_jid)
+        def accept(contact_jid)
           presence = Xmpp::Presence.new.set_type(:subscribed)
           presence.to = contact_jid  
           Send(presence)
         end
 
         #.........................................................................................................
-        def decline_subscription_request(contact_jid)
+        def decline(contact_jid)
           presence = Xmpp::Presence.new.set_type(:unsubscribed)
           presence.to = contact_jid      
           Send(presence)

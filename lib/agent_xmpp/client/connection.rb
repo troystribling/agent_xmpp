@@ -84,7 +84,7 @@ module AgentXmpp
     def process
       @current.add_namespace(@streamns) if @current.namespace('').to_s.eql?('')
       begin
-        stanza = Xmpp::XMPPStanza::import(@current)
+        stanza = Xmpp::Stanza::import(@current)
       rescue Xmpp::NoNameXmlnsRegistered
         stanza = @current
       end

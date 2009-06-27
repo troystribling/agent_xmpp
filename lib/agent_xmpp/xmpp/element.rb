@@ -6,60 +6,66 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class XMPPElement < REXML::Element
+    class Element < REXML::Element
 
+      #####-------------------------------------------------------------------------------------------------------
+      class << self
+        
+        #.......................................................................................................
+        def name_xmlns(name, xmlns=nil)
+          @@name_xmlns_classes[[name, xmlns]] = self
+        end
+
+        #.......................................................................................................
+        def force_xmlns(force)
+          @@force_xmlns = force
+        end
+
+        #.......................................................................................................
+        def force_xmlns?
+          @@force_xmlns
+        end
+
+        #.......................................................................................................
+        def name_xmlns_for_class(klass)
+          klass.ancestors.each do |klass1|
+            @@name_xmlns_classes.each do |name_xmlns,k|
+              if klass1 == k
+                return name_xmlns
+              end
+            end
+          end
+          raise NoNameXmlnsRegistered.new(klass)
+        end
+
+        #.......................................................................................................
+        def class_for_name_xmlns(name, xmlns)
+          if @@name_xmlns_classes.has_key? [name, xmlns]
+            @@name_xmlns_classes[[name, xmlns]]
+          elsif @@name_xmlns_classes.has_key? [name, nil]
+            @@name_xmlns_classes[[name, nil]]
+          else
+            REXML::Element
+          end
+        end
+
+        #.......................................................................................................
+        def import(element)
+          klass = class_for_name_xmlns(element.name, element.namespace)
+          if klass != self and klass.ancestors.include?(self)
+            klass.new.import(element)
+          else
+            self.new.import(element)
+          end
+        end
+        
+      #### self
+      end
+      
       #.......................................................................................................
       @@name_xmlns_classes = {}
       @@force_xmlns = false
-
-      #.......................................................................................................
-      def self.name_xmlns(name, xmlns=nil)
-        @@name_xmlns_classes[[name, xmlns]] = self
-      end
-
-      #.......................................................................................................
-      def self.force_xmlns(force)
-        @@force_xmlns = force
-      end
-
-      #.......................................................................................................
-      def self.force_xmlns?
-        @@force_xmlns
-      end
-
-      #.......................................................................................................
-      def self.name_xmlns_for_class(klass)
-        klass.ancestors.each do |klass1|
-          @@name_xmlns_classes.each do |name_xmlns,k|
-            if klass1 == k
-              return name_xmlns
-            end
-          end
-        end
-        raise NoNameXmlnsRegistered.new(klass)
-      end
-
-      #.......................................................................................................
-      def self.class_for_name_xmlns(name, xmlns)
-        if @@name_xmlns_classes.has_key? [name, xmlns]
-          @@name_xmlns_classes[[name, xmlns]]
-        elsif @@name_xmlns_classes.has_key? [name, nil]
-          @@name_xmlns_classes[[name, nil]]
-        else
-          REXML::Element
-        end
-      end
-
-      #.......................................................................................................
-      def self.import(element)
-        klass = class_for_name_xmlns(element.name, element.namespace)
-        if klass != self and klass.ancestors.include?(self)
-          klass.new.import(element)
-        else
-          self.new.import(element)
-        end
-      end
-
+      
       #.......................................................................................................
       def initialize(*arg)
         if arg.empty?
@@ -78,7 +84,7 @@ module AgentXmpp
         if element.kind_of? REXML::Element
           element_ns = (element.namespace.to_s == '') ? namespace : element.namespace
 
-          klass = XMPPElement::class_for_name_xmlns(element.name, element_ns)
+          klass = Element::class_for_name_xmlns(element.name, element_ns)
           if klass != element.class
             element = klass.import(element)
           end
@@ -121,8 +127,14 @@ module AgentXmpp
         self.xml_lang = l
         self
       end
-
-    #### XMPPElement
+      
+      #.....................................................................................................
+      def <<(child)
+        add(child)
+        self
+      end
+      
+    #### Element
     end  
       
   #### XMPP

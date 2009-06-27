@@ -12,7 +12,7 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def get_peer_client_version(contact_jid, pipe)
+        def request(contact_jid, pipe)
           iq = Xmpp::Iq.new(:get, contact_jid)
           iq.query = new
           Send(iq) do |r|
@@ -23,7 +23,7 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def respond_to_client_version_request(request, pipe)
+        def respond(request, pipe)
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = new

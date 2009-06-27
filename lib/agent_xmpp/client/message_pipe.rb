@@ -5,10 +5,6 @@ module AgentXmpp
   class MessagePipe
 
     #---------------------------------------------------------------------------------------------------------
-    include RosterMessages
-    #---------------------------------------------------------------------------------------------------------
-
-    #---------------------------------------------------------------------------------------------------------
     attr_reader   :connection_status, :delegates, :id_callbacks, :client, :stream_features, :stream_mechanisms             
     attr_accessor :connection               
     #---------------------------------------------------------------------------------------------------------
@@ -57,7 +53,7 @@ module AgentXmpp
     #.........................................................................................................
     def send(data, &blk)
       raise AgentXmppError, 'not connected'  unless connected?
-      if block_given? and data.kind_of?(Xmpp::XMPPStanza)
+      if block_given? and data.kind_of?(Xmpp::Stanza)
         if data.id.nil?
           data.id = Xmpp::IdGenerator.generate_id
         end
@@ -105,7 +101,7 @@ module AgentXmpp
     #.........................................................................................................
     def receive(stanza)
       AgentXmpp.logger.info "RECV: #{stanza.to_s}"
-      result = if stanza.kind_of?(Xmpp::XMPPStanza) and stanza.id and blk = id_callbacks[stanza.id]
+      result = if stanza.kind_of?(Xmpp::Stanza) and stanza.id and blk = id_callbacks[stanza.id]
                  id_callbacks.delete(stanza.id)
                  blk.call(stanza)
                else
@@ -137,7 +133,7 @@ module AgentXmpp
         if connection_status.eql?(:offline)
           Xmpp::SASL.authenticate(stream_mechanisms, self)
         elsif connection_status.eql?(:authenticated)
-          Xmpp::Iq.bind(stanza, self)
+          Xmpp::Iq.bind(stanza, self) if stream_features.has_key?('bind') and stream_features.has_key?('session')
         end
       when 'stream'
       when 'success'
@@ -161,7 +157,7 @@ module AgentXmpp
     def demux_stanza(stanza)
       stanza_class = stanza.class.to_s
       #### roster update
-      if stanza.type == :set and stanza.query.kind_of?(AgentXmpp::Xmpp::Roster::IqQueryRoster)
+      if stanza.type == :set and stanza.query.kind_of?(AgentXmpp::Xmpp::IqRoster)
         [stanza.query.inject([]) do |r, i|  
           method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
           r.push(broadcast_to_delegates(method, self, i))
