@@ -6,7 +6,7 @@ module AgentXmpp
 
     #---------------------------------------------------------------------------------------------------------
     attr_reader   :connection_status, :delegates, :id_callbacks, :client, :stream_features, \
-                  :stream_mechanisms, :roster            
+                  :stream_mechanisms, :config
     attr_accessor :connection               
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
@@ -18,8 +18,13 @@ module AgentXmpp
       @connection_status = :offline;
       @delegates = [self.class]
       @connection = nil
+      @config = config
       @id_callbacks = {}
-      @roster = RosterModel.new(client.jid, config['contacts'])
+    end
+    
+    #.........................................................................................................
+    def roster
+      @roster ||= RosterModel.new(client.jid, config['contacts'])
     end
     
     #.........................................................................................................
@@ -243,11 +248,9 @@ module AgentXmpp
       # presence
       #.........................................................................................................
       def did_receive_presence(pipe, presence)
-        from_jid = presence.from.to_s     
-        from_bare_jid = presence.from.bare.to_s     
-        if pipe.roster.has_key?(from_bare_jid) 
-          pipe.roster[from_bare_jid.to_s][:resources][from_jid] = {} if pipe.roster[from_bare_jid.to_s][:resources][from_jid].nil?
-          pipe.roster[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
+        if pipe.roster.has_jid?(presence.from.bare.to_s) 
+          from_jid = presence.from.to_s     
+          pipe.roster.update_resource(presence)
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
           Xmpp::IqVersion.request(from_jid, pipe) if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
         else
@@ -258,7 +261,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_presence_subscribe(pipe, presence)
         from_jid = presence.from.to_s     
-        if pipe.roster.has_key?(presence.from.bare.to_s ) 
+        if pipe.roster.has_jid?(presence.from.bare.to_s ) 
           AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
           Xmpp::Presence.accept(from_jid)  
         else
@@ -270,7 +273,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_presence_unsubscribed(pipe, presence)
         from_jid = presence.from.to_s     
-        if pipe.roster.delete(presence.from.bare.to_s )           
+        if pipe.roster.destroy_by_jid(presence.from.bare.to_s )           
           AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
           Xmpp::IqRoster.remove(presence.from, pipe)  
         else
@@ -280,8 +283,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def did_receive_presence_subscribed(pipe, presence)
-        from_jid = presence.from.to_s     
-        AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{from_jid}" 
+        AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{presence.from.to_s}" 
       end
 
       #.........................................................................................................
@@ -290,26 +292,26 @@ module AgentXmpp
       def did_receive_roster_item(pipe, roster_item)
         AgentXmpp.logger.info "RECEIVED ROSTER ITEM"   
         roster_item_jid = roster_item.jid.to_s
-        if pipe.roster.has_key?(roster_item_jid) 
+        if pipe.roster.has_jid?(roster_item_jid) 
           case roster_item.subscription   
           when :none
             if roster_item.ask.eql?(:subscribe)
               AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid}"   
-              pipe.roster[roster_item_jid][:status] = :ask 
+              pipe.roster.update_status(roster_item_jid, :ask) 
             else
               AgentXmpp.logger.info "CONTACT ADDED TO ROSTER: #{roster_item_jid}"   
-              pipe.roster[roster_item_jid][:status] = :added 
+              pipe.roster.update_status(roster_item_jid, :added)
             end
           when :to
             AgentXmpp.logger.info "SUBSCRIBED TO CONTACT PRESENCE: #{roster_item_jid}"   
-            pipe.roster[roster_item_jid][:status] = :to 
+            pipe.roster.update_status(roster_item_jid, :to) 
           when :from
             AgentXmpp.logger.info "CONTACT SUBSCRIBED TO PRESENCE: #{roster_item_jid}"   
-            pipe.roster[roster_item_jid][:status] = :from 
+            pipe.roster.update_status(roster_item_jid, :from) 
           when :both    
             AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid}"   
-            pipe.roster[roster_item_jid][:status] = :both 
-            pipe.roster[roster_item_jid][:roster_item] = roster_item 
+            pipe.roster.update_status(roster_item_jid, :both) 
+            pipe.roster.update_roster_item(roster_item)
           end
         else
           AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
@@ -321,16 +323,16 @@ module AgentXmpp
       def did_remove_roster_item(pipe, roster_item)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM"   
         roster_item_jid = roster_item.jid.to_s
-        if pipe.roster.has_key?(roster_item_jid) 
+        if pipe.roster.has_jid?(roster_item_jid) 
           AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid}"   
-          pipe.roster.delete(roster_item_jid) 
+          pipe.roster.destroy_by_jid(roster_item_jid) 
         end
       end
 
       #.........................................................................................................
       def did_receive_all_roster_items(pipe)
         AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
-        pipe.roster.select{|j,r| r[:status].eql?(:inactive)}.collect do |j, r|
+        pipe.roster.find_all_by_status(:inactive).collect do |j, r|
           AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
           Xmpp::IqRoster.add(Xmpp::JID.new(j), pipe)  
         end
@@ -339,16 +341,16 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_add_roster_item_error(pipe, response, roster_item_jid)
         AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid.to_s}"
-        pipe.roster.delete(roster_item_jid)
+        pipe.roster.destroy_by_jid(roster_item_jid)
       end
 
       #.........................................................................................................
       # service discovery management
       #.........................................................................................................
       def did_receive_client_version_result(pipe, from, version)
-        if pipe.roster.has_key?(from.bare.to_s)
+        if pipe.roster.has_jid?(from.bare.to_s)
           AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
-          pipe.roster[from.bare.to_s][:resources][from.to_s][:version] = version
+          pipe.roster.update_resource_version(from, version)
         else
           AgentXmpp.logger.warn "RECEIVED CLIENT VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
         end        
@@ -356,7 +358,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def did_receive_client_version_get(pipe, request)
-        if pipe.roster.has_key?(request.from.bare.to_s)
+        if pipe.roster.has_jid?(request.from.bare.to_s)
           AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
           Xmpp::IqVersion.respond(request, pipe)
         else
