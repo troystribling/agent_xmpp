@@ -44,7 +44,7 @@ class TestClient
     #.........................................................................................................
     def command_x_data(args) 
       iq = AgentXmpp::Xmpp::Iq.new(:set, args[:to])
-      iq.query = AgentXmpp::Xmpp::Command::IqCommand.new(args[:node], :execute)
+      iq.query = AgentXmpp::Xmpp::IqCommand.new(args[:node], :execute)
       send_command(iq)
     end
 
