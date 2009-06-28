@@ -18,7 +18,7 @@ class TestRosterManagement < Test::Unit::TestCase
   #.........................................................................................................
   should "query server for roster on succesful session start and activate configured roster items which match those returned in query result" do
   
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_init_roster(client, config)
     
@@ -28,7 +28,7 @@ class TestRosterManagement < Test::Unit::TestCase
   should "query server for roster on succesful session start and send a subscription request to configured roster items not returned by query result" do
   
     #### client configured with two contacts in roster. 'troy@nowhere.com' will not be returned by roster initial query
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_send_roster_request(client, config)
     delegate = client.new_delegate
@@ -88,7 +88,7 @@ class TestRosterManagement < Test::Unit::TestCase
   should "query server for roster on succesful session start and send an unsubscribe request to roster items returned by query result that are not in the configuration roster" do
   
     #### client configured with one contact in roster. 'troy@nowhere.com' will be returned by roster initial query
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_send_roster_request(client, config)
     delegate = client.new_delegate
@@ -120,7 +120,7 @@ class TestRosterManagement < Test::Unit::TestCase
   #.........................................................................................................
   should "remove roster item if a roster add message is received for a roster item not in the configuration roster" do
   
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_init_roster(client, config)
   
@@ -144,7 +144,7 @@ class TestRosterManagement < Test::Unit::TestCase
   should "query server for roster on succesful session start and throw an exeception if there is an error retrieving roster" do
   
     #### client configured with two contacts in roster
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_send_roster_request(client, config)
     delegate = client.new_delegate
@@ -157,7 +157,7 @@ class TestRosterManagement < Test::Unit::TestCase
   #.........................................................................................................
   should "not respond to errors received in response to a remove roster query" do
   
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_init_roster(client, config)
   
@@ -182,7 +182,7 @@ class TestRosterManagement < Test::Unit::TestCase
   should "not respond to errors received in response to an add roster query but should remove roster item from configured list" do
   
     #### client configured with two contacts in roster. 'troy@nowhere.com' will not be returned by roster initial query
-    config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
+    config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
     client = TestClient.new(config)
     test_send_roster_request(client, config)
     delegate = client.new_delegate

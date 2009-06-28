@@ -1,7 +1,29 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing XMPP client bots that respond to Ad-Hoc Commands
+Agent XMPP is a simple DSL for writing XMPP bots that respond to Ad-Hoc Commands
 described in XMPP extension XEP-0050 (see http://xmpp.org/extensions/xep-0050.html).
+
+    # mybot.rb
+    require 'rubygems'
+    require 'agent_xmpp'
+
+    execute 'hello' do
+      'Hello World 
+    end
+
+in agent_xmpp.yml specify the agent Jabber ID (JID), password and roster.
+
+    jid: mybot@nowhere.com
+    password: pass
+    roster:
+        - you@home.com
+        - someone@somewhere.com
+
+Install the gem and run
+
+    sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
+    ruby mybot.rb
+
 
 == Copyright
 

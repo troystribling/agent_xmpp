@@ -5,9 +5,9 @@ module AgentXmpp
   class RosterModel
 
     #.........................................................................................................
-    def initialize(jid, contacts)
+    def initialize(jid, roster)
       @items = Hash.new{|hash, key| hash[key] = {:status => :inactive, :resources => {}}}
-      contacts.each{|c| @items[c]}
+      roster.each{|r| @items[r]}
       @items[jid.bare.to_s] = {:status => :both, :resources => {}}
     end
 

@@ -6,7 +6,7 @@ class TestApplicationMessageProcessing < Test::Unit::TestCase
 
   #.........................................................................................................
   def setup
-    @config = {'jid' => 'test@nowhere.com', 'contacts' =>['dev@nowhere.com'], 'password' => 'nopass'}
+    @config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com'], 'password' => 'nopass'}
     @client = TestClient.new(@config)
     test_init_roster(@client, @config)
     @delegate = @client.new_delegate

@@ -33,7 +33,7 @@ class Test::Unit::TestCase
     #### receive roster request and verify that roster items are activated
     delegate.did_receive_all_roster_items_method.should_not be_called     
     client.roster.find_all{|r| r.status.should be(:inactive)}  
-    client.receiving(RosterMessages.recv_iq_result_query_roster(client, config['contacts'])).should not_respond
+    client.receiving(RosterMessages.recv_iq_result_query_roster(client, config['roster'])).should not_respond
     client.roster.find_all{|r| r.status.should be(:both)}  
     delegate.did_receive_all_roster_items_method.should be_called     
   end

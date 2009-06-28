@@ -24,7 +24,7 @@ module AgentXmpp
     
     #.........................................................................................................
     def roster
-      @roster ||= RosterModel.new(client.jid, config['contacts'])
+      @roster ||= RosterModel.new(client.jid, config['roster'])
     end
     
     #.........................................................................................................
