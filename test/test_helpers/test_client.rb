@@ -6,8 +6,8 @@ class TestClient
 
   #.........................................................................................................
   def initialize(config = nil)
-    config ||= File.open('test/test_helpers/agent_xmpp.yml') {|yf| YAML::load(yf)}
-    @client = AgentXmpp::Client.new(config)
+    @config = config || File.open('test/test_helpers/agent_xmpp.yml') {|yf| YAML::load(yf)}
+    @client = AgentXmpp::Client.new(@config)
     @client.connect
   end
 

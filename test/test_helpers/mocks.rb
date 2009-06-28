@@ -39,7 +39,7 @@ module AgentXmpp
   
     #.........................................................................................................
     def connect
-      @connection = AgentXmpp::Connection.new(self, jid, password, pipe, port)    
+      @connection = AgentXmpp::Connection.new(self, jid, password, port)    
     end
 
     #.........................................................................................................

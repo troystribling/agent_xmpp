@@ -9,14 +9,13 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :client, :jid, :port, :password, :connection_status, :delegates, :keepalive, :pipe               
+    attr_reader :client, :jid, :port, :password, :delegates, :keepalive, :pipe               
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
-    def initialize(client, jid, password, pipe, port=5222)
-      @client, @jid, @password, @pipe, @port = client, jid, password, pipe, port
-      @connection_status = :offline;
-      @pipe.connection = self
+    def initialize(client, jid, password, port=5222)
+      @client, @jid, @password, @port = client, jid, password, port
+      @pipe = MessagePipe.new(self, client.config)
     end
     
     #---------------------------------------------------------------------------------------------------------

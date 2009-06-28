@@ -97,15 +97,9 @@ By default log messages are written to STDOUT. A log file can be specified with 
 
     ruby mybot.rb -l file.log
 
-The logger can be accessed with,
+The logger can be accessed and configured.
 
-    AgentXmpp.logger
-
-and configured in the before_start callback.
-
-    AgentXmpp::Boot.before_start do
-      AgentXmpp.logger.level = Logger::WARN  
-    end
+    AgentXmpp.logger.level = Logger::WARN 
 
 == Message Processing Callbacks
 

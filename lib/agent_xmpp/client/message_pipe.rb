@@ -5,46 +5,44 @@ module AgentXmpp
   class MessagePipe
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader   :connection_status, :delegates, :id_callbacks, :client, :stream_features, \
+    attr_reader   :connection_status, :delegates, :id_callbacks, :connection, :stream_features, \
                   :stream_mechanisms, :config
-    attr_accessor :connection               
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
-    def initialize(client, config)
-      @client = client
+    def initialize(connection, config)
+      @connection = connection
       @connection_status = :offline;
       @delegates = [self.class]
-      @connection = nil
       @config = config
       @id_callbacks = {}
     end
     
     #.........................................................................................................
     def roster
-      @roster ||= RosterModel.new(client.jid, config['roster'])
+      @roster ||= RosterModel.new(connection.jid, config['roster'])
     end
     
     #.........................................................................................................
     def jid
-      client.jid
+      connection.jid
     end
 
     #.........................................................................................................
     def jid=(jid)
-      client.jid = jid
+      connection.jid = jid
     end
 
     #.........................................................................................................
     def password
-      client.password
+      connection.password
     end
     
     #.........................................................................................................
     def add_delegate(delegate)
-      @delegates << delegate
+      @delegates << delegate unless @delegates.include?(delegate)
     end
 
     #.........................................................................................................
@@ -178,7 +176,7 @@ module AgentXmpp
       #### presence unsubscribe 
       elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
         broadcast_to_delegates(:did_receive_presence_unsubscribed, self, stanza)
-      #### client version request
+      #### version request
       elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqVersion)
         broadcast_to_delegates(:did_receive_version_get, self, stanza)
       #### received command
@@ -349,20 +347,20 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_version_result(pipe, from, version)
         if pipe.roster.has_jid?(from.bare.to_s)
-          AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
+          AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
           pipe.roster.update_resource_version(from, version)
         else
-          AgentXmpp.logger.warn "RECEIVED CLIENT VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
+          AgentXmpp.logger.warn "RECEIVED VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
         end        
       end
 
       #.........................................................................................................
       def did_receive_version_get(pipe, request)
         if pipe.roster.has_jid?(request.from.bare.to_s)
-          AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
+          AgentXmpp.logger.info "RECEIVED VERSION REQUEST: #{request.from.to_s}"
           Xmpp::IqVersion.respond(request, pipe)
         else
-          AgentXmpp.logger.warn "RECEIVED CLIENT VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
+          AgentXmpp.logger.warn "RECEIVED VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
         end
       end
          
