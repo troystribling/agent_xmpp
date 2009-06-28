@@ -1,6 +1,7 @@
 ####------------------------------------------------------------------------------------------------------
 AgentXmpp::Boot.before_start do
 
+  AgentXmpp.logger.level = Logger::DEBUG
   AgentXmpp.logger.info "AgentXmpp::BootApp.before_start"
   
 end

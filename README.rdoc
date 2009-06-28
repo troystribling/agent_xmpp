@@ -1,7 +1,7 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing XMPP bots that respond to Ad-Hoc Commands
-described in XMPP extension XEP-0050 (see http://xmpp.org/extensions/xep-0050.html).
+Agent XMPP is a simple DSL for writing XMPP bots that respond to Ad-Hoc Commands.
+Ad-Hoc Commands are described in XMPP extension XEP-0050 (see http://xmpp.org/extensions/xep-0050.html).
 
     # mybot.rb
     require 'rubygems'
@@ -45,6 +45,67 @@ with
             </x>
         </command>
     </iq>    
+
+== Response Payloads
+
+Agent XMPP supports mapping scalar, arrays and hashes to jabber:x:data payloads
+
+    execute 'scalar' do
+      'scalar' 
+    end
+
+    execute 'hash' do
+      {:attr1 => 'val1', :attr2 => 'val2'}
+    end
+
+    execute 'scalar_array' do
+      ['val1', 'val2','val3', 'val4'] 
+    end
+
+    execute 'hash_array' do
+      {:attr1 => ['val11', 'val11'], :attr2 => 'val12'}
+    end
+
+    execute 'array_hash' do
+      [{:attr1 => 'val11', :attr2 => 'val12'}, 
+       {:attr1 => 'val21', :attr2 => 'val22'}, 
+       {:attr1 => 'val31', :attr2 => 'val32'}]
+    end
+
+    execute 'array_hash_array' do
+      [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, 
+       {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, 
+       {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
+    end
+
+== Application Startup Callbacks
+
+Callback methods are available for applications and should be placed in boot.rb
+
+    AgentXmpp::Boot.before_start do
+    end
+
+    AgentXmpp::Boot.after_connected do |pipe|
+    end
+
+    AgentXmpp::Boot.restarting_server do |pipe|
+    end
+
+== Logging
+
+By default log messages are written to STDOUT. A log file can be specified with the -l option.
+
+    ruby mybot.rb -l file.log
+
+The logger can be accessed with,
+
+    AgentXmpp.logger
+
+The logger can be configured in the before_start callback.
+
+    AgentXmpp::Boot.before_start do
+      AgentXmpp.logger.level = Logger::WARN  
+    end
 
 == Copyright
 
