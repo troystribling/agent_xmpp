@@ -101,7 +101,7 @@ The logger can be accessed with,
 
     AgentXmpp.logger
 
-The logger can be configured in the before_start callback.
+and configured in the before_start callback.
 
     AgentXmpp::Boot.before_start do
       AgentXmpp.logger.level = Logger::WARN  
