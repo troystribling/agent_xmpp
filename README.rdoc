@@ -8,10 +8,10 @@ described in XMPP extension XEP-0050 (see http://xmpp.org/extensions/xep-0050.ht
     require 'agent_xmpp'
 
     execute 'hello' do
-      'Hello World 
+      'Hello World' 
     end
 
-in agent_xmpp.yml specify the agent Jabber ID (JID), password and roster.
+Specify the agent Jabber ID (JID), password and roster in agent_xmpp.yml.
 
     jid: mybot@nowhere.com
     password: pass
@@ -24,6 +24,27 @@ Install the gem and run
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
     ruby mybot.rb
 
+Request and response payloads use the jabber:x:data protocol described in XMPP extension 
+XEP-0004 (see http://xmpp.org/extensions/xep-0004.html).
+
+When first started mybot.rb will automatically send buddy requests to all contacts specified
+in the agent_xmpp.yml. Accept the buddy request and send commands.
+
+mybot.rb will respond to the request,
+
+    <iq id='5644' to='mybot@nowhere.com/mybot-host' type='set' xmlns='jabber:client'>
+        <command node='hello' action='execute' xmlns='http://jabber.org/protocol/commands'/>
+    </iq>
+    
+with
+
+    <iq from='mybot@nowhere.com/mybot-host' to='you@home.com/your-host' id='5644' type='result' xmlns='jabber:client'>
+        <command node='scalar' action='completed' xmlns='http://jabber.org/protocol/commands'>
+            <x type='result' xmlns='jabber:x:data'>
+                <field><value>Hello World</value></field>
+            </x>
+        </command>
+    </iq>    
 
 == Copyright
 
