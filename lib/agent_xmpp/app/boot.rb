@@ -66,8 +66,8 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def restarting_server(&blk)
-         define_meta_class_method(:call_restarting_server, &blk)
+      def restarting_client(&blk)
+         define_meta_class_method(:call_restarting_client, &blk)
       end
                     
     ####......................................................................................................

@@ -37,7 +37,7 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
     should "respond to client version requests from that jid" do
       @client.receiving(SystemDiscoveryMessages.recv_iq_get_query_version(@client, 'troy@nowhere.com/home')).should \
         respond_with(SystemDiscoveryMessages.send_iq_result_query_version(@client, 'troy@nowhere.com/home'))
-      @delegate.did_receive_client_version_get_method.should be_called
+      @delegate.did_receive_version_get_method.should be_called
     end
 
   end

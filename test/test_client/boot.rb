@@ -7,7 +7,7 @@ AgentXmpp::Boot.after_connected do |pipe|
 end
 
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp::Boot.restarting_server do |pipe|
+AgentXmpp::Boot.restarting_client do |pipe|
 
   AgentXmpp.logger.info "AgentXmpp::BootApp.restarting_server"
 
