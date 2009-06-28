@@ -1,6 +1,7 @@
-= agent_xmpp
+= Agent XMPP
 
-Description goes here.
+Agent XMPP is a simple DSL for writing XMPP client bots that respond to Ad-Hoc Commands
+described in XMPP extension XEP-0050 (see http://xmpp.org/extensions/xep-0050.html).
 
 == Copyright
 
