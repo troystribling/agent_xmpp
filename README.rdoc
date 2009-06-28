@@ -80,7 +80,7 @@ Agent XMPP supports mapping scalar, arrays and hashes to jabber:x:data payloads
 
 == Application Startup Callbacks
 
-Callback methods are available for applications and should be placed in boot.rb
+Startup callback methods are available to applications and should be placed in boot.rb
 
     AgentXmpp::Boot.before_start do
     end
@@ -105,6 +105,86 @@ and configured in the before_start callback.
 
     AgentXmpp::Boot.before_start do
       AgentXmpp.logger.level = Logger::WARN  
+    end
+
+== Message Processing Callbacks
+
+Message processing callbacks are available to applications and should be implemented in a delegate module. 
+
+    AgentXmpp::Boot.after_connected do |pipe|
+      pipe.add_delegate(YourDelegate)
+    end
+
+The available callback methods are,
+
+=== Connection
+
+    def did_connect(pipe)
+    end
+
+    def did_disconnect(pipe)
+    end
+
+    def did_not_connect(pipe)
+    end
+
+=== Authentication
+
+    def did_authenticate(pipe, stanza)
+    end
+
+    def did_not_authenticate(pipe, stanza)
+    end
+
+    def did_bind(pipe, stanza)
+    end
+
+    def did_start_session(pipe, stanza)
+    end
+
+=== Presence
+
+    def did_receive_presence(pipe, presence)
+    end
+
+    def did_receive_presence_subscribe(pipe, presence)
+    end
+
+    def did_receive_presence_unsubscribed(pipe, presence)
+    end
+
+    def did_receive_presence_subscribed(pipe, presence)
+    end
+
+=== Roster
+
+    def did_receive_roster_item(pipe, roster_item)
+    end
+
+    def did_remove_roster_item(pipe, roster_item)
+    end
+
+    def did_receive_all_roster_items(pipe)
+    end
+
+    def did_acknowledge_add_roster_item(pipe, response, roster_item_jid)
+    end
+
+    def did_acknowledge_remove_roster_item(pipe, response, roster_item_jid)
+    end
+
+    def did_receive_remove_roster_item_error(pipe, response, roster_item_jid)
+    end
+
+    def did_receive_add_roster_item_error(pipe, response, roster_item_jid)
+    end
+
+=== Service Discovery
+
+    def did_receive_version_result(pipe, from, version)
+    end
+
+    def did_receive_version_get(pipe, request)
     end
 
 == Copyright

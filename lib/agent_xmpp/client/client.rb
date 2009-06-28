@@ -137,11 +137,11 @@ module AgentXmpp
     #.........................................................................................................
     # service discovery management
     #.........................................................................................................
-    def did_receive_client_version_result(pipe, from, version)
+    def did_receive_version_result(pipe, from, version)
     end
 
     #.........................................................................................................
-    def did_receive_client_version_get(pipe, request)
+    def did_receive_version_get(pipe, request)
     end
 
   #### Client

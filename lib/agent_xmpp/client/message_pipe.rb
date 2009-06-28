@@ -180,7 +180,7 @@ module AgentXmpp
         broadcast_to_delegates(:did_receive_presence_unsubscribed, self, stanza)
       #### client version request
       elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqVersion)
-        broadcast_to_delegates(:did_receive_client_version_get, self, stanza)
+        broadcast_to_delegates(:did_receive_version_get, self, stanza)
       #### received command
       elsif stanza.type.eql?(:set) and stanza.command.kind_of?(AgentXmpp::Xmpp::IqCommand)
         process_command(stanza)
@@ -347,7 +347,7 @@ module AgentXmpp
       #.........................................................................................................
       # service discovery management
       #.........................................................................................................
-      def did_receive_client_version_result(pipe, from, version)
+      def did_receive_version_result(pipe, from, version)
         if pipe.roster.has_jid?(from.bare.to_s)
           AgentXmpp.logger.info "RECEIVED CLIENT VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
           pipe.roster.update_resource_version(from, version)
@@ -357,7 +357,7 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def did_receive_client_version_get(pipe, request)
+      def did_receive_version_get(pipe, request)
         if pipe.roster.has_jid?(request.from.bare.to_s)
           AgentXmpp.logger.info "RECEIVED CLIENT VERSION REQUEST: #{request.from.to_s}"
           Xmpp::IqVersion.respond(request, pipe)

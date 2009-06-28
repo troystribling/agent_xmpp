@@ -17,7 +17,7 @@ module AgentXmpp
           iq.query = new
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqVersion)
-              pipe.broadcast_to_delegates(:did_receive_client_version_result, pipe, r.from, r.query)
+              pipe.broadcast_to_delegates(:did_receive_version_result, pipe, r.from, r.query)
             end
           end
         end

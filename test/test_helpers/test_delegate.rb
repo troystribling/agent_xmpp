@@ -44,7 +44,7 @@ class TestDelegate
                      :did_receive_add_roster_item_error
 
   #### service discovery management
-  delegate_callbacks :did_receive_client_version_result,:did_receive_client_version_get
+  delegate_callbacks :did_receive_version_result,:did_receive_version_get
   
   #---------------------------------------------------------------------------------------------------------
   def initialize
