@@ -22,7 +22,7 @@ module AgentXmpp
     def connect
       while (true)
         EventMachine.run do
-          @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, port)
+          @connection = EventMachine.connect(jid.domain, port, Connection, self)
         end
         Boot.call_if_implemented(:call_restarting_client, pipe)     
         sleep(10.0)
