@@ -179,6 +179,9 @@ module AgentXmpp
       #### version request
       elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqVersion)
         broadcast_to_delegates(:did_receive_version_get, self, stanza)
+      #### disco info request
+      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqDiscoInfo)
+        broadcast_to_delegates(:did_receive_discoinfo_get, self, stanza)
       #### received command
       elsif stanza.type.eql?(:set) and stanza.command.kind_of?(AgentXmpp::Xmpp::IqCommand)
         process_command(stanza)
@@ -239,18 +242,19 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe, stanza)
         AgentXmpp.logger.info "SESSION STARTED"
-        Xmpp::IqRoster.get(pipe)
+        [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(nil, pipe)]
       end
 
       #.........................................................................................................
       # presence
       #.........................................................................................................
       def did_receive_presence(pipe, presence)
-        if pipe.roster.has_jid?(presence.from.bare.to_s) 
+        if pipe.roster.has_jid?(presence.from) 
           from_jid = presence.from.to_s     
           pipe.roster.update_resource(presence)
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
-          Xmpp::IqVersion.request(from_jid, pipe) if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
+          [Xmpp::IqVersion.request(from_jid, pipe), Xmpp::IqDiscoInfo.get(from_jid, pipe)] \
+            if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
         else
           AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
         end
@@ -259,7 +263,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_presence_subscribe(pipe, presence)
         from_jid = presence.from.to_s     
-        if pipe.roster.has_jid?(presence.from.bare.to_s ) 
+        if pipe.roster.has_jid?(presence.from) 
           AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
           Xmpp::Presence.accept(from_jid)  
         else
@@ -271,7 +275,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_presence_unsubscribed(pipe, presence)
         from_jid = presence.from.to_s     
-        if pipe.roster.destroy_by_jid(presence.from.bare.to_s )           
+        if pipe.roster.destroy_by_jid(presence.from)           
           AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
           Xmpp::IqRoster.remove(presence.from, pipe)  
         else
@@ -289,40 +293,40 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_roster_item(pipe, roster_item)
         AgentXmpp.logger.info "RECEIVED ROSTER ITEM"   
-        roster_item_jid = roster_item.jid.to_s
+        roster_item_jid = roster_item.jid
         if pipe.roster.has_jid?(roster_item_jid) 
           case roster_item.subscription   
           when :none
             if roster_item.ask.eql?(:subscribe)
-              AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid}"   
+              AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid.to_s}"   
               pipe.roster.update_status(roster_item_jid, :ask) 
             else
-              AgentXmpp.logger.info "CONTACT ADDED TO ROSTER: #{roster_item_jid}"   
+              AgentXmpp.logger.info "CONTACT ADDED TO ROSTER: #{roster_item_jid.to_s}"   
               pipe.roster.update_status(roster_item_jid, :added)
             end
           when :to
-            AgentXmpp.logger.info "SUBSCRIBED TO CONTACT PRESENCE: #{roster_item_jid}"   
+            AgentXmpp.logger.info "SUBSCRIBED TO CONTACT PRESENCE: #{roster_item_jid.to_s}"   
             pipe.roster.update_status(roster_item_jid, :to) 
           when :from
-            AgentXmpp.logger.info "CONTACT SUBSCRIBED TO PRESENCE: #{roster_item_jid}"   
+            AgentXmpp.logger.info "CONTACT SUBSCRIBED TO PRESENCE: #{roster_item_jid.to_s}"   
             pipe.roster.update_status(roster_item_jid, :from) 
           when :both    
-            AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid}"   
+            AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid.to_s}"   
             pipe.roster.update_status(roster_item_jid, :both) 
             pipe.roster.update_roster_item(roster_item)
           end
         else
-          AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid}"   
-          Xmpp::IqRoster.remove(roster_item.jid, pipe)  
+          AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid.to_s}"   
+          Xmpp::IqRoster.remove(roster_item_jid, pipe)  
         end
       end
 
       #.........................................................................................................
       def did_remove_roster_item(pipe, roster_item)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM"   
-        roster_item_jid = roster_item.jid.to_s
+        roster_item_jid = roster_item.jid
         if pipe.roster.has_jid?(roster_item_jid) 
-          AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid}"   
+          AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid.to_s}"   
           pipe.roster.destroy_by_jid(roster_item_jid) 
         end
       end
@@ -346,7 +350,7 @@ module AgentXmpp
       # service discovery management
       #.........................................................................................................
       def did_receive_version_result(pipe, from, version)
-        if pipe.roster.has_jid?(from.bare.to_s)
+        if pipe.roster.has_jid?(from)
           AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
           pipe.roster.update_resource_version(from, version)
         else
@@ -356,14 +360,34 @@ module AgentXmpp
 
       #.........................................................................................................
       def did_receive_version_get(pipe, request)
-        if pipe.roster.has_jid?(request.from.bare.to_s)
+        if pipe.roster.has_jid?(request.from)
           AgentXmpp.logger.info "RECEIVED VERSION REQUEST: #{request.from.to_s}"
-          Xmpp::IqVersion.respond(request, pipe)
+          Xmpp::IqVersion.result(request, pipe)
         else
           AgentXmpp.logger.warn "RECEIVED VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
         end
       end
          
+      #.........................................................................................................
+      def did_receive_discoinfo_result(pipe, from, discoinfo)   
+        if pipe.roster.has_jid?(from)
+          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT: #{from.to_s}"
+          pipe.roster.update_resource_discoinfo(from, discoinfo)
+        else
+          AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
+        end        
+      end
+
+      #.........................................................................................................
+      def did_receive_discoinfo_get(pipe, from, request)   
+        if pipe.roster.has_jid?(request.from)
+          AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from.to_s}"
+          Xmpp::IqDiscoInfo.result(request, pipe)
+        else
+          AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
+        end
+      end
+      
     #### self
     end
      

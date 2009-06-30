@@ -13,7 +13,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def has_jid?(jid)
-      @items.has_key?(jid) 
+      @items.has_key?(jid.bare.to_s) 
     end
 
     #.........................................................................................................
@@ -23,7 +23,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def find_by_jid(jid)
-      @items[jid].nil? ? nil : RosterItemModel.new(@items[jid])   
+      @items[jid.bare.to_s].nil? ? nil : RosterItemModel.new(@items[jid])   
     end
 
     #.........................................................................................................
@@ -33,12 +33,40 @@ module AgentXmpp
 
     #.........................................................................................................
     def destroy_by_jid(jid)
+      @items.delete(jid.bare.to_s)
+    end 
+    
+    #.........................................................................................................
+    def features(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        @items[jid.bare.to_s][:resources][jid.to_s][:discoinfo].features
+      else 
+        []
+      end
+    end 
+
+    #.........................................................................................................
+    def has_feature?(jid, feature)
+       features.include?(feature)
+    end 
+
+    #.........................................................................................................
+    def identities(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        @items[jid.bare.to_s][:resources][jid.to_s][:discoinfo].identities
+      else 
+        []
+      end
+    end 
+
+    #.........................................................................................................
+    def has_identity?(jid, item)
       @items.delete(jid)
     end 
     
     #.........................................................................................................
     def update_status(jid, status)
-      @items[jid][:status] = status
+      @items[jid.bare.to_s][:status] = status
     end
 
     #.........................................................................................................
@@ -57,6 +85,12 @@ module AgentXmpp
     #.........................................................................................................
     def update_resource_version(from, version)
       @items[from.bare.to_s][:resources][from.to_s][:version] = version \
+        if @items[from.bare.to_s][:resources][from.to_s]
+    end
+    
+    #.........................................................................................................
+    def update_resource_discoinfo(from, disco)
+      @items[from.bare.to_s][:resources][from.to_s][:discoinfo] = disco \
         if @items[from.bare.to_s][:resources][from.to_s]
     end
     

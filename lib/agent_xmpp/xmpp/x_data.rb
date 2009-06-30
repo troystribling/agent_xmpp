@@ -19,7 +19,7 @@ module AgentXmpp
 
       #.....................................................................................................
       def field(var)
-        each_element { |xe|
+        elements { |xe|
           return xe if xe.kind_of?(XDataField) and xe.var == var
         }
         nil
@@ -59,9 +59,7 @@ module AgentXmpp
 
       #.....................................................................................................
       def instructions
-        fields = []
-        each_element('instructions') {|xe| fields << xe}
-        fields
+        elements.inject('instructions', []) {|f, xe| f << xe}
       end
 
       #.....................................................................................................

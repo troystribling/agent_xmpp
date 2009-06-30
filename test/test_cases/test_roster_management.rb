@@ -38,8 +38,8 @@ class TestRosterManagement < Test::Unit::TestCase
       client.roster.find_all{|r| r.status.should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_result_query_roster(client, ['dev@nowhere.com'])).should \
         respond_with(RosterMessages.send_iq_set_query_roster(client, 'troy@nowhere.com'))
-      client.roster.find_by_jid('dev@nowhere.com').status.should be(:both)      
-      client.roster.find_by_jid('troy@nowhere.com').status.should be(:inactive)
+      client.roster.find_by_jid(Xmpp::JID.new('dev@nowhere.com')).status.should be(:both)      
+      client.roster.find_by_jid(Xmpp::JID.new('troy@nowhere.com')).status.should be(:inactive)
     end
   
     ### receive roster add ackgnowledgement and send subscription request
@@ -58,14 +58,14 @@ class TestRosterManagement < Test::Unit::TestCase
     #### receive roster update with subscription=none and ask=subscribe indicating pending susbscription request for newly added contact
     test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_iq_set_query_roster_none_subscribe(client, 'troy@nowhere.com')).should not_respond
-      client.roster.find_by_jid('troy@nowhere.com').status.should be(:ask)      
+      client.roster.find_by_jid(Xmpp::JID.new('troy@nowhere.com')).status.should be(:ask)      
     end
     
     #### receive roster update with subscription=to indicating that the contact's presence updates will be received 
     #### (i.e. the contact accepted the invite)
     test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_iq_set_query_roster_to(client, 'troy@nowhere.com')).should not_respond
-      client.roster.find_by_jid('troy@nowhere.com').status.should be(:to)
+      client.roster.find_by_jid(Xmpp::JID.new('troy@nowhere.com')).status.should be(:to)
     end
     
     #### receive subscribe request from contact and accept
@@ -79,7 +79,7 @@ class TestRosterManagement < Test::Unit::TestCase
     #### will treceive presence updates and activate contact roster item
     test_receive_roster_item(client) do |client|
       client.receiving(RosterMessages.recv_iq_set_query_roster_both(client, 'troy@nowhere.com')).should not_respond
-      client.roster.find_by_jid('troy@nowhere.com').status.should be(:both)      
+      client.roster.find_by_jid(Xmpp::JID.new('troy@nowhere.com')).status.should be(:both)      
     end
     
   end
@@ -98,7 +98,7 @@ class TestRosterManagement < Test::Unit::TestCase
       client.roster.find_all{|r| r.status.should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_result_query_roster(client, ['dev@nowhere.com', 'troy@nowhere.com'])).should \
         respond_with(RosterMessages.send_iq_set_query_roster_remove(client, 'troy@nowhere.com'))
-      client.roster.find_by_jid('dev@nowhere.com').status.should be(:both)      
+      client.roster.find_by_jid(Xmpp::JID.new('dev@nowhere.com')).status.should be(:both)      
     end
   
     #### receive roster remove ackgnowledgement

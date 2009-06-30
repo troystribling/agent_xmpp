@@ -15,11 +15,12 @@ module AgentXmpp
     #.........................................................................................................
     def connect
       EventMachine.run do
-        @connection = EventMachine.connect(jid.domain, port, Connection, self, jid, password, pipe, port)
+        @connection = EventMachine.connect(jid.domain, port, Connection, self)
       end
     end
     
   end
+    
 end
 
 ##############################################################################################################
@@ -35,10 +36,9 @@ class TestClient
     def message(args) 
       msg = AgentXmpp::Xmpp::Message.new(args[:to], args[:body])
       msg.type = :chat
-      define_meta_class_method(:did_receive_all_roster_items) do |client_connection|
-        client_connection.send(msg)
+      boot_with do |pipe|
+        pipe.send(msg)
       end
-      AgentXmpp::Boot.boot
     end
 
     #.........................................................................................................
@@ -47,17 +47,36 @@ class TestClient
       iq.query = AgentXmpp::Xmpp::IqCommand.new(args[:node], :execute)
       send_command(iq)
     end
-
+    
     #.........................................................................................................
-    def send_command(iq)
-      define_meta_class_method(:did_receive_all_roster_items) do |pipe|
+    def disco_info(args={}) 
+      boot_with do |pipe|
+        iq = AgentXmpp::Xmpp::IqDiscoInfo.get(args[:to], pipe).message
         pipe.send(iq) do |r|
           puts "\nRESPONSE: #{r.to_s}"
         end
       end
+    end
+
+  private
+  
+    #.........................................................................................................
+    def send_command(iq) 
+      boot_with do |pipe|
+        pipe.send(iq) do |r|
+          puts "\nRESPONSE: #{r.to_s}"
+        end
+      end
+    end
+
+    #.........................................................................................................
+    def boot_with
+      define_meta_class_method(:did_receive_all_roster_items) do |pipe|
+        yield pipe
+      end
       AgentXmpp::Boot.boot
     end
-    
+
   end
   
 #### TestClient  

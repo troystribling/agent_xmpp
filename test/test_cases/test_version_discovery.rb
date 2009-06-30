@@ -45,7 +45,7 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
   #.........................................................................................................
   should "not respond to client version requests from jids not in configured roster" do
     @delegate.did_receive_version_get_method.should_not be_called
-    @client.roster.has_jid?('noone@nowhere.com').should be(false)
+    @client.roster.has_jid?(Xmpp::JID.new('noone@nowhere.com')).should be(false)
     @client.receiving(SystemDiscoveryMessages.recv_iq_get_query_version(@client, 'noone@nowhere.com/nothing')).should not_respond
     @delegate.did_receive_version_get_method.should be_called
   end
