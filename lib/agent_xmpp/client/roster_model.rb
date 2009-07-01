@@ -83,15 +83,21 @@ module AgentXmpp
     end
  
     #.........................................................................................................
-    def update_resource_version(from, version)
-      @items[from.bare.to_s][:resources][from.to_s][:version] = version \
-        if @items[from.bare.to_s][:resources][from.to_s]
+    def update_resource_version(version)
+      from_jid = version.from
+      if @items[from_jid.bare.to_s][:resources][from_jid.to_s]    
+        @items[from_jid.bare.to_s][:resources][from_jid.to_s][:version] = version.query
+      end        
+      version.query
     end
     
     #.........................................................................................................
-    def update_resource_discoinfo(from, disco)
-      @items[from.bare.to_s][:resources][from.to_s][:discoinfo] = disco \
-        if @items[from.bare.to_s][:resources][from.to_s]
+    def update_resource_discoinfo(disco)
+      from_jid = disco.from
+      if @items[from_jid.bare.to_s][:resources][from_jid.to_s]    
+        @items[from_jid.bare.to_s][:resources][from_jid.to_s][:discoinfo] = disco.query 
+      end        
+      disco.query 
     end
     
     #.........................................................................................................

@@ -15,6 +15,7 @@ require 'agent_xmpp/xmpp/iq_version'
 require 'agent_xmpp/xmpp/iq_roster'
 
 require 'agent_xmpp/xmpp/iq_discoinfo'
+require 'agent_xmpp/xmpp/iq_discoitems'
 
 require 'agent_xmpp/xmpp/x_data'
 require 'agent_xmpp/xmpp/error_response'

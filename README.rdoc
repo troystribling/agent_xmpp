@@ -161,16 +161,16 @@ The available callback methods are,
     def did_receive_all_roster_items(pipe)
     end
 
-    def did_acknowledge_add_roster_item(pipe, response, roster_item_jid)
+    def did_acknowledge_add_roster_item(pipe, response)
     end
 
-    def did_acknowledge_remove_roster_item(pipe, response, roster_item_jid)
+    def did_acknowledge_remove_roster_item(pipe, response)
     end
 
-    def did_receive_remove_roster_item_error(pipe, response, roster_item_jid)
+    def did_receive_remove_roster_item_error(pipe, response)
     end
 
-    def did_receive_add_roster_item_error(pipe, response, roster_item_jid)
+    def did_receive_add_roster_item_error(pipe, response)
     end
 
 === Service Discovery

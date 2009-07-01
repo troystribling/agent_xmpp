@@ -341,7 +341,8 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def did_receive_add_roster_item_error(pipe, response, roster_item_jid)
+      def did_receive_add_roster_item_error(pipe, response)
+        roster_item_jid = response.from
         AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid.to_s}"
         pipe.roster.destroy_by_jid(roster_item_jid)
       end
@@ -349,10 +350,12 @@ module AgentXmpp
       #.........................................................................................................
       # service discovery management
       #.........................................................................................................
-      def did_receive_version_result(pipe, from, version)
-        if pipe.roster.has_jid?(from)
-          AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{from.to_s}, #{version.iname}, #{version.version}"
-          pipe.roster.update_resource_version(from, version)
+      def did_receive_version_result(pipe, version)
+        version_jid = version.from
+        if pipe.roster.has_jid?(version_jid)
+          query = version.query
+          AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{version_jid.to_s}, #{query.iname}, #{query.version}"
+          pipe.roster.update_resource_version(version)
         else
           AgentXmpp.logger.warn "RECEIVED VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
         end        
@@ -369,23 +372,35 @@ module AgentXmpp
       end
          
       #.........................................................................................................
-      def did_receive_discoinfo_result(pipe, from, discoinfo)   
-        if pipe.roster.has_jid?(from)
-          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT: #{from.to_s}"
-          pipe.roster.update_resource_discoinfo(from, discoinfo)
+      def did_receive_discoinfo_result(pipe, discoinfo)   
+        if pipe.roster.has_jid?(discoinfo.from)
+          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{discoinfo.from.to_s}"
+          pipe.roster.update_resource_discoinfo(discoinfo)
+          discoinfo.query.identities.each do |i|
+            AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
+          end
+          discoinfo.query.features.each do |f|
+            AgentXmpp.logger.info " FEATURE: #{f}"
+          end
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
+          AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{discoinfo.from.to_s}"
         end        
       end
 
       #.........................................................................................................
-      def did_receive_discoinfo_get(pipe, from, request)   
-        if pipe.roster.has_jid?(request.from)
-          AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from.to_s}"
+      def did_receive_discoinfo_get(pipe, request)   
+        from_jid = request.from
+        if pipe.roster.has_jid?(from_jid)
+          AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from_jid.to_s}"
           Xmpp::IqDiscoInfo.result(request, pipe)
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
+          AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end
+      end
+      
+      #.........................................................................................................
+      def did_receive_discoitems_result(pipe, discoitems)
+        AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}"
       end
       
     #### self

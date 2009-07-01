@@ -21,7 +21,7 @@ module AgentXmpp
           iq.add(query)
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoInfo)
-              pipe.broadcast_to_delegates(:did_receive_discoinfo_result, pipe, r.from, r.query)
+              pipe.broadcast_to_delegates(:did_receive_discoinfo_result, pipe, r)
             end
           end
         end
@@ -31,6 +31,8 @@ module AgentXmpp
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = IqDiscoInfo.new
+          iq.query << AgentXmpp::IDENTITY
+          iq.query.features = AgentXmpp::FEATURES
           Send(iq)
         end
         
@@ -66,6 +68,11 @@ module AgentXmpp
       #.........................................................................................................
       def features
         elements.inject('feature', []) { |r, f| r.push(f.var)}
+      end
+  
+      #.........................................................................................................
+      def features=(feats)
+        feats.each{|f|self << DiscoFeature.new(f)}
       end
   
     #### IqDiscoInfo
