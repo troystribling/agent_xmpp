@@ -65,6 +65,24 @@ module AgentXmpp
     end 
     
     #.........................................................................................................
+    def has_discoinfo?(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        not @items[jid.bare.to_s][:resources][jid.to_s][:discoinfo].nil?
+      else 
+        false
+      end
+    end 
+        
+    #.........................................................................................................
+    def has_version?(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        not @items[jid.bare.to_s][:resources][jid.to_s][:version].nil?
+      else 
+        false
+      end
+    end 
+                    
+    #.........................................................................................................
     def update_status(jid, status)
       @items[jid.bare.to_s][:status] = status
     end

@@ -29,7 +29,7 @@ module AgentXmpp
         end
       
         #.........................................................................................................
-        def authenticate(stream_mechanisms, pipe)
+        def authenticate(pipe, stream_mechanisms)
           if stream_mechanisms.include?('PLAIN')
             Send(new('PLAIN').auth(pipe.jid, pipe.password))
           else

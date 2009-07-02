@@ -15,9 +15,9 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def get(to, pipe)
+        def get(pipe, to)
           iq = Iq.new(:get, to)
-          query = IqDiscoItems.new
+          query = new
           iq.add(query)
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoItems)
@@ -27,10 +27,10 @@ module AgentXmpp
         end
         
         #.........................................................................................................
-        def result(request, pipe)
+        def result(pipe, request)
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
-          iq.query = IqDiscoItems.new
+          iq.query = new
           Send(iq)
         end
 
@@ -62,7 +62,7 @@ module AgentXmpp
     end
 
     #####-------------------------------------------------------------------------------------------------------
-    class DiscoItem < XMPPElement
+    class DiscoItem < Element
 
       #.........................................................................................................
       name_xmlns 'item', 'http://jabber.org/protocol/disco#items'

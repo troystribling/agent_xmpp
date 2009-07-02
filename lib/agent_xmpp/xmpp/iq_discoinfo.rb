@@ -15,7 +15,7 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def get(to, pipe)
+        def get(pipe, to=nil)
           iq = Iq.new(:get, to)
           query = IqDiscoInfo.new
           iq.add(query)
@@ -27,7 +27,7 @@ module AgentXmpp
         end
         
         #.........................................................................................................
-        def result(request, pipe)
+        def result(pipe, request)
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = IqDiscoInfo.new

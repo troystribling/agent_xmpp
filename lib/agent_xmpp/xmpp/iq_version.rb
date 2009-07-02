@@ -15,7 +15,7 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def request(contact_jid, pipe)
+        def request(pipe, contact_jid)
           iq = Xmpp::Iq.new(:get, contact_jid)
           iq.query = new
           Send(iq) do |r|
@@ -26,7 +26,7 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def result(request, pipe)
+        def result(pipe, request)
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = new

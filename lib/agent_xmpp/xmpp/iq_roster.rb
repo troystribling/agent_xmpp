@@ -27,7 +27,7 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def add(roster_item_jid, pipe)
+        def add(pipe, roster_item_jid)
           request = new_rosterset
           request.query.add(Xmpp::RosterItem.new(roster_item_jid))
           Send(request) do |r|
@@ -42,7 +42,7 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def remove(roster_item_jid, pipe)
+        def remove(pipe, roster_item_jid)
           request = new_rosterset
           request.query.add(Xmpp::RosterItem.new(roster_item_jid, nil, :remove))
           Send(request) do |r|

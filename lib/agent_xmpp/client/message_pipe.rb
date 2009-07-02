@@ -81,27 +81,6 @@ module AgentXmpp
     end
     
     #---------------------------------------------------------------------------------------------------------
-    # process commands
-    #.........................................................................................................
-    def process_command(stanza)
-      command = stanza.command
-      params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
-        :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
-      AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-      Controller.new(self, params).invoke_command
-    end
-
-    #---------------------------------------------------------------------------------------------------------
-    # process chat messages
-    #.........................................................................................................
-    def process_chat_message_body(stanza)
-      params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, \
-        :body => stanza.body}
-      AgentXmpp.logger.info "RECEIVED MESSAGE BODY: #{stanza.body}"
-      Controller.new(self, params).invoke_chat
-    end
-
-    #---------------------------------------------------------------------------------------------------------
     # connection callbacks
     #.........................................................................................................
     def receive(stanza)
@@ -136,9 +115,9 @@ module AgentXmpp
       when 'features'
         set_stream_features_and_mechanisms(stanza)
         if connection_status.eql?(:offline)
-          Xmpp::SASL.authenticate(stream_mechanisms, self)
+          broadcast_to_delegates(:did_receive_pre_authenticate_features, self)
         elsif connection_status.eql?(:authenticated)
-          Xmpp::Iq.bind(stanza, self) if stream_features.has_key?('bind') and stream_features.has_key?('session')
+          broadcast_to_delegates(:did_receive_post_authenticate_features, self, stanza)
         end
       when 'stream'
       when 'success'
@@ -160,36 +139,20 @@ module AgentXmpp
   
     #.........................................................................................................
     def demux_stanza(stanza)
-      stanza_class = stanza.class.to_s
+      meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq) 
+                                /.*::Iq(.*)/.match(stanza.query.class.to_s).to_a.last
+                              else
+                                /.*::(.*)/.match(stanza.class.to_s).to_a.last
+                              end.downcase
+      meth += '_' + stanza.type.to_s if stanza.type
       #### roster update
       if stanza.type == :set and stanza.query.kind_of?(AgentXmpp::Xmpp::IqRoster)
         [stanza.query.inject([]) do |r, i|  
           method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
           r.push(broadcast_to_delegates(method, self, i))
         end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
-      #### presence subscription request  
-      elsif stanza.type.eql?(:subscribe) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
-        broadcast_to_delegates(:did_receive_presence_subscribe, self, stanza)
-      #### presence subscription accepted  
-      elsif stanza.type.eql?(:subscribed) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
-        broadcast_to_delegates(:did_receive_presence_subscribed, self, stanza)
-      #### presence unsubscribe 
-      elsif stanza.type.eql?(:unsubscribed) and stanza_class.eql?('AgentXmpp::Xmpp::Presence')
-        broadcast_to_delegates(:did_receive_presence_unsubscribed, self, stanza)
-      #### version request
-      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqVersion)
-        broadcast_to_delegates(:did_receive_version_get, self, stanza)
-      #### disco info request
-      elsif stanza.type.eql?(:get) and stanza.query.kind_of?(AgentXmpp::Xmpp::IqDiscoInfo)
-        broadcast_to_delegates(:did_receive_discoinfo_get, self, stanza)
-      #### received command
-      elsif stanza.type.eql?(:set) and stanza.command.kind_of?(AgentXmpp::Xmpp::IqCommand)
-        process_command(stanza)
-      #### chat message received
-      elsif stanza_class.eql?('AgentXmpp::Xmpp::Message') and stanza.type.eql?(:chat) and stanza.respond_to?(:body)
-        process_chat_message_body(stanza)
       else
-        broadcast_to_delegates(('did_receive_' + /.*::(.*)/.match(stanza_class).to_a.last.downcase).to_sym, self, stanza)
+        broadcast_to_delegates(meth.to_sym, self, stanza)
       end
     end
   
@@ -220,7 +183,41 @@ module AgentXmpp
       #---------------------------------------------------------------------------------------------------------
       # event flow delegate methods
       #.........................................................................................................
+      # process commands
+      #.........................................................................................................
+      def did_receive_command_set(pipe, stanza)
+        command = stanza.command
+        params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
+          :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
+        AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
+        Controller.new(pipe, params).invoke_command
+      end
+
+      #.........................................................................................................
+      # process chat messages
+      #.........................................................................................................
+      def did_receive_message_chat(pipe, stanza)
+        params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, \
+          :body => stanza.body}
+        AgentXmpp.logger.info "RECEIVED MESSAGE BODY: #{stanza.body}"
+        Controller.new(pipe, params).invoke_chat
+      end
+
+      #.........................................................................................................
       # connection
+      #.........................................................................................................
+      def did_receive_pre_authenticate_features(pipe)
+        AgentXmpp.logger.info "SESSION INIALIZED"
+        Xmpp::SASL.authenticate(pipe, pipe.stream_mechanisms)
+      end
+
+      #.........................................................................................................
+      def did_receive_post_authenticate_features(pipe, stanza)
+        AgentXmpp.logger.info "SESSION STARTED"
+        Xmpp::Iq.bind(pipe, stanza) if \
+          pipe.stream_features.has_key?('bind') and pipe.stream_features.has_key?('session')
+      end
+ 
       #.........................................................................................................
       def did_connect(pipe)
         AgentXmpp.logger.info "CONNECTED"
@@ -242,7 +239,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe, stanza)
         AgentXmpp.logger.info "SESSION STARTED"
-        [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(nil, pipe)]
+        [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe)]
       end
 
       #.........................................................................................................
@@ -250,11 +247,15 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_presence(pipe, presence)
         if pipe.roster.has_jid?(presence.from) 
-          from_jid = presence.from.to_s     
+          from_jid = presence.from    
           pipe.roster.update_resource(presence)
-          AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid}"
-          [Xmpp::IqVersion.request(from_jid, pipe), Xmpp::IqDiscoInfo.get(from_jid, pipe)] \
-            if not from_jid.eql?(pipe.jid.to_s) and presence.type.nil?
+          AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s }"
+          response = []
+          unless from_jid.eql?(pipe.jid.to_s)
+            response << Xmpp::IqVersion.request(pipe, from_jid) unless pipe.roster.has_version?(from_jid)
+            response << Xmpp::IqDiscoInfo.get(pipe, from_jid) unless pipe.roster.has_discoinfo?(from_jid)
+          end
+          response
         else
           AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
         end
@@ -277,7 +278,7 @@ module AgentXmpp
         from_jid = presence.from.to_s     
         if pipe.roster.destroy_by_jid(presence.from)           
           AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
-          Xmpp::IqRoster.remove(presence.from, pipe)  
+          Xmpp::IqRoster.remove(pipe, presence.from)  
         else
           AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
         end
@@ -317,7 +318,7 @@ module AgentXmpp
           end
         else
           AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid.to_s}"   
-          Xmpp::IqRoster.remove(roster_item_jid, pipe)  
+          Xmpp::IqRoster.remove(pipe, roster_item_jid)  
         end
       end
 
@@ -336,7 +337,7 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
         pipe.roster.find_all_by_status(:inactive).collect do |j, r|
           AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-          Xmpp::IqRoster.add(Xmpp::JID.new(j), pipe)  
+          Xmpp::IqRoster.add(pipe, j)  
         end
       end
 
@@ -365,7 +366,7 @@ module AgentXmpp
       def did_receive_version_get(pipe, request)
         if pipe.roster.has_jid?(request.from)
           AgentXmpp.logger.info "RECEIVED VERSION REQUEST: #{request.from.to_s}"
-          Xmpp::IqVersion.result(request, pipe)
+          Xmpp::IqVersion.result(pipe, request)
         else
           AgentXmpp.logger.warn "RECEIVED VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
         end
@@ -392,9 +393,20 @@ module AgentXmpp
         from_jid = request.from
         if pipe.roster.has_jid?(from_jid)
           AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from_jid.to_s}"
-          Xmpp::IqDiscoInfo.result(request, pipe)
+          Xmpp::IqDiscoInfo.result(pipe, request)
         else
           AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+        end
+      end
+
+      #.........................................................................................................
+      def did_receive_discoitems_get(pipe, request)   
+        from_jid = request.from
+        if pipe.roster.has_jid?(from_jid)
+          AgentXmpp.logger.info "RECEIVED DISCO ITEMS REQUEST: #{from_jid.to_s}"
+          Xmpp::IqDiscoItems.result(pipe, request)
+        else
+          AgentXmpp.logger.warn "RECEIVED DISCO ITEMS REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end
       end
       

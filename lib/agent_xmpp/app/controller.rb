@@ -14,18 +14,23 @@ module AgentXmpp
       attr_reader :routes
 
       #.........................................................................................................
-      def execute(path, opts = {}, &blk) 
-        route(:execute, path, opts, &blk) 
+      def execute(node, opts = {}, &blk) 
+        route(:execute, {:node => node, :opts => opts, :blk => &blk}) 
       end
 
       #.........................................................................................................
-      def chat(path, opts = {}, &blk) 
-        route(:chat, path, opts, &blk)
+      def chat(opts = {}, &blk) 
+        route(:chat, {:opts => opts, :blk => &blk})
       end
 
       #.........................................................................................................
-      def route(action, path, opts={}, &blk)
-        (routes[action] ||= []).push({:path => path, :opts => opts, :blk => blk}).last
+      def route(action, nroute)
+        (routes[action] ||= []).push(nroute).last
+      end
+     
+      #.........................................................................................................
+      def command_nodes
+        @routes[:execute].map{|r| r[:node]}
       end
       
     #### self

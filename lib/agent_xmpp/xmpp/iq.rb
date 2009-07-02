@@ -16,12 +16,12 @@ module AgentXmpp
       class << self
         
         #.........................................................................................................
-        def bind(stanza, pipe)
+        def bind(pipe, stanza)
           iq = new_bind(pipe.jid)
           Send(iq) do |r|
             if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
               pipe.jid = JID.new(full_jid.text)                
-              [session(stanza, pipe), pipe.broadcast_to_delegates(:did_bind, pipe, stanza)].smash
+              [session(pipe, stanza), pipe.broadcast_to_delegates(:did_bind, pipe, stanza)].smash
             elsif r.type.eql?(:error) and r.bind
               raise AgentXmppError, "resource bind failed"
             end
@@ -29,7 +29,7 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def session(stanza, pipe)
+        def session(pipe, stanza)
           iq = new_session
           Send(iq) do |r|
             if r.type == :result                

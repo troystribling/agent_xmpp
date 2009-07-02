@@ -124,6 +124,12 @@ The available callback methods are,
 
 === Authentication
 
+    def did_receive_pre_authenticate_features(pipe)
+    end
+
+    def did_receive_post_authenticate_features(pipe, stanza)
+    end
+
     def did_authenticate(pipe, stanza)
     end
 
