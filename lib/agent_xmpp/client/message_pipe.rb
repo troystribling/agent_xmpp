@@ -51,6 +51,11 @@ module AgentXmpp
     end
     
     #.........................................................................................................
+    def delegates_respond_to?(method)
+     delegates.inject(0){|r,d| d.respond_to?(method) ? r + 1 : r} > 0
+    end
+    
+    #.........................................................................................................
     def broadcast_to_delegates(method, *args)
       delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}.smash
     end
@@ -139,20 +144,25 @@ module AgentXmpp
   
     #.........................................................................................................
     def demux_stanza(stanza)
-      meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq) 
-                                /.*::Iq(.*)/.match(stanza.query.class.to_s).to_a.last
+      meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
+                                iqclass = if stanza.query
+                                           stanza.query.class
+                                         elsif stanza.command
+                                           stanza.command.class
+                                         end
+                                if iqclass
+                                  /.*::Iq(.*)/.match(iqclass.to_s).to_a.last 
+                                else
+                                  broadcast_to_delegates(:did_receive_unsupported_message, self, stanza)
+                                end
                               else
                                 /.*::(.*)/.match(stanza.class.to_s).to_a.last
                               end.downcase
       meth += '_' + stanza.type.to_s if stanza.type
-      #### roster update
-      if stanza.type == :set and stanza.query.kind_of?(AgentXmpp::Xmpp::IqRoster)
-        [stanza.query.inject([]) do |r, i|  
-          method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
-          r.push(broadcast_to_delegates(method, self, i))
-        end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
-      else
+      if delegates_respond_to?(meth.to_sym) 
         broadcast_to_delegates(meth.to_sym, self, stanza)
+      else
+        broadcast_to_delegates(:did_receive_unsupported_message, self, stanza)
       end
     end
   
@@ -251,7 +261,7 @@ module AgentXmpp
           pipe.roster.update_resource(presence)
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s }"
           response = []
-          unless from_jid.eql?(pipe.jid.to_s)
+          unless from_jid.to_s.eql?(pipe.jid.to_s)
             response << Xmpp::IqVersion.request(pipe, from_jid) unless pipe.roster.has_version?(from_jid)
             response << Xmpp::IqDiscoInfo.get(pipe, from_jid) unless pipe.roster.has_discoinfo?(from_jid)
           end
@@ -291,6 +301,14 @@ module AgentXmpp
 
       #.........................................................................................................
       # roster management
+      #.........................................................................................................
+      def did_receive_roster_set(pipe, stanza)
+        [stanza.query.inject([]) do |r, i|  
+          method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
+          r.push(broadcast_to_delegates(method, self, i))
+        end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
+      end
+
       #.........................................................................................................
       def did_receive_roster_item(pipe, roster_item)
         AgentXmpp.logger.info "RECEIVED ROSTER ITEM"   
@@ -374,8 +392,9 @@ module AgentXmpp
          
       #.........................................................................................................
       def did_receive_discoinfo_result(pipe, discoinfo)   
-        if pipe.roster.has_jid?(discoinfo.from)
-          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{discoinfo.from.to_s}"
+        from_jid = discoinfo.from
+        if pipe.roster.has_jid?(from_jid)
+          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}"
           pipe.roster.update_resource_discoinfo(discoinfo)
           discoinfo.query.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
@@ -383,8 +402,9 @@ module AgentXmpp
           discoinfo.query.features.each do |f|
             AgentXmpp.logger.info " FEATURE: #{f}"
           end
+          from_jid.to_s.eql?(pipe.jid.bare.to_s) ? Xmpp::IqDiscoItems.get(pipe) : Xmpp::IqDiscoItems.get(pipe, from_jid.to_s)
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{discoinfo.from.to_s}"
+          AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end        
       end
 
@@ -403,8 +423,13 @@ module AgentXmpp
       def did_receive_discoitems_get(pipe, request)   
         from_jid = request.from
         if pipe.roster.has_jid?(from_jid)
-          AgentXmpp.logger.info "RECEIVED DISCO ITEMS REQUEST: #{from_jid.to_s}"
-          Xmpp::IqDiscoItems.result(pipe, request)
+          if (request.query.node.eql?('http://jabber.org/protocol/commands'))
+            AgentXmpp.logger.info "RECEIVED COMMAND NODE DISCO ITEMS REQUEST: #{from_jid.to_s}"
+            Xmpp::IqDiscoItems.command_nodes(pipe, request)
+          else
+            AgentXmpp.logger.info "RECEIVED DISCO ITEMS REQUEST: #{from_jid.to_s}"
+            Xmpp::IqDiscoItems.result(pipe, request)
+          end
         else
           AgentXmpp.logger.warn "RECEIVED DISCO ITEMS REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end
@@ -413,6 +438,13 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_discoitems_result(pipe, discoitems)
         AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}"
+      end
+  
+      #.........................................................................................................
+      # errors
+      #.........................................................................................................
+      def did_receive_unsupported_message(pipe, stanza)
+        AgentXmpp.logger.info "RECEIVED UNSUPPORTED MESSAGE FROM: #{stanza.from.to_s}"
       end
       
     #### self

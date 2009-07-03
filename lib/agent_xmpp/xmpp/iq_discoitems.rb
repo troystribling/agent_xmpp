@@ -15,10 +15,9 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def get(pipe, to)
+        def get(pipe, to=nil)
           iq = Iq.new(:get, to)
-          query = new
-          iq.add(query)
+          iq.query = new
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoItems)
               pipe.broadcast_to_delegates(:did_receive_discoitems_result, pipe, r)
@@ -31,6 +30,15 @@ module AgentXmpp
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = new
+          Send(iq)
+        end
+
+        #.........................................................................................................
+        def command_nodes(pipe, request)
+          iq = Xmpp::Iq.new(:result, request.from.to_s)
+          iq.id = request.id unless request.id.nil?
+          iq.query = new
+          iq.query.items = BaseController.command_nodes.map{|n| {:node => n, :name => n, :jid => pipe.jid.to_s}}
           Send(iq)
         end
 
@@ -58,6 +66,11 @@ module AgentXmpp
         get_elements('item')
       end
 
+      #.........................................................................................................
+      def items=(its)
+        its.each{|i| self << DiscoItem.new(i[:jid], i[:name], i[:node])}
+      end
+
     #### IqDiscoItems
     end
 
@@ -70,9 +83,9 @@ module AgentXmpp
       #.........................................................................................................
       def initialize(jid=nil, iname=nil, node=nil)
         super()
-        set_jid(jid)
-        set_iname(iname)
-        set_node(node)
+        self.jid = jid
+        self.iname = iname
+        self.node = node
       end
 
       #.........................................................................................................
@@ -85,13 +98,6 @@ module AgentXmpp
         attributes['jid'] = val.to_s
       end
 
-      #.........................................................................................................
-      def set_jid(val)
-        self.jid = val
-        self
-      end
-
-      #.........................................................................................................
       def iname
         attributes['name']
       end
@@ -102,13 +108,7 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def set_iname(val)
-        self.iname = val
-        self
-      end
-
-      #.........................................................................................................
-     def node
+      def node
         attributes['node']
       end
 
@@ -117,12 +117,6 @@ module AgentXmpp
         attributes['node'] = val
       end
 
-      #.........................................................................................................
-      def set_node(val)
-        self.node = val
-        self
-      end
-    
     #### Item
     end
     

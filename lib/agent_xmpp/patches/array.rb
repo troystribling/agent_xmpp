@@ -7,7 +7,7 @@ module AgentXmpp
       module InstanceMethods
 
         #......................................................................................................
-        def to_x_data(type = 'result')
+        def to_x_data(type = 'form')
           data = Xmpp::XData.new(type)
           if first.instance_of?(Hash)
             reported = Xmpp::XDataReported.new

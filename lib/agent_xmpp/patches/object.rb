@@ -7,7 +7,7 @@ module AgentXmpp
       module InstanceMethods
 
         #.......................................................................................................
-        def to_x_data(type = 'result')
+        def to_x_data(type = 'form')
           Xmpp::XData.new(type).add_field_with_value(nil, to_s)
         end
   
