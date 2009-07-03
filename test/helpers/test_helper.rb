@@ -32,7 +32,7 @@ require 'session_messages'
 require 'presence_messages'
 
 #####-------------------------------------------------------------------------------------------------------
-AgentXmpp.app_path = 'test/test_helpers'
+AgentXmpp.app_path = 'test/helpers'
 AgentXmpp.logger.level = Logger::DEBUG
 
 ####------------------------------------------------------------------------------------------------------

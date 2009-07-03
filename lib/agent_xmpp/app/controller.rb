@@ -51,7 +51,7 @@ module AgentXmpp
        unless route.nil?
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |result|
-           add_payload_to_container(result.to_x_data(:form))
+           add_payload_to_container(result.to_x_data)
          end
          handle_request
        else

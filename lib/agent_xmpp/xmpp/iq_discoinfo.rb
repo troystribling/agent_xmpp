@@ -31,7 +31,7 @@ module AgentXmpp
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = IqDiscoInfo.new
-          iq.query << AgentXmpp::IDENTITY
+          iq.query << DiscoIdentity.new(AgentXmpp::IDENTITY[:category], AgentXmpp::IDENTITY[:name], AgentXmpp::IDENTITY[:type])
           iq.query.features = AgentXmpp::FEATURES
           Send(iq)
         end
@@ -81,9 +81,9 @@ module AgentXmpp
       #.........................................................................................................
       def initialize(category=nil, iname=nil, type=nil)
         super()
-        category = category
-        iname = iname
-        type = type
+        self.category = category
+        self.iname = iname
+        self.type = type
       end
 
       #.........................................................................................................

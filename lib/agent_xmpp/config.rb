@@ -3,7 +3,7 @@ module AgentXmpp
   VERSION = "0.0.0"
   AGENT_XMPP_NAME = 'AgentXMPP'
   OS_VERSION = IO.popen('uname -sr').readlines.to_s.strip
-  IDENTITY = Xmpp::DiscoIdentity.new('client', AGENT_XMPP_NAME, 'bot')
+  IDENTITY = {:category => 'client', :name => AGENT_XMPP_NAME, :type => 'bot'}
   FEATURES = ['http://jabber.org/protocol/disco#info', 
               'http://jabber.org/protocol/disco#items',
               'jabber:iq:version',
