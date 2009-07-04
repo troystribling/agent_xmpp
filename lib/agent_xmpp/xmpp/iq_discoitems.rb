@@ -39,7 +39,7 @@ module AgentXmpp
           iq.id = request.id unless request.id.nil?
           iq.query = new
           iq.query.node = 'http://jabber.org/protocol/commands'
-          iq.query.items = BaseController.command_nodes.map{|n| {:node => n, :name => n, :jid => pipe.jid.to_s}}
+          iq.query.items = BaseController.command_nodes.map{|n| {:node => n, :name => n.humanize, :jid => pipe.jid.to_s}}
           Send(iq)
         end
 

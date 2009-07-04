@@ -35,7 +35,6 @@ class TestClient
     doc = REXML::Document.new(prepared_msg).root
     doc = doc.elements.first if doc.name.eql?('stream')
     if ['presence', 'message', 'iq'].include?(doc.name)
-      doc.add_namespace('jabber:client') if doc.namespace('').to_s.eql?('')
       doc = AgentXmpp::Xmpp::Stanza::import(doc) 
     end
     client.connection.receive(doc)

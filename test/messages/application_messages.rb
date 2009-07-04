@@ -8,7 +8,7 @@ module ApplicationMessages
     #.........................................................................................................
     def recv_iq_set_command_execute(client, node, from)
       <<-MSG
-        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='set'>
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='set' xmlns='jabber:client'>
           <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'/>
         </iq>
       MSG
@@ -17,7 +17,7 @@ module ApplicationMessages
     #.........................................................................................................
     def recv_message_chat(client, from)
       <<-MSG
-        <message from='#{from}' to='#{client.client.jid.to_s}' type='chat'>
+        <message from='#{from}' to='#{client.client.jid.to_s}' type='chat' xmlns='jabber:client'>
           <body>fuck you</body>
         </message>
       MSG
@@ -200,6 +200,8 @@ module ApplicationMessages
        MSG
     end
        
+  ## self  
   end
-      
+ 
+#### ApplicationMessages      
 end

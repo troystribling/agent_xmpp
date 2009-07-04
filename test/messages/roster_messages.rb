@@ -9,7 +9,7 @@ module RosterMessages
     def recv_iq_result_query_roster(client, roster_jids)
       subscriptions = roster_jids.inject("") {|s, r| s += "<item subscription='both' jid='#{r}'/>"}
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'>
             #{subscriptions}
           </query>
@@ -19,18 +19,18 @@ module RosterMessages
 
     #.........................................................................................................
     def recv_iq_result_query_roster_ack(client)
-      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result'/>"
+      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='result' xmlns='jabber:client'/>"
     end
 
     #.........................................................................................................
     def recv_error_query_roster(client)
-      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='error'/>"
+      "<iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='error' xmlns='jabber:client'/>"
     end
 
     #.........................................................................................................
     def recv_iq_set_query_roster_none(client, roster_jid)
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='set'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='1' type='set' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'>
             <item subscription='none' jid='#{roster_jid}'/>
           </query>
@@ -41,7 +41,7 @@ module RosterMessages
     #.........................................................................................................
     def recv_iq_set_query_roster_none_subscribe(client, roster_jid)
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'>
             <item ask='subscribe' subscription='none' jid='#{roster_jid}'/>
           </query>
@@ -52,7 +52,7 @@ module RosterMessages
      #.........................................................................................................
      def recv_iq_set_query_roster_to(client, roster_jid)
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set' xmlns='jabber:client'>
          <query xmlns='jabber:iq:roster'>
            <item subscription='to' jid='#{roster_jid}'/>
          </query>
@@ -63,7 +63,7 @@ module RosterMessages
     #.........................................................................................................
     def recv_iq_set_query_roster_both(client, roster_jid)
       <<-MSG
-        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+        <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set' xmlns='jabber:client'>
           <query xmlns='jabber:iq:roster'>
             <item subscription='both' jid='#{roster_jid}'/>
           </query>
@@ -74,7 +74,7 @@ module RosterMessages
      #.........................................................................................................
      def recv_iq_set_query_roster_remove(client, roster_jid)
        <<-MSG
-         <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set'>
+         <iq from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' id='push' type='set' xmlns='jabber:client'>
            <query xmlns='jabber:iq:roster'>
              <item jid='#{roster_jid}' subscription='remove'/>
            </query>
@@ -114,6 +114,8 @@ module RosterMessages
         MSG
        end
 
+  ## self  
   end
-      
+  
+#### RosterMessages      
 end

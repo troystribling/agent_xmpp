@@ -9,6 +9,7 @@ module AgentXmpp
       @items = Hash.new{|hash, key| hash[key] = {:status => :inactive, :resources => {}}}
       roster.each{|r| @items[r]}
       @items[jid.bare.to_s] = {:status => :both, :resources => {}}
+      @items[jid.domain] = {:status => :host, :resources => {}}
     end
 
     #.........................................................................................................

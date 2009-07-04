@@ -10,6 +10,11 @@ module AgentXmpp
         def classify
           split('_').collect{|s| s.capitalize}.join
         end
+
+        #......................................................................................................
+        def humanize
+          gsub(/_/, ' ')
+        end
         
       #### InstanceMethods
       end  

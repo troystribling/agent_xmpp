@@ -8,7 +8,7 @@ module PresenceMessages
     #.........................................................................................................
     def recv_presence_self(client)
       <<-MSG
-        <presence from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}'>
+        <presence from='#{client.client.jid.to_s}' to='#{client.client.jid.to_s}' xmlns='jabber:client'>
           <priority>1</priority>
         </presence>
       MSG
@@ -17,7 +17,7 @@ module PresenceMessages
     #.........................................................................................................
     def recv_presence_available(client, from)
       <<-MSG
-        <presence from='#{from}' to='#{client.client.jid.to_s}'>
+        <presence from='#{from}' to='#{client.client.jid.to_s}' xmlns='jabber:client'>
           <priority>1</priority>
         </presence>
       MSG
@@ -25,22 +25,22 @@ module PresenceMessages
 
     #.........................................................................................................
     def recv_presence_unavailable(client, from)
-      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='unavailable'/>"
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='unavailable' xmlns='jabber:client'/>"
     end
 
     #.........................................................................................................
     def recv_presence_subscribe(client, from)
-      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='subscribe'/>"
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='subscribe' xmlns='jabber:client'/>"
     end
  
     #.........................................................................................................
     def recv_presence_subscribed(client, from)
-      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='subscribed'/>"
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='subscribed' xmlns='jabber:client'/>"
     end
     
     #.........................................................................................................
     def recv_presence_unsubscribed(client, from)
-      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='unsubscribed'/>"
+      "<presence from='#{from}' to='#{client.client.jid.to_s}' type='unsubscribed' xmlns='jabber:client'/>"
     end
         
     #### sent messages    
@@ -59,6 +59,8 @@ module PresenceMessages
       "<presence to='#{to}' type='unsubscribed' xmlns='jabber:client'/>"
     end
    
+  ## self  
   end
-      
+ 
+#### PresenceMessages      
 end

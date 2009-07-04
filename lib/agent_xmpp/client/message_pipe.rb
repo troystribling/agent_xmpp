@@ -249,7 +249,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe, stanza)
         AgentXmpp.logger.info "SESSION STARTED"
-        [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe)]
+        [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain)]
       end
 
       #.........................................................................................................
@@ -402,7 +402,7 @@ module AgentXmpp
           discoinfo.query.features.each do |f|
             AgentXmpp.logger.info " FEATURE: #{f}"
           end
-          from_jid.to_s.eql?(pipe.jid.bare.to_s) ? Xmpp::IqDiscoItems.get(pipe) : Xmpp::IqDiscoItems.get(pipe, from_jid.to_s)
+          Xmpp::IqDiscoItems.get(pipe, from_jid.to_s)
         else
           AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end        

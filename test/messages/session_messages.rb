@@ -63,7 +63,7 @@ module SessionMessages
     #.........................................................................................................
     def recv_iq_result_bind(client)
       <<-MSG
-        <iq id='1' type='result'>
+        <iq id='1' type='result' xmlns='jabber:client'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
             <jid>#{client.client.jid.to_s}</jid>
           </bind>
@@ -83,7 +83,7 @@ module SessionMessages
     #.........................................................................................................
     def recv_error_bind(client)
       <<-MSG
-        <iq type='error' id='1'>
+        <iq type='error' id='1' xmlns='jabber:client'>
           <bind xmlns='urn:ietf:params:xml:ns:xmpp-bind'>
             <resource>someresource</resource>
           </bind>
@@ -97,7 +97,7 @@ module SessionMessages
     #.........................................................................................................
     def recv_error_session(client)
       <<-MSG
-        <iq from='#{client.client.jid.domain}' type='error' id='1'>
+        <iq from='#{client.client.jid.domain}' type='error' id='1' xmlns='jabber:client'>
           <session xmlns='urn:ietf:params:xml:ns:xmpp-session'/>
           <error type='wait'>
             <internal-server-error xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
@@ -150,7 +150,9 @@ module SessionMessages
         </presence>
       MSG
     end
-     
+
+  ## self  
   end
-      
+
+#### SessionMessages      
 end
