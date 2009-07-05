@@ -27,6 +27,7 @@ require 'test_case_extensions'
 #####-------------------------------------------------------------------------------------------------------
 require 'application_messages'
 require 'roster_messages'
+require 'version_discovery_messages'
 require 'service_discovery_messages'
 require 'session_messages'
 require 'presence_messages'

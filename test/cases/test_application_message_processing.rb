@@ -8,7 +8,8 @@ class TestApplicationMessageProcessing < Test::Unit::TestCase
   def setup
     @config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com'], 'password' => 'nopass'}
     @client = TestClient.new(@config)
-    test_init_roster(@client, @config)
+    AgentXmpp::Xmpp::IdGenerator.init_gen_id
+    test_init_roster(@client)
     @delegate = @client.new_delegate
   end
 

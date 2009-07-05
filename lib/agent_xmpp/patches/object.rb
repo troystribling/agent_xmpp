@@ -8,7 +8,7 @@ module AgentXmpp
 
         #.......................................................................................................
         def to_x_data(type='result')
-          Xmpp::XData.new(type).add_field_with_value(nil, to_s, type='fixed')
+          Xmpp::XData.new(type).add_field_with_value(nil, to_s)
         end
   
         #.......................................................................................................
@@ -16,11 +16,6 @@ module AgentXmpp
           (class << self; self; end).instance_eval {define_method(name, &blk)}
         end
 
-        #.......................................................................................................
-        def stuff_a
-          kind_of?(Array) ? self : [self]
-        end
-  
       #### InstanceMethods
       end  
         

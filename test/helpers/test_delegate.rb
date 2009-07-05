@@ -32,16 +32,17 @@ class TestDelegate
   delegate_callbacks :did_disconnect
 
   #### authentication
-  delegate_callbacks :did_authenticate, :did_bind, :did_start_session
+  delegate_callbacks :did_authenticate, :did_bind, :did_start_session, :did_receive_preauthenticate_features,
+                     :did_receive_postauthenticate_features
 
   #### presence
   delegate_callbacks :did_receive_presence, :did_receive_presence_subscribe, :did_receive_presence_unsubscribed,
-                     :did_receive_presence_subscribed
+                     :did_receive_presence_subscribed, :did_receive_presence_unavailable
 
   #### roster management
   delegate_callbacks :did_receive_roster_item, :did_receive_all_roster_items, :did_acknowledge_add_roster_item, 
-                     :did_remove_roster_item, :did_acknowledge_remove_roster_item, :did_receive_remove_roster_item_error,
-                     :did_receive_add_roster_item_error
+                     :did_receive_roster_result, :did_receive_roster_set, :did_remove_roster_item, :did_acknowledge_remove_roster_item, 
+                     :did_receive_remove_roster_item_error, :did_receive_add_roster_item_error
 
   #### service discovery management
   delegate_callbacks :did_receive_version_result,:did_receive_version_get

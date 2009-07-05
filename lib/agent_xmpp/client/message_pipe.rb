@@ -75,7 +75,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def send_resp(resp)
-      resp.stuff_a.inject([]) do |m, r| 
+      [resp].flatten.inject([]) do |m, r| 
         r.kind_of?(AgentXmpp::Response) ? m.push(send(r.message, &r.responds_with)) : m
       end
     end
@@ -120,9 +120,9 @@ module AgentXmpp
       when 'features'
         set_stream_features_and_mechanisms(stanza)
         if connection_status.eql?(:offline)
-          broadcast_to_delegates(:did_receive_pre_authenticate_features, self)
+          broadcast_to_delegates(:did_receive_preauthenticate_features, self)
         elsif connection_status.eql?(:authenticated)
-          broadcast_to_delegates(:did_receive_post_authenticate_features, self, stanza)
+          broadcast_to_delegates(:did_receive_postauthenticate_features, self)
         end
       when 'stream'
       when 'success'
@@ -146,14 +146,16 @@ module AgentXmpp
     def demux_stanza(stanza)
       meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
                                 iqclass = if stanza.query
-                                           stanza.query.class
-                                         elsif stanza.command
-                                           stanza.command.class
-                                         end
+                                            stanza.query.class
+                                          elsif stanza.command
+                                            stanza.command.class
+                                          else
+                                            nil
+                                          end
                                 if iqclass
                                   /.*::Iq(.*)/.match(iqclass.to_s).to_a.last 
                                 else
-                                  broadcast_to_delegates(:did_receive_unsupported_message, self, stanza)
+                                  'fail'
                                 end
                               else
                                 /.*::(.*)/.match(stanza.class.to_s).to_a.last
@@ -216,19 +218,6 @@ module AgentXmpp
       #.........................................................................................................
       # connection
       #.........................................................................................................
-      def did_receive_pre_authenticate_features(pipe)
-        AgentXmpp.logger.info "SESSION INIALIZED"
-        Xmpp::SASL.authenticate(pipe, pipe.stream_mechanisms)
-      end
-
-      #.........................................................................................................
-      def did_receive_post_authenticate_features(pipe, stanza)
-        AgentXmpp.logger.info "SESSION STARTED"
-        Xmpp::Iq.bind(pipe, stanza) if \
-          pipe.stream_features.has_key?('bind') and pipe.stream_features.has_key?('session')
-      end
- 
-      #.........................................................................................................
       def did_connect(pipe)
         AgentXmpp.logger.info "CONNECTED"
       end
@@ -246,6 +235,24 @@ module AgentXmpp
 
       #.........................................................................................................
       # authentication
+      #.........................................................................................................
+      def did_bind(pipe)
+        AgentXmpp.logger.info "DID BIND TO RESOURCE: #{pipe.jid.resource}"
+      end
+
+      #.........................................................................................................
+      def did_receive_preauthenticate_features(pipe)
+        AgentXmpp.logger.info "SESSION INITIALIZED"
+        Xmpp::SASL.authenticate(pipe, pipe.stream_mechanisms)
+      end
+
+      #.........................................................................................................
+      def did_receive_postauthenticate_features(pipe)
+        AgentXmpp.logger.info "SESSION STARTED"
+        Xmpp::Iq.bind(pipe) if \
+          pipe.stream_features.has_key?('bind') and pipe.stream_features.has_key?('session')
+      end
+ 
       #.........................................................................................................
       def did_start_session(pipe, stanza)
         AgentXmpp.logger.info "SESSION STARTED"
@@ -284,6 +291,22 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def did_receive_presence_subscribed(pipe, presence)
+        AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{presence.from.to_s}" 
+      end
+
+      #.........................................................................................................
+      def did_receive_presence_unavailable(pipe, presence)
+        from_jid = presence.from    
+        if pipe.roster.has_jid?(from_jid) 
+          pipe.roster.update_resource(presence)
+          AgentXmpp.logger.info "RECEIVED UNAVAILABLE PRESENCE FROM: #{from_jid.to_s }"
+        else
+          AgentXmpp.logger.warn "RECEIVED UNAVAILABLE PRESENCE FROM JID NOT IN ROSTER: #{from_jid}"   
+        end
+      end
+
+      #.........................................................................................................
       def did_receive_presence_unsubscribed(pipe, presence)
         from_jid = presence.from.to_s     
         if pipe.roster.destroy_by_jid(presence.from)           
@@ -295,24 +318,21 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def did_receive_presence_subscribed(pipe, presence)
-        AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{presence.from.to_s}" 
-      end
-
-      #.........................................................................................................
       # roster management
       #.........................................................................................................
-      def did_receive_roster_set(pipe, stanza)
-        [stanza.query.inject([]) do |r, i|  
-          method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
-          r.push(broadcast_to_delegates(method, self, i))
-        end, broadcast_to_delegates(:did_receive_all_roster_items, self)].smash
+      def did_receive_roster_result(pipe, stanza)
+        process_roster_items(pipe, stanza)
       end
 
       #.........................................................................................................
+      def did_receive_roster_set(pipe, stanza)
+        process_roster_items(pipe, stanza)
+      end
+
+     #.........................................................................................................
       def did_receive_roster_item(pipe, roster_item)
-        AgentXmpp.logger.info "RECEIVED ROSTER ITEM"   
         roster_item_jid = roster_item.jid
+        AgentXmpp.logger.info "RECEIVED ROSTER ITEM: #{roster_item_jid.to_s}"   
         if pipe.roster.has_jid?(roster_item_jid) 
           case roster_item.subscription   
           when :none
@@ -360,10 +380,15 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def did_receive_add_roster_item_error(pipe, response)
-        roster_item_jid = response.from
-        AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid.to_s}"
-        pipe.roster.destroy_by_jid(roster_item_jid)
+      def did_receive_add_roster_item_error(pipe, roster_item_jid)
+        AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
+        pipe.roster.destroy_by_jid(Xmpp::JID.new(roster_item_jid))
+      end
+
+      #.........................................................................................................
+      def did_receive_remove_roster_item_error(pipe, roster_item_jid)
+        AgentXmpp.logger.info "REMOVE ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
+        pipe.roster.destroy_by_jid(Xmpp::JID.new(roster_item_jid))
       end
 
       #.........................................................................................................
@@ -444,9 +469,19 @@ module AgentXmpp
       # errors
       #.........................................................................................................
       def did_receive_unsupported_message(pipe, stanza)
-        AgentXmpp.logger.info "RECEIVED UNSUPPORTED MESSAGE FROM: #{stanza.from.to_s}"
+        AgentXmpp.logger.info "RECEIVED UNSUPPORTED MESSAGE: #{stanza.to_s}"
       end
       
+    private
+    
+      #.........................................................................................................
+      def process_roster_items(pipe, stanza)
+        [stanza.query.inject([]) do |r, i|  
+          method =  i.subscription.eql?(:remove) ? :did_remove_roster_item : :did_receive_roster_item
+          r.push(pipe.broadcast_to_delegates(method, pipe, i))
+        end, pipe.broadcast_to_delegates(:did_receive_all_roster_items, pipe)].smash
+      end
+    
     #### self
     end
      

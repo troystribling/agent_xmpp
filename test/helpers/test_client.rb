@@ -2,12 +2,13 @@
 class TestClient
 
   #.........................................................................................................
-  attr_reader :client
+  attr_reader :client, :config, :jid
 
   #.........................................................................................................
   def initialize(config = nil)
     @config = config || File.open('test/helpers/agent_xmpp.yml') {|yf| YAML::load(yf)}
     @client = AgentXmpp::Client.new(@config)
+    @jid = @client.jid
     @client.connect
   end
 

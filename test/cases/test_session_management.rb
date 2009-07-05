@@ -7,6 +7,7 @@ class TestSessionManagement < Test::Unit::TestCase
   #.........................................................................................................
   def setup
     @client = TestClient.new
+    AgentXmpp::Xmpp::IdGenerator.init_gen_id
     @delegate = @client.new_delegate
   end
   

@@ -45,7 +45,7 @@ end
 Rake::TestTask.new(:test_case) do |test|
   file = ENV["FILE"] || ''
   test.libs << ['test/cases', 'test/helpers', 'test/messages']
-  test.test_files = ["test/test_cases/#{file}"]
+  test.test_files = ["test/cases/#{file}"]
   test.verbose = true
 end
 

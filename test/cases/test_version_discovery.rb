@@ -7,8 +7,9 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
   #.........................................................................................................
   def setup
     @config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
+    AgentXmpp::Xmpp::IdGenerator.init_gen_id
     @client = TestClient.new(@config)
-    test_init_roster(@client, @config)
+    test_init_roster(@client)
     @delegate = @client.new_delegate
   end
   
@@ -39,13 +40,13 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
         respond_with(VersionDiscoveryMessages.send_iq_result_query_version(@client, 'troy@nowhere.com/home'))
       @delegate.did_receive_version_get_method.should be_called
     end
-
+  
   end
     
   #.........................................................................................................
   should "not respond to client version requests from jids not in configured roster" do
     @delegate.did_receive_version_get_method.should_not be_called
-    @client.roster.has_jid?(Xmpp::JID.new('noone@nowhere.com')).should be(false)
+    @client.roster.has_jid?(AgentXmpp::Xmpp::JID.new('noone@nowhere.com')).should be(false)
     @client.receiving(VersionDiscoveryMessages.recv_iq_get_query_version(@client, 'noone@nowhere.com/nothing')).should not_respond
     @delegate.did_receive_version_get_method.should be_called
   end
