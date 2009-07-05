@@ -5,11 +5,6 @@ require 'test_helper'
 class TestRosterManagement < Test::Unit::TestCase
 
   #.........................................................................................................
-  def setup
-    AgentXmpp::Xmpp::IdGenerator.init_gen_id
-  end
-
-   #.........................................................................................................
   def test_receive_roster_item(client)
     delegate = client.new_delegate
     delegate.did_receive_roster_item_method.should_not be_called

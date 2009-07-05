@@ -6,9 +6,7 @@ class TestServiceDiscovery < Test::Unit::TestCase
 
   #.........................................................................................................
   def setup
-    @config = {'jid' => 'test@nowhere.com', 'roster' =>['dev@nowhere.com', 'troy@nowhere.com'], 'password' => 'nopass'}
-    @client = TestClient.new(@config)
-    AgentXmpp::Xmpp::IdGenerator.init_gen_id
+    @client = TestClient.new()
     test_init_roster(@client)
     @delegate = @client.new_delegate
   end

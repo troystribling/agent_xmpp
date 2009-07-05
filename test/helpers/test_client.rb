@@ -23,6 +23,11 @@ class TestClient
   end
 
   #.........................................................................................................
+  def responder_list
+    @client.pipe.responder_list
+  end
+
+  #.........................................................................................................
   def new_delegate
     @client.remove_delegate(@delegate) unless @delegate.nil?
     @delegate = TestDelegate.new

@@ -73,8 +73,9 @@ module AgentXmpp
     class IdGenerator
       @gen_id;
       class << self
-        def init_gen_id(val=0); @gen_id = val; end
-        def generate_id; @gen_id += 1; end
+        def set_gen_id(val=1); @gen_id = val; end
+        def gen_id; @gen_id; end;
+        def generate_id; @gen_id.kind_of?(Array) ? @gen_id.shift : @gen_id; end
       end
     end
   end

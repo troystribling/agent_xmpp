@@ -59,6 +59,11 @@ module AgentXmpp
     def broadcast_to_delegates(method, *args)
       delegates.inject([]){|r,d| d.respond_to?(method) ? r.push(d.send(method, *args)) : r}.smash
     end
+
+    #.........................................................................................................
+    def responder_list
+      @id_callbacks
+    end
     
     #.........................................................................................................
     def send(data, &blk)
@@ -66,6 +71,7 @@ module AgentXmpp
       if block_given? and data.kind_of?(Xmpp::Stanza)
         if data.id.nil?
           data.id = Xmpp::IdGenerator.generate_id
+puts "data.id = #{data.id}"          
         end
         @id_callbacks[data.id] = blk
       end

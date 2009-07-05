@@ -34,7 +34,7 @@ module ServiceDiscoveryMessages
     #.........................................................................................................
     def recv_iq_result_query_discoinfo(client, from)
       <<-MSG
-        <iq from='#{from}' to='#{client.client.jid.to_s}' id='4' type='get' xmlns='jabber:client'>
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='2' type='get' xmlns='jabber:client'>
           <query xmlns='http://jabber.org/protocol/disco#info'>
             <identity name='Gajim' category='client' type='pc'/>
             <feature var='http://jabber.org/protocol/bytestreams'/>
@@ -54,7 +54,7 @@ module ServiceDiscoveryMessages
     #.........................................................................................................
     def recv_iq_result_query_discoitems(client, from)
       <<-MSG
-        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get' xmlns='jabber:client'>
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='2' type='get' xmlns='jabber:client'>
           <query xmlns='http://jabber.org/protocol/disco#items'>
             <item jid='conference.plan-b.ath.cx'/>
             <item jid='irc.plan-b.ath.cx'/>
@@ -70,7 +70,7 @@ module ServiceDiscoveryMessages
     #.........................................................................................................
     def send_iq_get_query_discoinfo_to_server(client)
       <<-MSG
-        <iq id='4' to='#{client.jid.domain}' type='get' xmlns='jabber:client'>
+        <iq id='2' to='#{client.jid.domain}' type='get' xmlns='jabber:client'>
           <query xmlns='http://jabber.org/protocol/disco#info'/>
         </iq>
       MSG
@@ -79,7 +79,7 @@ module ServiceDiscoveryMessages
     #.........................................................................................................
     def send_iq_get_query_discoinfo(client, to)
       <<-MSG
-        <iq id='6' to='#{to}' type='get' xmlns='jabber:client'>
+        <iq id='2' to='#{to}' type='get' xmlns='jabber:client'>
           <query xmlns='http://jabber.org/protocol/disco#info'/>
         </iq>
       MSG

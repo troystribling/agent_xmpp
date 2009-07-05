@@ -3,6 +3,7 @@ class Test::Unit::TestCase
 
   #.........................................................................................................
   def bind_resource(client)
+    AgentXmpp::Xmpp::IdGenerator.set_gen_id
     client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(client)) 
     client.receiving(SessionMessages.recv_auth_success(client)) 
     client.receiving(SessionMessages.recv_postauthentication_stream_features(client)) 
@@ -18,11 +19,12 @@ class Test::Unit::TestCase
   
     #### session starts and roster is requested
     delegate.did_start_session_method.should_not be_called
+    AgentXmpp::Xmpp::IdGenerator.set_gen_id([1,2])
     client.receiving(SessionMessages.recv_iq_result_session(client)).should \
       respond_with(SessionMessages.send_presence_init(client), RosterMessages.send_iq_get_query_roster(client), \
                    ServiceDiscoveryMessages.send_iq_get_query_discoinfo_to_server(client)) 
     delegate.did_start_session_method.should be_called
-  
+    AgentXmpp::Xmpp::IdGenerator.set_gen_id
   end
   
   #.........................................................................................................

@@ -7,7 +7,7 @@ class TestSessionManagement < Test::Unit::TestCase
   #.........................................................................................................
   def setup
     @client = TestClient.new
-    AgentXmpp::Xmpp::IdGenerator.init_gen_id
+    AgentXmpp::Xmpp::IdGenerator.set_gen_id
     @delegate = @client.new_delegate
   end
   
@@ -85,24 +85,24 @@ class TestSessionManagement < Test::Unit::TestCase
   #.........................................................................................................
   should "raise exception when steam start fails" do
   
-      #### connect to server
-      @client.client.pipe.connection_completed
-    
-      #### receive pre authentication stream feautues and mechanisms and authenticate
-      @delegate.did_authenticate_method.should_not be_called
-      @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
-        respond_with(SessionMessages.send_auth_plain(@client)) 
-      @client.receiving(SessionMessages.recv_auth_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
-      @delegate.did_authenticate_method.should be_called
-    
-      #### bind resource
-      @delegate.did_bind_method.should_not be_called
-      @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_iq_set_bind(@client)) 
-      @client.receiving(SessionMessages.recv_iq_result_bind(@client)).should respond_with(SessionMessages.send_iq_set_session(@client)) 
-      @delegate.did_bind_method.should be_called
-    
-      #### start session and request roster
-      lambda{@client.receiving(SessionMessages.recv_error_session(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
+    #### connect to server
+    @client.client.pipe.connection_completed
+  
+    #### receive pre authentication stream feautues and mechanisms and authenticate
+    @delegate.did_authenticate_method.should_not be_called
+    @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
+      respond_with(SessionMessages.send_auth_plain(@client)) 
+    @client.receiving(SessionMessages.recv_auth_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
+    @delegate.did_authenticate_method.should be_called
+  
+    #### bind resource
+    @delegate.did_bind_method.should_not be_called
+    @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_iq_set_bind(@client)) 
+    @client.receiving(SessionMessages.recv_iq_result_bind(@client)).should respond_with(SessionMessages.send_iq_set_session(@client)) 
+    @delegate.did_bind_method.should be_called
+  
+    #### start session and request roster
+    lambda{@client.receiving(SessionMessages.recv_error_session(@client))}.should raise_error(AgentXmpp::AgentXmppError) 
   
   end
   
