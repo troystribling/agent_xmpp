@@ -113,79 +113,81 @@ The available callback methods are,
 
 === Connection
 
-    def did_connect(pipe)
-    end
+    did_connect(pipe)
 
-    def did_disconnect(pipe)
-    end
+    did_disconnect(pipe)
 
-    def did_not_connect(pipe)
-    end
+    did_not_connect(pipe)
 
 === Authentication
 
-    def did_receive_pre_authenticate_features(pipe)
-    end
+    did_bind(pipe)
 
-    def did_receive_post_authenticate_features(pipe, stanza)
-    end
+    did_receive_pre_authenticate_features(pipe)
 
-    def did_authenticate(pipe, stanza)
-    end
+    did_authenticate(pipe)
 
-    def did_not_authenticate(pipe, stanza)
-    end
+    did_not_authenticate(pipe)
 
-    def did_bind(pipe, stanza)
-    end
+    did_receive_post_authenticate_features(pipe)
 
-    def did_start_session(pipe, stanza)
-    end
+    did_start_session(pipe)
 
 === Presence
 
-    def did_receive_presence(pipe, presence)
-    end
+    did_receive_presence(pipe, presence)
 
-    def did_receive_presence_subscribe(pipe, presence)
-    end
+    did_receive_presence_subscribe(pipe, presence)
 
-    def did_receive_presence_unsubscribed(pipe, presence)
-    end
+    did_receive_presence_subscribed(pipe, presence)
 
-    def did_receive_presence_subscribed(pipe, presence)
-    end
+    did_receive_presence_unavailable(pipe, presence)
+
+    did_receive_presence_unsubscribed(pipe, presence)
 
 === Roster
 
-    def did_receive_roster_item(pipe, roster_item)
-    end
+    did_receive_roster_result(pipe, stanza)
 
-    def did_remove_roster_item(pipe, roster_item)
-    end
+    did_receive_roster_set(pipe, stanza)
 
-    def did_receive_all_roster_items(pipe)
-    end
+    did_receive_roster_item(pipe, roster_item)
 
-    def did_acknowledge_add_roster_item(pipe, response)
-    end
+    did_remove_roster_item(pipe, roster_item)
 
-    def did_acknowledge_remove_roster_item(pipe, response)
-    end
+    did_receive_all_roster_items(pipe)
 
-    def did_receive_remove_roster_item_error(pipe, response)
-    end
+    did_acknowledge_add_roster_item(pipe, response)
 
-    def did_receive_add_roster_item_error(pipe, response)
-    end
+    did_acknowledge_remove_roster_item(pipe, response)
+
+    did_receive_remove_roster_item_error(pipe, response)
+
+    did_receive_add_roster_item_error(pipe, response)
 
 === Service Discovery
 
-    def did_receive_version_result(pipe, from, version)
-    end
+    did_receive_version_result(pipe, version)
 
-    def did_receive_version_get(pipe, request)
-    end
+    did_receive_version_get(pipe, request)
+    
+    did_receive_discoinfo_result(pipe, discoinfo)
+    
+    did_receive_discoinfo_get(pipe, request) 
+    
+    did_receive_discoitems_result(pipe, discoitems)
+    
+    did_receive_discoitems_get(pipe, request)
+            
+=== Applications
+
+    did_receive_command_set(pipe, stanza)
+
+    did_receive_message_chat(pipe, stanza)
+
+=== ERRORS
+
+    did_receive_unsupported_message(pipe, stanza)
 
 == Copyright
 

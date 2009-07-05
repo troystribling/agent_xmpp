@@ -29,7 +29,7 @@ class TestDelegate
   
   #---------------------------------------------------------------------------------------------------------
   #### connection
-  delegate_callbacks :did_disconnect
+  delegate_callbacks :did_connect, :did_disconnect, :did_not_connect
 
   #### authentication
   delegate_callbacks :did_authenticate, :did_bind, :did_start_session, :did_receive_preauthenticate_features,
@@ -45,7 +45,11 @@ class TestDelegate
                      :did_receive_remove_roster_item_error, :did_receive_add_roster_item_error
 
   #### service discovery management
-  delegate_callbacks :did_receive_version_result,:did_receive_version_get
+  delegate_callbacks :did_receive_version_result,:did_receive_version_get, :did_receive_discoinfo_result,
+                     :did_receive_discoinfo_get, :did_receive_discoitems_get, :did_receive_discoitems_result
+
+   #### errors
+   delegate_callbacks :did_receive_unsupported_message
   
   #---------------------------------------------------------------------------------------------------------
   def initialize

@@ -33,7 +33,7 @@ module AgentXmpp
           iq = new_session
           Send(iq) do |r|
             if r.type == :result                
-              [Send(Presence.new(nil, nil, 1)), pipe.broadcast_to_delegates(:did_start_session, pipe, r)].smash
+              [Send(Presence.new(nil, nil, 1)), pipe.broadcast_to_delegates(:did_start_session, pipe)].smash
             elsif r.type.eql?(:error) and r.session
               raise AgentXmppError, "session start failed"
             end

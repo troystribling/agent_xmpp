@@ -10,6 +10,15 @@ class TestServiceDiscovery < Test::Unit::TestCase
     test_init_roster(@client)
     @delegate = @client.new_delegate
   end
+
+  #.........................................................................................................
+  def test_receive_discoinfo(client)
+    delegate = client.new_delegate
+    delegate.did_receive_roster_item_method.should_not be_called
+    yield client
+    delegate.did_receive_roster_item_method.should be_called
+    delegate.did_receive_all_roster_items_method.should be_called     
+  end
   
   #.........................................................................................................
   should "respond with features and identity when get disco#info is received with no specified node" do

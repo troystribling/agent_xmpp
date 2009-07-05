@@ -71,7 +71,6 @@ module AgentXmpp
       if block_given? and data.kind_of?(Xmpp::Stanza)
         if data.id.nil?
           data.id = Xmpp::IdGenerator.generate_id
-puts "data.id = #{data.id}"          
         end
         @id_callbacks[data.id] = blk
       end
@@ -135,13 +134,13 @@ puts "data.id = #{data.id}"
         if connection_status.eql?(:offline)
           @connection.reset_parser
           @connection_status = :authenticated
-          broadcast_to_delegates(:did_authenticate, self, stanza)
+          broadcast_to_delegates(:did_authenticate, self)
           init_connection(jid, false)
         end
       when 'failure'
         if connection_status.eql?(:offline)
           @connection.reset_parser
-          raise AgentXmppError, "authentication failed"
+          broadcast_to_delegates(:did_not_authenticate, self)
         end
       else
         demux_stanza(stanza)
@@ -253,14 +252,26 @@ puts "data.id = #{data.id}"
       end
 
       #.........................................................................................................
+      def did_authenticate(pipe)
+        AgentXmpp.logger.info "AUTHENTICATED"
+      end
+
+      #.........................................................................................................
+      def did_not_authenticate(pipe)
+        AgentXmpp.logger.info "AUTHENTICATION FAILED"
+        raise AgentXmppError, "authentication failed"
+      end
+
+      #.........................................................................................................
       def did_receive_postauthenticate_features(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
         Xmpp::Iq.bind(pipe) if \
           pipe.stream_features.has_key?('bind') and pipe.stream_features.has_key?('session')
       end
+
  
       #.........................................................................................................
-      def did_start_session(pipe, stanza)
+      def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
         [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain)]
       end
@@ -383,6 +394,16 @@ puts "data.id = #{data.id}"
           AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
           Xmpp::IqRoster.add(pipe, j)  
         end
+      end
+
+      #.........................................................................................................
+      def did_acknowledge_add_roster_item(pipe, response)
+        AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDEGED"   
+      end
+
+      #.........................................................................................................
+      def did_acknowledge_remove_roster_item(pipe, response)
+        AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDEGED"   
       end
 
       #.........................................................................................................
