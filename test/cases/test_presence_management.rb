@@ -18,6 +18,7 @@ class TestPresenceManagement < Test::Unit::TestCase
   ####------------------------------------------------------------------------------------------------------
   context "on receipt of first presence message from jid in configured roster" do
   
+    #.........................................................................................................
     setup do
       AgentXmpp::Xmpp::IdGenerator.set_gen_id([1,2])
       @client.roster.resources(@home).should be_empty
