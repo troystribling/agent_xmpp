@@ -38,7 +38,8 @@ class TestSessionManagement < Test::Unit::TestCase
     #### start session and request roster
     @delegate.did_start_session_method.should_not be_called
     @client.receiving(SessionMessages.recv_iq_result_session(@client)).should \
-      respond_with(SessionMessages.send_presence_init(@client), RosterMessages.send_iq_get_query_roster(@client)) 
+      respond_with(SessionMessages.send_presence_init(@client), RosterMessages.send_iq_get_query_roster(@client),
+                   ServiceDiscoveryMessages.send_iq_get_query_discoinfo_to_server(@client)) 
     @delegate.did_start_session_method.should be_called
   
   end

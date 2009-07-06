@@ -9,40 +9,59 @@ class TestServiceDiscovery < Test::Unit::TestCase
     @client = TestClient.new()
     test_init_roster(@client)
     @delegate = @client.new_delegate
+    @server = AgentXmpp::Xmpp::JID.new(@client.jid.domain)
   end
 
   #.........................................................................................................
-  def test_receive_discoinfo(client)
-    delegate = client.new_delegate
-    delegate.did_receive_roster_item_method.should_not be_called
-    yield client
-    delegate.did_receive_roster_item_method.should be_called
-    delegate.did_receive_all_roster_items_method.should be_called     
-  end
-  
-  #.........................................................................................................
-  should "respond with features and identity when get disco#info is received with no specified node" do
+  should "update roster with result of session start disco#info request to server" do
+    @delegate = @client.new_delegate
+    @delegate.did_receive_discoinfo_result_method.should_not be_called
+    @client.roster.has_discoinfo?(@server).should be(false)
+    @client.receiving(ServiceDiscoveryMessages.recv_iq_result_query_discoinfo(@client, @server.to_s)).should \
+      respond_with(ServiceDiscoveryMessages.send_iq_get_query_discoitems(@client, @server.to_s))
+    @delegate.did_receive_discoinfo_result_method.should be_called
+    @client.roster.has_discoinfo?(@server).should be(true)
   end
 
-  #.........................................................................................................
-  should "respond with empty result when get disco#info is received for unsupported node" do
-  end
-
-  #.........................................................................................................
-  should "respond with service-unavailable error when get disco#info is received for unsupported node" do
-  end
-
-  #.........................................................................................................
-  should "respond with empty result when get disco#items is received with no specified node" do
-  end
-
-  #.........................................................................................................
-  should "respond with command nodes when get disco#items is received for the node 'http://jabber.org/protocol/commands'" do
-  end
-  
-  #.........................................................................................................
-  should "respond with item-not-found error when get disco#items is received for unsupported node" do
-  end
+  # #.........................................................................................................
+  # should "update roster with result of contact disco#info request performed when contact transitions to available" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with features and identity when get disco#info is received with no specified node" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with features and identity when get disco#info is received with no specified node" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with empty result when get disco#info is received for unsupported node" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with service-unavailable error when get disco#info is received for unsupported node" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "update roster with result of session start disco#items request to server" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "update roster with result of contact disco#items request performed when contact transitions to available" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with empty result when get disco#items is received with no specified node" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with command nodes when get disco#items is received for the node 'http://jabber.org/protocol/commands'" do
+  # end
+  # 
+  # #.........................................................................................................
+  # should "respond with item-not-found error when get disco#items is received for unsupported node" do
+  # end
   
 end
 

@@ -489,7 +489,16 @@ module AgentXmpp
       
       #.........................................................................................................
       def did_receive_discoitems_result(pipe, discoitems)
-        AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}"
+        from_jid = discoitems.from
+        if pipe.roster.has_jid?(from_jid)
+          AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}"
+          pipe.roster.update_resource_discoitems(discoitems)
+          discoitems.query.items.each do |i|
+            AgentXmpp.logger.info " ITEM JID: #{i.jid}"
+          end
+        else
+          AgentXmpp.logger.warn "RECEIVED DISCO ITEMS FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+        end        
       end
   
       #.........................................................................................................

@@ -9,7 +9,7 @@ module AgentXmpp
       @items = Hash.new{|hash, key| hash[key] = {:status => :inactive, :resources => {}}}
       roster.each{|r| @items[r]}
       @items[jid.bare.to_s] = {:status => :both, :resources => {}}
-      @items[jid.domain] = {:status => :host, :resources => {}}
+      @items[jid.domain] = {:status => :host, :resources => {jid.domain => {}}}
     end
 
     #.........................................................................................................
@@ -47,6 +47,25 @@ module AgentXmpp
     end 
 
     #.........................................................................................................
+    def has_resource?(jid)
+      not @items[jid.bare.to_s][:resources][jid.to_s].nil?
+    end 
+
+    #.........................................................................................................
+    def resources(jid)
+      @items[jid.bare.to_s][:resources]
+    end 
+    
+    #.........................................................................................................
+    def resource(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        @items[jid.bare.to_s][:resources][jid.to_s][:presence]
+      else 
+        nil
+      end
+    end 
+    
+    #.........................................................................................................
     def has_feature?(jid, feature)
        features.include?(feature)
     end 
@@ -61,8 +80,8 @@ module AgentXmpp
     end 
 
     #.........................................................................................................
-    def has_identity?(jid, item)
-      @items.delete(jid)
+    def has_identity?(jid, ident)
+      identities.include?(ident)
     end 
     
     #.........................................................................................................
@@ -73,7 +92,16 @@ module AgentXmpp
         false
       end
     end 
-        
+
+    #.........................................................................................................
+    def has_discoitems?(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        not @items[jid.bare.to_s][:resources][jid.to_s][:discoitems].nil?
+      else 
+        false
+      end
+    end 
+                
     #.........................................................................................................
     def has_version?(jid)
       if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
@@ -97,26 +125,35 @@ module AgentXmpp
     def update_resource(presence)
       from_jid = presence.from.to_s     
       from_bare_jid = presence.from.bare.to_s     
-      @items[from_bare_jid.to_s][:resources][from_jid] ||= {}
-      @items[from_bare_jid.to_s][:resources][from_jid][:presence] = presence
+      @items[from_bare_jid][:resources][from_jid] ||= {}
+      @items[from_bare_jid][:resources][from_jid][:presence] = presence
     end
  
     #.........................................................................................................
     def update_resource_version(version)
-      from_jid = version.from
-      if @items[from_jid.bare.to_s][:resources][from_jid.to_s]    
-        @items[from_jid.bare.to_s][:resources][from_jid.to_s][:version] = version.query
+      from_jid = version.from.to_s     
+      from_bare_jid = version.from.bare.to_s     
+      if @items[from_bare_jid][:resources][from_jid]   
+        @items[from_bare_jid][:resources][from_jid][:version] = version.query
       end        
-      version.query
     end
     
     #.........................................................................................................
     def update_resource_discoinfo(disco)
-      from_jid = disco.from
-      if @items[from_jid.bare.to_s][:resources][from_jid.to_s]    
-        @items[from_jid.bare.to_s][:resources][from_jid.to_s][:discoinfo] = disco.query 
+      from_jid = disco.from.to_s     
+      from_bare_jid = disco.from.bare.to_s   
+      if @items[from_bare_jid][:resources][from_jid]    
+        @items[from_bare_jid][:resources][from_jid][:discoinfo] = disco.query 
       end        
-      disco.query 
+    end
+ 
+    #.........................................................................................................
+    def update_resource_discoitems(disco)      
+      from_jid = disco.from.to_s     
+      from_bare_jid = disco.from.bare.to_s     
+      if @items[from_bare_jid][:resources][from_jid]    
+        @items[from_bare_jid][:resources][from_jid][:discoitems] = disco.query 
+      end        
     end
     
     #.........................................................................................................
