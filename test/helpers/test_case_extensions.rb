@@ -22,7 +22,7 @@ class Test::Unit::TestCase
     AgentXmpp::Xmpp::IdGenerator.set_gen_id([1,2])
     client.receiving(SessionMessages.recv_iq_result_session(client)).should \
       respond_with(SessionMessages.send_presence_init(client), RosterMessages.send_iq_get_query_roster(client), \
-                   ServiceDiscoveryMessages.send_iq_get_query_discoinfo_to_server(client)) 
+                   ServiceDiscoveryMessages.send_iq_get_query_discoinfo(client, client.jid.domain)) 
     delegate.did_start_session_method.should be_called
     AgentXmpp::Xmpp::IdGenerator.set_gen_id
   end

@@ -170,14 +170,20 @@ The available callback methods are,
     did_receive_version_result(pipe, version)
 
     did_receive_version_get(pipe, request)
+
+    did_receive_version_error(pipe, error)
     
     did_receive_discoinfo_result(pipe, discoinfo)
     
     did_receive_discoinfo_get(pipe, request) 
+
+    did_receive_discoinfo_error(pipe, error)
     
     did_receive_discoitems_result(pipe, discoitems)
     
     did_receive_discoitems_get(pipe, request)
+
+    did_receive_discoitems_error(pipe, error)
             
 === Applications
 

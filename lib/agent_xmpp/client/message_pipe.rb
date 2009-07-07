@@ -443,6 +443,23 @@ module AgentXmpp
       end
          
       #.........................................................................................................
+      def did_receive_version_error(pipe, discoinfo)   
+        from_jid = discoinfo.from
+        AgentXmpp.logger.warn "RECEIVED VERSION ERROR FROM: #{from_jid.to_s}"
+      end
+         
+      #.........................................................................................................
+      def did_receive_discoinfo_get(pipe, request)   
+        from_jid = request.from
+        if pipe.roster.has_jid?(from_jid)
+          AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from_jid.to_s}"
+          Xmpp::IqDiscoInfo.result(pipe, request)
+        else
+          AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+        end
+      end
+
+      #.........................................................................................................
       def did_receive_discoinfo_result(pipe, discoinfo)   
         from_jid = discoinfo.from
         if pipe.roster.has_jid?(from_jid)
@@ -456,19 +473,14 @@ module AgentXmpp
           end
           Xmpp::IqDiscoItems.get(pipe, from_jid.to_s)
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+          AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end        
       end
 
       #.........................................................................................................
-      def did_receive_discoinfo_get(pipe, request)   
-        from_jid = request.from
-        if pipe.roster.has_jid?(from_jid)
-          AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from_jid.to_s}"
-          Xmpp::IqDiscoInfo.result(pipe, request)
-        else
-          AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
-        end
+      def did_receive_discoinfo_error(pipe, discoinfo)   
+        from_jid = discoinfo.from
+        AgentXmpp.logger.warn "RECEIVED DISCO INFO ERROR FROM: #{from_jid.to_s}"
       end
 
       #.........................................................................................................
@@ -500,7 +512,13 @@ module AgentXmpp
           AgentXmpp.logger.warn "RECEIVED DISCO ITEMS FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end        
       end
-  
+
+      #.........................................................................................................
+      def did_receive_discoitems_error(pipe, discoinfo)   
+        from_jid = discoinfo.from
+        AgentXmpp.logger.warn "RECEIVED DISCO ITEMS ERROR FROM: #{from_jid.to_s}"
+      end
+        
       #.........................................................................................................
       # errors
       #.........................................................................................................

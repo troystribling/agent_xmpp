@@ -21,6 +21,8 @@ module AgentXmpp
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoItems)
               pipe.broadcast_to_delegates(:did_receive_discoitems_result, pipe, r)
+            elsif r.type.eql?(:error)
+              pipe.broadcast_to_delegates(:did_receive_discoitems_error, pipe, r)
             end
           end
         end

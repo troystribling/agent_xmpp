@@ -45,8 +45,9 @@ class TestDelegate
                      :did_receive_remove_roster_item_error, :did_receive_add_roster_item_error
 
   #### service discovery management
-  delegate_callbacks :did_receive_version_result,:did_receive_version_get, :did_receive_discoinfo_result,
-                     :did_receive_discoinfo_get, :did_receive_discoitems_get, :did_receive_discoitems_result
+  delegate_callbacks :did_receive_version_result, :did_receive_version_get, :did_receive_version_error, :did_receive_discoinfo_result,
+                     :did_receive_discoinfo_get, :did_receive_discoitems_get, :did_receive_discoitems_result,
+                     :did_receive_discoinfo_error, :did_receive_discoitems_error
 
    #### errors
    delegate_callbacks :did_receive_unsupported_message

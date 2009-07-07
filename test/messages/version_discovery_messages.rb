@@ -27,6 +27,18 @@ module VersionDiscoveryMessages
       MSG
     end
 
+    #.........................................................................................................
+    def recv_iq_error_query_version(client, from)
+      <<-MSG
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='error' xmlns='jabber:client'>
+        <query xmlns='jabber:iq:version'/>
+        <error code='503' type='cancel'>
+          <service-unavailable xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+        </error>
+        </iq>
+      MSG
+    end
+
     #### sent messages    
     #.........................................................................................................
     def send_iq_result_query_version(client, to)
