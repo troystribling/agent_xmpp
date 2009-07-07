@@ -15,6 +15,16 @@ module ServiceDiscoveryMessages
     end
 
     #.........................................................................................................
+    def recv_iq_get_query_discoinfo_for_commands_node(client, from)
+      <<-MSG
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get' xmlns='jabber:client'>
+          <query node='http://jabber.org/protocol/commands' xmlns='http://jabber.org/protocol/disco#info'/>
+        </iq>
+      MSG
+    end
+
+
+    #.........................................................................................................
     def recv_iq_get_query_discoitems(client, from)
       <<-MSG
         <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get' xmlns='jabber:client'>
