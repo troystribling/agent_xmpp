@@ -29,13 +29,6 @@ module AgentXmpp
 
         ####..............
         raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
-        begin
-          require add_path('boot')
-        rescue LoadError
-          AgentXmpp.logger.info "boot.rb not given"
-        else
-          AgentXmpp.logger.info "boot.rb loaded"
-        end
 
         ####..............
         call_if_implemented(:call_before_start)

@@ -1,7 +1,24 @@
+##########################################################################################################
 require 'rubygems'
 require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 
+##########################################################################################################
+before_start do
+  AgentXmpp.logger.level = Logger::DEBUG
+  AgentXmpp.logger.info "before_start"
+end
+
 #.........................................................................................................
+after_connected do |pipe|
+  AgentXmpp.logger.info "after_connected"
+end
+
+#.........................................................................................................
+restarting_client do |pipe|
+  AgentXmpp.logger.info "restarting_client"
+end
+
+##########################################################################################################
 execute 'scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 

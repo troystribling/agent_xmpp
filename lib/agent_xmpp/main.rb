@@ -17,21 +17,30 @@ module AgentXmpp
   module Delegator 
 
     class << self
-      
-      def delegate(*methods)
+
+      def delegate(del, *methods)
         methods.each do |method_name|
           class_eval <<-RUBY
             def #{method_name.to_s}(*args, &blk)
-              ::AgentXmpp::BaseController.send(#{method_name.inspect}, *args, &blk)
+              ::#{del}.send(#{method_name.inspect}, *args, &blk)
             end
             private #{method_name.inspect}
           RUBY
         end
       end
+
+      def delegate_to_controller(*methods)
+        delegate AgentXmpp::BaseController, *methods
+      end
+
+      def delegate_to_boot(*methods)
+        delegate AgentXmpp::Boot, *methods
+      end
       
     end
 
-    delegate :execute, :chat
+    delegate_to_controller :execute, :chat
+    delegate_to_boot :before_start, :after_connected, :restarting_client
   
   end
 end
