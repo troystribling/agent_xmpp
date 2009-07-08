@@ -80,15 +80,15 @@ Agent XMPP supports mapping scalars, arrays and hashes to jabber:x:data payloads
 
 == Application Startup Callbacks
 
-Startup callback methods are available to applications and should be placed in boot.rb
+Startup callback methods are available to applications 
 
-    AgentXmpp::Boot.before_start do
+    before_start do
     end
 
-    AgentXmpp::Boot.after_connected do |pipe|
+    after_connected do |pipe|
     end
 
-    AgentXmpp::Boot.restarting_client do |pipe|
+    restarting_client do |pipe|
     end
 
 == Logging
