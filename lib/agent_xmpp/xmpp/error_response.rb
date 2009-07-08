@@ -23,24 +23,57 @@ module AgentXmpp
         
         #.........................................................................................................
         def unsupported_payload(params)
-          error(params, 'bad-request', 'unsupported payload')
+          command_error(params, 'bad-request', 'unsupported payload')
         end
-
 
         #.........................................................................................................
         def no_route(params)
-          error(params, 'item-not-found', 'no route for specified command node')
+          command_error(params, 'item-not-found', 'no route for specified command node')
+        end
+
+        #.........................................................................................................
+        def feature_not_implemented(request)
+          iq_error(request, 'feature-not-implemented', 'feature not implemented')
+        end
+
+        #.........................................................................................................
+        def service_unavailable(request)
+          query_error(request, 'service-unavailable', 'service unavailable')
+        end
+
+        #.........................................................................................................
+        def item_not_found(request)
+          query_error(request, 'item-not-found', 'item not found')
         end
 
       ####........................................................................................................
       private
 
         #.........................................................................................................
-        def error(params, condition, text)
+        def iq_error(request, condition, text)
+          iq = Xmpp::Iq.new(:error, request.from)
+          iq.id = request.id unless request.id.nil?
+          iq.error = Xmpp::ErrorResponse.new(condition, text)
+          Send(iq)
+        end
+
+        #.........................................................................................................
+        def query_error(request, condition, text)
+          iq = Xmpp::Iq.new(:error, request.from)
+          iq.id = request.id unless request.id.nil?
+          iq.query = Xmpp::IqQuery.new
+          iq.query.add_namespace(request.query.namespace)
+          iq.query.attributes['node'] = request.query.node if request.query.node
+          iq.error = Xmpp::ErrorResponse.new(condition, text)
+          Send(iq)
+        end
+
+        #.........................................................................................................
+        def command_error(params, condition, text)
           iq = Xmpp::Iq.new(:error, params[:from])
           iq.id = params[:id] unless params[:id].nil?
           iq.command = Xmpp::IqCommand.new(params[:node], params[:action])
-          iq.command << Xmpp::ErrorResponse.new(condition, text)
+          iq.command = Xmpp::ErrorResponse.new(condition, text)
           Send(iq)
         end
       

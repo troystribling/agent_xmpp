@@ -15,10 +15,10 @@ module ServiceDiscoveryMessages
     end
 
     #.........................................................................................................
-    def recv_iq_get_query_discoinfo_for_commands_node(client, from)
+    def recv_iq_get_query_discoinfo_error(client, from)
       <<-MSG
         <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get' xmlns='jabber:client'>
-          <query node='http://jabber.org/protocol/commands' xmlns='http://jabber.org/protocol/disco#info'/>
+          <query node='http://jabber.org/protocol/nothing' xmlns='http://jabber.org/protocol/disco#info'/>
         </iq>
       MSG
     end
@@ -38,6 +38,15 @@ module ServiceDiscoveryMessages
       <<-MSG
         <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get' xmlns='jabber:client'>
           <query node='http://jabber.org/protocol/commands' xmlns='http://jabber.org/protocol/disco#items'/>
+        </iq>
+      MSG
+    end
+
+    #.........................................................................................................
+    def recv_iq_get_query_discoitems_error(client, from)
+      <<-MSG
+        <iq from='#{from}' to='#{client.client.jid.to_s}' id='1' type='get' xmlns='jabber:client'>
+          <query node='http://jabber.org/protocol/nothing' xmlns='http://jabber.org/protocol/disco#items'/>
         </iq>
       MSG
     end
@@ -128,6 +137,18 @@ module ServiceDiscoveryMessages
     end
     
     #.........................................................................................................
+    def send_iq_error_discoinfo_service_unavailable(client, to)
+      <<-MSG
+        <iq id='1' to='#{to}' type='error' xmlns='jabber:client'>
+          <query node='http://jabber.org/protocol/nothing' xmlns='http://jabber.org/protocol/disco#info'/>
+          <error code='503' type='cancel'><service-unavailable xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+            <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>service unavailable</text>
+          </error>
+        </iq>
+      MSG
+    end
+   
+    #.........................................................................................................
     def send_iq_get_query_discoitems(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='get' xmlns='jabber:client'>
@@ -146,33 +167,17 @@ module ServiceDiscoveryMessages
     end
 
     #.........................................................................................................
-    def send_error_item_not_found(client, node, to)
+    def send_iq_error_discoitems_item_not_found(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='error' xmlns='jabber:client'>
-          <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'>
-            <error code='404' type='cancel'>
-              <item-not-found xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
-              <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>item not found</text>
-            </error>
-          </command>
+          <query node='http://jabber.org/protocol/nothing' xmlns='http://jabber.org/protocol/disco#items'/>
+          <error code='404' type='cancel'><item-not-found xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+            <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>item not found</text>
+          </error>
         </iq>
       MSG
     end
     
-    #.........................................................................................................
-    def send_error_service_unavailable(client, node, to)
-      <<-MSG
-        <iq id='1' to='#{to}' type='error' xmlns='jabber:client'>
-          <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'>
-            <error code='503' type='cancel'>
-              <service-unavailable xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
-              <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>service unavailable</text>
-            </error>
-          </command>
-        </iq>
-      MSG
-    end
-   
     #.........................................................................................................
     def send_iq_result_query_discoitems_for_commands_node(client, to)
       <<-MSG
@@ -180,10 +185,10 @@ module ServiceDiscoveryMessages
           <query node='http://jabber.org/protocol/commands' xmlns='http://jabber.org/protocol/disco#items'>
             <item name='scalar' node='scalar' jid='#{client.client.jid.to_s}'/>
             <item name='hash' node='hash' jid='#{client.client.jid.to_s}'/>
-            <item name='scalar_array' node='scalar_array' jid='#{client.client.jid.to_s}'/>
-            <item name='hash_array' node='hash_array' jid='#{client.client.jid.to_s}'/>
-            <item name='array_hash' node='array_hash' jid='#{client.client.jid.to_s}'/>
-            <item name='array_hash_array' node='array_hash_array' jid='#{client.client.jid.to_s}'/>
+            <item name='scalar array' node='scalar_array' jid='#{client.client.jid.to_s}'/>
+            <item name='hash array' node='hash_array' jid='#{client.client.jid.to_s}'/>
+            <item name='array hash' node='array_hash' jid='#{client.client.jid.to_s}'/>
+            <item name='array hash array' node='array_hash_array' jid='#{client.client.jid.to_s}'/>
           </query>
         </iq>
       MSG

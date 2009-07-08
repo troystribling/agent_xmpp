@@ -31,6 +31,7 @@ require 'version_discovery_messages'
 require 'service_discovery_messages'
 require 'session_messages'
 require 'presence_messages'
+require 'error_messages'
 
 #####-------------------------------------------------------------------------------------------------------
 AgentXmpp.app_path = 'test/helpers'

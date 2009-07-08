@@ -95,7 +95,6 @@ class TestServiceDiscovery < Test::Unit::TestCase
       
   end
   
-  
   #.........................................................................................................
   should "not update the roster entry with the disco#info result or geneate a disco#items request if an error is received as a result of a disco#info request" do
     @delegate.did_receive_discoinfo_result_method.should_not be_called
@@ -115,14 +114,20 @@ class TestServiceDiscovery < Test::Unit::TestCase
     @delegate.did_receive_discoinfo_get_method.should be_called
   end
   
-  # #.........................................................................................................
-  # should "respond with service-unavailable error when get disco#info is received for unsupported node" do
-  # end
-  # 
+  #.........................................................................................................
+  should "respond with service-unavailable error when get disco#info is received for unsupported node" do
+    @delegate.did_receive_discoinfo_get_method.should_not be_called
+    @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoinfo_error(@client, @test.to_s)).should \
+      respond_with(ServiceDiscoveryMessages.send_iq_error_discoinfo_service_unavailable(@client, @test.to_s))
+    @delegate.did_receive_discoinfo_get_method.should be_called
+  end
+  
   #.........................................................................................................
   should "not respond if get disco#info is received from a jid not in the configuration roster" do
+    @client.roster.has_jid?(@noone).should be(false)
     @delegate.did_receive_discoinfo_get_method.should_not be_called
     @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoinfo(@client, @noone.to_s)).should not_respond
+    @client.roster.has_jid?(@noone).should be(false)
     @delegate.did_receive_discoinfo_get_method.should be_called
   end
   
@@ -134,21 +139,30 @@ class TestServiceDiscovery < Test::Unit::TestCase
     @delegate.did_receive_discoitems_get_method.should be_called
   end
   
-  # #.........................................................................................................
-  # should "respond with command nodes when get disco#items is received for the node 'http://jabber.org/protocol/commands'" do
-  # end
-  # 
-  # #.........................................................................................................
-  # should "respond with item-not-found error when get disco#items is received for unsupported node" do
-  # end
-  #
   #.........................................................................................................
-  should "not respond if get disco#items is received from a jid not in the configuration roster" do
+  should "respond with command nodes when get disco#items is received for the node 'http://jabber.org/protocol/commands'" do
     @delegate.did_receive_discoitems_get_method.should_not be_called
-    @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoitems(@client, @noone.to_s)).should not_respond
+    @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoitems_for_commands_node(@client, @test.to_s)).should \
+      respond_with(ServiceDiscoveryMessages.send_iq_result_query_discoitems_for_commands_node(@client, @test.to_s))
     @delegate.did_receive_discoitems_get_method.should be_called
   end
   
+  #.........................................................................................................
+  should "respond with item-not-found error when get disco#items is received for unsupported node" do
+    @delegate.did_receive_discoitems_get_method.should_not be_called
+    @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoitems_error(@client, @test.to_s)).should \
+      respond_with(ServiceDiscoveryMessages.send_iq_error_discoitems_item_not_found(@client, @test.to_s))
+    @delegate.did_receive_discoitems_get_method.should be_called
+  end
   
+  #.........................................................................................................
+  should "not respond if get disco#items is received from a jid not in the configuration roster" do
+    @client.roster.has_jid?(@noone).should be(false)
+    @delegate.did_receive_discoitems_get_method.should_not be_called
+    @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoitems(@client, @noone.to_s)).should not_respond
+    @client.roster.has_jid?(@noone).should be(false)
+    @delegate.did_receive_discoitems_get_method.should be_called
+  end
+    
 end
 

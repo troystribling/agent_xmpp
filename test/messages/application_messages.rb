@@ -181,12 +181,11 @@ module ApplicationMessages
     def send_error_command_routing(client, node, to)
       <<-MSG
         <iq id='1' to='#{to}' type='error' xmlns='jabber:client'>
-          <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'>
-            <error code='404' type='cancel'>
-              <item-not-found xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
-              <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>no route for specified command node</text>
-            </error>
-          </command>
+          <command node='#{node}' action='execute' xmlns='http://jabber.org/protocol/commands'/>
+          <error code='404' type='cancel'>
+            <item-not-found xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>
+            <text xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'>no route for specified command node</text>
+          </error>
         </iq>
       MSG
     end

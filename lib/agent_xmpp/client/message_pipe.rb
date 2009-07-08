@@ -452,8 +452,13 @@ module AgentXmpp
       def did_receive_discoinfo_get(pipe, request)   
         from_jid = request.from
         if pipe.roster.has_jid?(from_jid)
-          AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST: #{from_jid.to_s}"
-          Xmpp::IqDiscoInfo.result(pipe, request)
+          if request.query.node.nil?
+            AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST FROM: #{from_jid.to_s}"
+            Xmpp::IqDiscoInfo.result(pipe, request)
+          else
+            AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST FOR UNSUPPORTED NODE FROM: #{from_jid.to_s}"
+            Xmpp::ErrorResponse.service_unavailable(request)
+          end
         else
           AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end
@@ -487,12 +492,15 @@ module AgentXmpp
       def did_receive_discoitems_get(pipe, request)   
         from_jid = request.from
         if pipe.roster.has_jid?(from_jid)
-          if (request.query.node.eql?('http://jabber.org/protocol/commands'))
-            AgentXmpp.logger.info "RECEIVED COMMAND NODE DISCO ITEMS REQUEST: #{from_jid.to_s}"
+          if request.query.node.eql?('http://jabber.org/protocol/commands')
+            AgentXmpp.logger.info "RECEIVED COMMAND NODE DISCO ITEMS REQUEST FROM: #{from_jid.to_s}"
             Xmpp::IqDiscoItems.command_nodes(pipe, request)
-          else
-            AgentXmpp.logger.info "RECEIVED DISCO ITEMS REQUEST: #{from_jid.to_s}"
+          elsif request.query.node.nil?
+            AgentXmpp.logger.info "RECEIVED DISCO ITEMS REQUEST FROM: #{from_jid.to_s}"
             Xmpp::IqDiscoItems.result(pipe, request)
+          else
+            AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST FOR UNSUPPORTED NODE FROM: #{from_jid.to_s}"
+            Xmpp::ErrorResponse.item_not_found(request)
           end
         else
           AgentXmpp.logger.warn "RECEIVED DISCO ITEMS REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
@@ -524,6 +532,9 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_unsupported_message(pipe, stanza)
         AgentXmpp.logger.info "RECEIVED UNSUPPORTED MESSAGE: #{stanza.to_s}"
+        if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
+          Xmpp::ErrorResponse.feature_not_implemented(stanza)
+        end
       end
       
     private
