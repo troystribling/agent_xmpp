@@ -269,8 +269,8 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      def add_field_with_value(var, value)
-        field = XDataField.new(var)        
+      def add_field_with_value(var, value, type=nil)
+        field = XDataField.new(var, type)        
         field.values = value
         self << field
       end

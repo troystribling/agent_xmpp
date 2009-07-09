@@ -18,7 +18,8 @@ module AgentXmpp
         def result(args)
           iq = Xmpp::Iq.new(:result, args[:to])
           iq.id = args[:id] unless args[:id].nil?
-          iq.command = new(args[:node], 'completed')
+          iq.command = new(args[:node])
+          iq.command.status = 'completed'
           iq.command << args[:payload]
           Send(iq)      
         end
@@ -29,8 +30,8 @@ module AgentXmpp
       #.....................................................................................................
       def initialize(node=nil, action=nil)
         super()
-        self.node = node
-        self.action = action || :execute
+        self.node = node if node
+        self.action = action if action
       end
 
       #.....................................................................................................

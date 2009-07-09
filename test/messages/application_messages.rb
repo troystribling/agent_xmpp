@@ -28,7 +28,7 @@ module ApplicationMessages
     def send_iq_result_command_x_data_scalar(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='scalar' action='completed' xmlns='http://jabber.org/protocol/commands'>
+          <command node='scalar' status='completed' xmlns='http://jabber.org/protocol/commands'>
             <x type='result' xmlns='jabber:x:data'>
               <field>
                 <value>scalar</value>
@@ -43,7 +43,7 @@ module ApplicationMessages
     def send_iq_result_command_x_data_hash(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='hash' action='completed' xmlns='http://jabber.org/protocol/commands'>
+          <command node='hash' status='completed' xmlns='http://jabber.org/protocol/commands'>
             <x type='result' xmlns='jabber:x:data'>
               <field var='attr1'>
                 <value>val1</value>
@@ -61,9 +61,9 @@ module ApplicationMessages
     def send_iq_result_command_x_data_scalar_array(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='scalar_array' action='completed' xmlns='http://jabber.org/protocol/commands'>
+          <command node='scalar_array' status='completed' xmlns='http://jabber.org/protocol/commands'>
             <x type='result' xmlns='jabber:x:data'>
-              <field>
+              <field type='list-multi'>
                 <value>val1</value>
                 <value>val2</value>
                 <value>val3</value>
@@ -79,9 +79,9 @@ module ApplicationMessages
     def send_iq_result_command_x_data_hash_array(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='hash_array' action='completed' xmlns='http://jabber.org/protocol/commands'>
+          <command node='hash_array' status='completed' xmlns='http://jabber.org/protocol/commands'>
             <x type='result' xmlns='jabber:x:data'>
-              <field var='attr1'>
+              <field type='list-multi' var='attr1'>
                 <value>val11</value>
                 <value>val11</value>
               </field>
@@ -98,7 +98,7 @@ module ApplicationMessages
     def send_iq_result_command_x_data_array_hash(client, to)
       <<-MSG
         <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-          <command node='array_hash' action='completed' xmlns='http://jabber.org/protocol/commands'>
+          <command node='array_hash' status='completed' xmlns='http://jabber.org/protocol/commands'>
             <x type='result' xmlns='jabber:x:data'>
               <reported>
                 <field var='attr1'/>
@@ -138,14 +138,14 @@ module ApplicationMessages
      def send_iq_result_command_x_data_array_hash_array(client, to)
        <<-MSG
          <iq id='1' to='#{to}' type='result' xmlns='jabber:client'>
-           <command node='array_hash_array' action='completed' xmlns='http://jabber.org/protocol/commands'>
+           <command node='array_hash_array' status='completed' xmlns='http://jabber.org/protocol/commands'>
              <x type='result' xmlns='jabber:x:data'>
                <reported>
                  <field var='attr1'/>
                  <field var='attr2'/>
                </reported>
                <item>
-                 <field var='attr1'>
+                 <field type='list-multi' var='attr1'>
                    <value>val11</value>
                    <value>val11</value>
                  </field>
@@ -154,7 +154,7 @@ module ApplicationMessages
                  </field>
                </item>
                <item>
-                 <field var='attr1'>
+                 <field type='list-multi' var='attr1'>
                    <value>val21</value>
                    <value>val21</value>
                  </field>
@@ -163,7 +163,7 @@ module ApplicationMessages
                  </field>
                </item>
                <item>
-                 <field var='attr1'>
+                 <field type='list-multi' var='attr1'>
                    <value>val31</value>
                    <value>val31</value>
                  </field>

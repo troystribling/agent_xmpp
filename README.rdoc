@@ -39,7 +39,7 @@ mybot.rb will respond to the request,
 with
 
     <iq from='mybot@nowhere.com/mybot-host' to='you@home.com/your-host' id='5644' type='result' xmlns='jabber:client'>
-        <command node='hello' action='completed' xmlns='http://jabber.org/protocol/commands'>
+        <command node='hello' status='completed' xmlns='http://jabber.org/protocol/commands'>
             <x type='result' xmlns='jabber:x:data'>
                 <field><value>Hello World</value></field>
             </x>
