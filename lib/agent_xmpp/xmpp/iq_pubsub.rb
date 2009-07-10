@@ -7,12 +7,10 @@ module AgentXmpp
 
     class IqPubSub < XMPPElement
       name_xmlns 'pubsub', NS_PUBSUB
-      force_xmlns true
     end
 
     class IqPubSubOwner < XMPPElement
       name_xmlns 'pubsub', NS_PUBSUB + '#owner'
-      force_xmlns true
     end
 
   end

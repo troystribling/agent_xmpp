@@ -12,26 +12,19 @@ module REXML
         el = REXML::Element.new(e)
         add_element(el)
       end
-      if t
-        el.text = t
-      end
+      el.text = t if t
       self
     end
 
     #.......................................................................................................
     def first_element(e)
-      each_element(e) { |el| return el }
-      return nil
+      elements.to_a(e).first
     end
 
     #.......................................................................................................
     def first_element_text(e)
       el = first_element(e)
-      if el
-        return el.text
-      else
-        return nil
-      end
+      el.nil? ? nil : el.text
     end
 
     #.......................................................................................................
@@ -65,38 +58,7 @@ module REXML
 
     #.......................................................................................................
     def delete_elements(element)
-      while(delete_element(element)) do end
-    end
-
-    #.......................................................................................................
-    def ==(o)
-      return false unless self.kind_of? REXML::Element
-      if o.kind_of? REXML::Element
-      elsif o.kind_of? String
-        begin
-          o = REXML::Document.new(o).root
-        rescue REXML::ParseException
-          return false
-        end
-      else
-        return false
-      end
-
-      return false unless name == o.name
-
-      attributes.each_attribute do |attr|
-        return false unless attr.value == o.attributes[attr.name]
-      end
-
-      o.attributes.each_attribute do |attr|
-        return false unless attributes[attr.name] == attr.value
-      end
-
-      children.each_with_index do |child,i|
-        return false unless child == o.children[i]
-      end
-
-      return true
+      elements.delete_all(element)
     end
 
   #### Element

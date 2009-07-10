@@ -10,7 +10,6 @@ module AgentXmpp
 
       #.......................................................................................................
       @@name_xmlns_classes = {}
-      @@force_xmlns = false
 
       #####-------------------------------------------------------------------------------------------------------
       class << self
@@ -18,16 +17,6 @@ module AgentXmpp
         #.......................................................................................................
         def name_xmlns(name, xmlns=nil)
           @@name_xmlns_classes[[name, xmlns]] = self
-        end
-
-        #.......................................................................................................
-        def force_xmlns(force)
-          @@force_xmlns = force
-        end
-
-        #.......................................................................................................
-        def force_xmlns?
-          @@force_xmlns
         end
 
         #.......................................................................................................
@@ -63,6 +52,49 @@ module AgentXmpp
           end
         end
         
+        #.....................................................................................................
+        def xmpp_attribute(*args)
+          args.each do |a|
+            class_eval <<-DEF
+              def #{a.to_s}
+                attributes['#{a.to_s}']
+              end
+              def #{a.to_s}=(v)
+                attributes['#{a.to_s}'] = v
+              end
+            DEF
+          end
+        end
+
+        #.....................................................................................................
+        def xmpp_attribute(*args)
+          sym = args.pop[:sym] if args.last.kind_of?(Hash)
+          if sym
+            args.each do |a|
+              class_eval <<-DEF
+                def #{a.to_s}
+                  attributes['#{a.to_s}'].to_sym
+                end
+              DEF
+            end
+          else
+            args.each do |a|
+              class_eval <<-DEF
+                def #{a.to_s}
+                  attributes['#{a.to_s}']
+                end
+              DEF
+            end
+          end
+          args.each do |a|
+            class_eval <<-DEF
+              def #{a.to_s}=(v)
+                attributes['#{a.to_s}'] = v.to_s
+              end
+            DEF
+          end
+        end
+        
       #### self
       end
       
@@ -71,9 +103,7 @@ module AgentXmpp
         if arg.empty?
           name, xmlns = self.class::name_xmlns_for_class(self.class)
           super(name)
-          if self.class::force_xmlns?
-            add_namespace(xmlns)
-          end
+          add_namespace(xmlns)
         else
           super
         end
@@ -83,13 +113,11 @@ module AgentXmpp
       def typed_add(element)
         if element.kind_of? REXML::Element
           element_ns = (element.namespace.to_s == '') ? namespace : element.namespace
-
           klass = Element::class_for_name_xmlns(element.name, element_ns)
           if klass != element.class
             element = klass.import(element)
           end
         end
-
         super(element)
       end
 
