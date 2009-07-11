@@ -29,18 +29,10 @@ module AgentXmpp
         end
       end
 
-      def delegate_to_controller(*methods)
-        delegate AgentXmpp::BaseController, *methods
-      end
-
-      def delegate_to_boot(*methods)
-        delegate AgentXmpp::Boot, *methods
-      end
-      
     end
 
-    delegate_to_controller :execute, :chat
-    delegate_to_boot :before_start, :after_connected, :restarting_client
+    delegate AgentXmpp::BaseController, :execute, :chat
+    delegate AgentXmpp::Boot, :before_start, :after_connected, :restarting_client
   
   end
 end

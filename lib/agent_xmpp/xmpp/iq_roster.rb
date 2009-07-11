@@ -86,27 +86,20 @@ module AgentXmpp
 
       #.......................................................................................................
       def [](jid)
-        each { |item|
-          return(item) if item.jid == jid
-        }
+        each{|item| return(item) if item.jid == jid}
         nil
       end
 
       #.......................................................................................................
       def to_a
         a = []
-        each { |item|
-          a.push(item)
-        }
+        each{|item| a.push(item)}
         a
       end
 
       #.......................................................................................................
       def receive_iq(iq, filter=true)
-        if filter && (((iq.type != :set) && (iq.type != :result)) || (iq.queryns != 'jabber:iq:roster'))
-          return
-        end
-
+        return if filter && (((iq.type != :set) && (iq.type != :result)) || (iq.queryns != 'jabber:iq:roster'))
         import(iq.query)
       end
 
@@ -124,6 +117,7 @@ module AgentXmpp
 
       #.......................................................................................................
       name_xmlns 'item', 'jabber:iq:roster'
+      xmpp_attribute :subscription, :sym => true
 
       #.......................................................................................................
       def initialize(jid=nil, iname=nil, subscription=nil, ask=nil)
@@ -155,16 +149,6 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-     def subscription
-        attributes['subscription'].to_sym
-      end
-
-      #.......................................................................................................
-      def subscription=(val)
-        attributes['subscription'] = val.to_s
-      end
-
-      #.......................................................................................................
       def ask
         case attributes['ask']
           when 'subscribe' then :subscribe
@@ -182,19 +166,13 @@ module AgentXmpp
 
       #.......................................................................................................
       def groups
-        result = []
-        each_element('group') { |group|
-          result.push(group.text)
-        }
-        result.uniq
+        elements.inject('group', []) {|r, group| r.push(group.text)}.uniq
       end
 
       #.......................................................................................................
       def groups=(ary)
         delete_elements('group')
-        ary.uniq.each { |group|
-          add_element('group').text = group
-        }
+        ary.uniq.each{|group| add_element('group').text = group}
       end
       
     #### RosterItem

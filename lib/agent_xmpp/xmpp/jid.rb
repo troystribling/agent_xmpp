@@ -30,7 +30,6 @@ module AgentXmpp
         if @domain.nil? and @resource.nil? and @node
           @node, @domain, @resource = @node.to_s.scan(PATTERN).first
         end
-
         if USE_STRINGPREP
           @node = IDN::Stringprep.nodeprep(@node) if @node
           @domain = IDN::Stringprep.nameprep(@domain) if @domain
@@ -39,7 +38,6 @@ module AgentXmpp
           @node.downcase! if @node
           @domain.downcase! if @domain
         end
-
         raise ArgumentError, 'Node too long' if (@node || '').length > 1023
         raise ArgumentError, 'Domain too long' if (@domain || '').length > 1023
         raise ArgumentError, 'Resource too long' if (@resource || '').length > 1023
