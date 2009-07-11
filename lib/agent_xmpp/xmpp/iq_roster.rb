@@ -31,8 +31,10 @@ module AgentXmpp
           request.query.add(Xmpp::RosterItem.new(roster_item_jid))
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              [Send(Xmpp::Presence.new.set_type(:subscribe).set_to(roster_item_jid)), \
-                pipe.broadcast_to_delegates(:did_acknowledge_add_roster_item, pipe, r)].smash
+              pres = Xmpp::Presence.new
+              pres.type = :subscribe
+              pres.to = roster_item_jid
+              [Send(pres), pipe.broadcast_to_delegates(:did_acknowledge_add_roster_item, pipe, r)].smash
             elsif r.type.eql?(:error)
               AgentXmpp.logger.error "ERROR ADDING ROSTER ITEM: #{roster_item_jid}"
               pipe.broadcast_to_delegates(:did_receive_add_roster_item_error, pipe, roster_item_jid)

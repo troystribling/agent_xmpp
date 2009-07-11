@@ -128,42 +128,14 @@ module AgentXmpp
 
       #.....................................................................................................
       name_xmlns 'field', 'jabber:x:data'
+      xmpp_attribute :label, :var
+      xmpp_attribute :type, :sym => true
 
       #.....................................................................................................
       def initialize(var=nil, type=nil)
         super()
-        self.var = var
+        self.var = var if var
         self.type = type if type
-      end
-
-      #.....................................................................................................
-      def label
-        attributes['label']
-      end
-
-      #.....................................................................................................
-      def label=(s)
-        attributes['label'] = s
-      end
-
-      #.....................................................................................................
-      def var
-        attributes['var']
-      end
-
-      #.....................................................................................................
-      def var=(s)
-        attributes['var'] = s
-      end
-
-      #.....................................................................................................
-      def type
-        attributes['type'].to_sym
-      end
-
-      #.....................................................................................................
-      def type=(t)
-        attributes['type'] = t.to_s
       end
 
       #.....................................................................................................
@@ -176,55 +148,38 @@ module AgentXmpp
       #.....................................................................................................
       def required=(r)
         delete_elements('required')
-        if r
-          add REXML::Element.new('required')
-        end
+        add REXML::Element.new('required') if r
       end
 
       #.....................................................................................................
       def values
-        res = []
-        each_element('value') { |e|
-          res << e.text
-        }
-        res
+        elements.inject('value', []) {|r,e| r << e.text}
       end
 
       #.....................................................................................................
       def values=(ary)
         delete_elements('value')
         ary.each {|v| add(REXML::Element.new('value')).text = v}
-        self
       end
 
-      #.....................................................................................................
-      def value
-        values.first
-      end
-
-      #.....................................................................................................
-      def value=(val)
-        self.values = [val]
-      end
       #.....................................................................................................
       def options
-        res = {}
-        each_element('option') { |e|
+        elements.inject('option',{}) do |r, e|
           value = nil
-          e.each_element('value') { |ve| value = ve.text }
-          res[value] = e.attributes['label']
-        }
-        res
+          value = (ve = first_element('value')).nil? ? nil : ve.text
+          r[value] = e.attributes['label'] if value
+          r 
+        end
       end
 
       #.....................................................................................................
       def options=(hsh)
         delete_elements('option')
-        hsh.each { |value,label|
+        hsh.each do |value,label|
           o = add(REXML::Element.new('option'))
           o.attributes['label'] = label
           o.add(REXML::Element.new('value')).text = value
-        }
+        end
       end
     end
 
@@ -235,14 +190,8 @@ module AgentXmpp
       name_xmlns 'reported', 'jabber:x:data'
 
       #.....................................................................................................
-      def fields(including_hidden=false)
-        fields = []
-        each_element do |xe|
-          if xe.kind_of?(AgentXmpp::Xmpp::XDataField) and (including_hidden or (xe.type != :hidden and xe.type != :fixed))
-            fields << xe
-          end
-        end
-        fields
+      def fields
+        elements.inject('field', []) {|f, xe| f << xe}
       end
 
       #.....................................................................................................
@@ -258,14 +207,8 @@ module AgentXmpp
       name_xmlns 'item', 'jabber:x:data'
 
       #.....................................................................................................
-      def fields(including_hidden=false)
-        fields = []
-        each_element do |xe|
-          if xe.kind_of?(AgentXmpp::Xmpp::XDataField) and (including_hidden or (xe.type != :hidden and xe.type != :fixed))
-            fields << xe
-          end
-        end
-        fields
+      def fields
+        elements.inject('field', []) {|f, xe| f << xe}
       end
 
       #.....................................................................................................

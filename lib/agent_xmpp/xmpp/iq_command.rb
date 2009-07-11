@@ -10,6 +10,9 @@ module AgentXmpp
 
       #.....................................................................................................
       name_xmlns 'command', 'http://jabber.org/protocol/commands'
+      xmpp_attribute :node, :sessionid
+      xmpp_attribute :action, :status, :sym => true
+      xmpp_child :actions
 
       #####-------------------------------------------------------------------------------------------------------
       class << self
@@ -28,19 +31,10 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      xmpp_attribute :node, :sessionid
-      xmpp_attribute :action, :status, :sym => true
-
-      #.....................................................................................................
       def initialize(node=nil, action=nil)
         super()
         self.node = node if node
         self.action = action if action
-      end
-
-      #.....................................................................................................
-      def actions
-        first_element('actions')
       end
 
     #### IqCommand

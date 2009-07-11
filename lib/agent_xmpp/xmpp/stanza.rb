@@ -9,14 +9,14 @@ module AgentXmpp
     class Stanza < Element
 
       #.......................................................................................................
-      def Stanza.answer(xmppstanza, import=true)
-        x = xmppstanza.class.new
+      def Stanza.answer(stanza, import=true)
+        x = stanza.class.new
         if import
-          x.import(xmppstanza)
+          x.import(stanza)
         end
-        x.from = xmppstanza.to
-        x.to = xmppstanza.from
-        x.id = xmppstanza.id
+        x.from = stanza.to
+        x.to = stanza.from
+        x.id = stanza.id
         x
       end
 
@@ -45,12 +45,6 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def set_to(v)
-        self.to = v
-        self
-      end
-
-      #.......................................................................................................
       def from
         (a = attribute('from')).nil? ? a : JID.new(a.value)
       end
@@ -58,12 +52,6 @@ module AgentXmpp
       #.......................................................................................................
       def from=(v)
         add_attribute('from', v ? v.to_s : nil)
-      end
-
-      #.......................................................................................................
-      def set_from(v)
-        add_attribute('from', v ? v.to_s : nil)
-        self
       end
 
       #.......................................................................................................
@@ -77,12 +65,6 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def set_id(v)
-        add_attribute('id', v.to_s)
-        self
-      end
-
-      #.......................................................................................................
       def type
         stanza_type = attributes['type']
         stanza_type.nil? ? nil : stanza_type.to_sym
@@ -93,12 +75,6 @@ module AgentXmpp
         attributes['type'] = t.to_s
       end
 
-      #.......................................................................................................
-      def set_type(t)
-        self.type = t
-        self
-      end
-      
     #### XMPPStanza
     end
     

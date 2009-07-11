@@ -17,6 +17,7 @@ module AgentXmpp
 
       #.........................................................................................................
       name_xmlns 'error'
+      xmpp_attribute :type, :sym => true
 
       #####-------------------------------------------------------------------------------------------------------
       class << self
@@ -84,72 +85,49 @@ module AgentXmpp
       def initialize(errorcondition=nil, text=nil)
         if errorcondition.nil?
           super()
-          set_text(text) unless text.nil?
         else
           errortype = nil
           errorcode = nil
-          @@Errors.each { |cond,type,code|
+          @@Errors.each do |cond,type,code|
             if errorcondition == cond
               errortype = type
               errorcode = code
             end
-          }
-          if errortype.nil? || errorcode.nil?
-            raise ArgumentError, "Unknown error condition when initializing ErrorReponse"
           end
+          raise ArgumentError, "Unknown error condition when initializing ErrorReponse" if errortype.nil? || errorcode.nil?
           super()
-          set_error(errorcondition)
-          set_type(errortype)
-          set_code(errorcode)
-          set_text(text) unless text.nil?
+          self.error = errorcondition unless errorcondition.nil?
+          self.type = errortype unless errortype.nil?
+          self.code = errorcode unless errorcode.nil?
         end
+        self.text = text unless text.nil?
       end
 
       #.......................................................................................................
       def code
-        if attributes['code']
-          attributes['code'].to_i
-        else
-          nil
-        end
+        (c = attributes['code']).nil? ? nil : c.to_i
       end
 
       #.......................................................................................................
       def code=(i)
-        if i.nil?
-          attributes['code'] = nil
-        else
-          attributes['code'] = i.to_s
-        end
-      end
-
-      #.......................................................................................................
-      def set_code(i)
-        self.code = i
-        self
+        attributes['code'] = i.nil? ? nil : i.to_s
       end
 
       #.......................................................................................................
       def error
         name = nil
-        each_element { |e| name = e.name if (e.namespace == 'urn:ietf:params:xml:ns:xmpp-stanzas') && (e.name != 'text') }
+        each_element {|e| name = e.name if (e.namespace == 'urn:ietf:params:xml:ns:xmpp-stanzas') && (e.name != 'text') }
         name
       end
 
       #.......................................................................................................
       def error=(s)
         xe = nil
-        each_element { |e| xe = e if (e.namespace == 'urn:ietf:params:xml:ns:xmpp-stanzas') && (e.name != 'text') }
+        each_element {|e| xe = e if (e.namespace == 'urn:ietf:params:xml:ns:xmpp-stanzas') && (e.name != 'text') }
         unless xe.nil?
           delete_element(xe)
         end
         add_element(s).add_namespace('urn:ietf:params:xml:ns:xmpp-stanzas')
-      end
-
-      #.......................................................................................................
-      def set_error(s)
-        self.error = s
-        self
       end
 
       #.......................................................................................................
@@ -165,28 +143,6 @@ module AgentXmpp
           e.add_namespace('urn:ietf:params:xml:ns:xmpp-stanzas')
           e.text = s
         end
-      end
-
-      #.......................................................................................................
-      def set_text(s)
-        self.text = s
-        self
-      end
-
-      #.......................................................................................................
-      def type
-        attributes['type'].to_sym
-      end
-
-      #.......................................................................................................
-      def type=(t)
-        attributes['type'] = t.to_s
-      end
-
-      #.......................................................................................................
-      def set_type(t)
-        self.type = t
-        self
       end
 
       #.......................................................................................................

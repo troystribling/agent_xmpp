@@ -9,7 +9,6 @@ require 'agent_xmpp/xmpp/message'
 require 'agent_xmpp/xmpp/presence'
 require 'agent_xmpp/xmpp/iq'
 
-require 'agent_xmpp/xmpp/iq_query'
 require 'agent_xmpp/xmpp/iq_command'
 require 'agent_xmpp/xmpp/iq_version'
 require 'agent_xmpp/xmpp/iq_roster'

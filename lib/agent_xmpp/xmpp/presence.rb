@@ -20,16 +20,18 @@ module AgentXmpp
         
         #.........................................................................................................
         def accept(contact_jid)
-          presence = Xmpp::Presence.new.set_type(:subscribed)
-          presence.to = contact_jid  
-          Send(presence)
+          pres = Xmpp::Presence.new
+          pres.type = :subscribed
+          pres.to = contact_jid  
+          Send(pres)
         end
 
         #.........................................................................................................
         def decline(contact_jid)
-          presence = Xmpp::Presence.new.set_type(:unsubscribed)
-          presence.to = contact_jid      
-          Send(presence)
+          pres = Xmpp::Presence.new
+          pres.type = :unsubscribed
+          pres.to = contact_jid      
+          Send(pres)
         end
         
       #### self
@@ -38,9 +40,9 @@ module AgentXmpp
       #.......................................................................................................
       def initialize(show=nil, status=nil, priority=nil)
         super()
-        set_show(show) if show
-        set_status(status) if status
-        set_priority(priority) if priority
+        self.show = show if show
+        self.status = status if status
+        self.priority = priority if priority
       end
 
       #.......................................................................................................
@@ -64,63 +66,28 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def set_show(val)
-        self.show = val
-        self
-      end
-
-      #.......................................................................................................
       def status
         first_element_text('status')
       end
 
       #.......................................................................................................
       def status=(val)
-        if val.nil?
-          delete_element('status')
-        else
-          replace_element_text('status', val)
-        end
-      end
-
-      #.......................................................................................................
-      def set_status(val)
-        self.status = val
-        self
+        val.nil? ? delete_element('status') : replace_element_text('status', val)
       end
 
       #.......................................................................................................
       def priority
-         e = first_element_text('priority')
-        if e
-          return e.to_i
-        else
-          return nil
-        end
+        (e = first_element_text('priority')).nil? ? nil : e.to_i
       end
 
       #.......................................................................................................
       def priority=(val)
-        if val.nil?
-          delete_element('priority')
-        else
-          replace_element_text('priority', val)
-        end
-      end
-
-      #.......................................................................................................
-      def set_priority(val)
-        self.priority = val
-        self
+        val.nil? ? delete_element('priority') : replace_element_text('priority', val)
       end
 
       #.......................................................................................................
       def <=>(o)
-        if priority.to_i == o.priority.to_i
-          cmp_interest(o)
-        else
-          priority.to_i <=> o.priority.to_i
-        end
+        priority.to_i == o.priority.to_i ? cmp_interest(o) : priority.to_i <=> o.priority.to_i
       end
 
       #.......................................................................................................
@@ -134,11 +101,7 @@ module AgentXmpp
       #.......................................................................................................
       def cmp_interest(o)
         if type.nil?
-          if o.type.nil?
-            PRESENCE_STATUS[show] <=> PRESENCE_STATUS[o.show]
-          else
-            return -1
-          end
+          o.type.nil? ? PRESENCE_STATUS[show] <=> PRESENCE_STATUS[o.show] : -1
         elsif o.type.nil?
           return 1
         else

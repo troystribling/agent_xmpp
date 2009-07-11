@@ -54,42 +54,29 @@ module AgentXmpp
         
         #.....................................................................................................
         def xmpp_attribute(*args)
+          sym = (args.pop[:sym] if args.last.kind_of?(Hash)).nil? ? '' : '.to_sym'
           args.each do |a|
             class_eval <<-DEF
               def #{a.to_s}
-                attributes['#{a.to_s}']
+                attributes['#{a.to_s}']#{sym}
               end
               def #{a.to_s}=(v)
-                attributes['#{a.to_s}'] = v
+                attributes['#{a.to_s}'] = v.to_s
               end
             DEF
           end
         end
-
-        #.....................................................................................................
-        def xmpp_attribute(*args)
-          sym = args.pop[:sym] if args.last.kind_of?(Hash)
-          if sym
-            args.each do |a|
-              class_eval <<-DEF
-                def #{a.to_s}
-                  attributes['#{a.to_s}'].to_sym
-                end
-              DEF
-            end
-          else
-            args.each do |a|
-              class_eval <<-DEF
-                def #{a.to_s}
-                  attributes['#{a.to_s}']
-                end
-              DEF
-            end
-          end
+        
+        #.......................................................................................................
+        def xmpp_child(*args)
           args.each do |a|
             class_eval <<-DEF
+              def #{a.to_s}
+                first_element('#{a.to_s}')
+              end
               def #{a.to_s}=(v)
-                attributes['#{a.to_s}'] = v.to_s
+                delete_elements(v.name)
+                add(v)
               end
             DEF
           end

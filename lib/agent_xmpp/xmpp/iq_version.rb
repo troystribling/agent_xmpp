@@ -32,7 +32,9 @@ module AgentXmpp
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = new
-          iq.query.set_iname(AgentXmpp::AGENT_XMPP_NAME).set_version(AgentXmpp::VERSION).set_os(AgentXmpp::OS_VERSION)
+          iq.query.iname = AgentXmpp::AGENT_XMPP_NAME
+          iq.query.version = AgentXmpp::VERSION
+          iq.query.os = AgentXmpp::OS_VERSION
           Send(iq)
         end
 
@@ -42,9 +44,9 @@ module AgentXmpp
       #.......................................................................................................
       def initialize(iname=nil, version=nil, os=nil)
         super()
-        set_iname(iname) if iname
-        set_version(version) if version
-        set_os(os) if os
+        self.iname = iname if iname
+        self.version = version if version
+        self.os = os if os
       end
 
       #.......................................................................................................
@@ -58,12 +60,6 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def set_iname(text)
-        self.iname = text
-        self
-      end
-
-      #.......................................................................................................
       def version
         first_element_text('version')
       end
@@ -74,31 +70,15 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def set_version(text)
-        self.version = text
-        self
-      end
-
-      #.......................................................................................................
       def os
         first_element_text('os')
       end
 
       #.......................................................................................................
       def os=(text)
-        if text
-          replace_element_text('os', text)
-        else
-          delete_elements('os')
-        end
+        replace_element_text('os', text.nil? ? '' : text)
       end
 
-      #.......................................................................................................
-      def set_os(text)
-        self.os = text
-        self
-      end
-      
     #### IqQueryVersion
     end
     

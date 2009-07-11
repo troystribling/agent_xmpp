@@ -85,12 +85,10 @@ module AgentXmpp
         def auth(password)
           auth_text = "#{@stream.jid.node}"
           error = nil
-          @stream.send(generate_auth('ANONYMOUS', Base64::encode64(auth_text).gsub(/\s/, ''))) { |reply|
-            if reply.name != 'success'
-              error = reply.first_element(nil).name
-            end
+          @stream.send(generate_auth('ANONYMOUS', Base64::encode64(auth_text).gsub(/\s/, ''))) do |reply|
+            error = reply.first_element(nil).name if reply.name != 'success'
             true
-          }
+          end
           raise error if error
         end
         
@@ -172,41 +170,40 @@ module AgentXmpp
           response['qop'] = 'auth'
           response['digest-uri'] = "xmpp/#{@stream.jid.domain}"
           response['response'] = response_value(@stream.jid.node, @stream.jid.domain, response['digest-uri'], password, @nonce, response['cnonce'], response['qop'], response['authzid'])
-          response.each { |key,value|
+          response.each do |key,value|
             unless %w(nc qop response charset).include? key
               response[key] = "\"#{value}\""
             end
-          }
+          end
 
           response_text = response.collect { |k,v| "#{k}=#{v}" }.join(',')
-
           r = REXML::Element.new('response')
           r.add_namespace NS_SASL
           r.text = Base64::encode64(response_text).gsub(/\s/, '')
 
           success_already = false
           error = nil
-          @stream.send(r) { |reply|
+          @stream.send(r) do |reply|
             if reply.name == 'success'
               success_already = true
             elsif reply.name != 'challenge'
               error = reply.first_element(nil).name
             end
             true
-          }
+          end
 
           return if success_already
           raise error if error
 
           r.text = nil
-          @stream.send(r) { |reply|
+          @stream.send(r) do |reply|
             if reply.name != 'success'
               error = reply.first_element(nil).name
             end
             true
-          }
-
+          end
           raise error if error
+          
         end
 
         private
