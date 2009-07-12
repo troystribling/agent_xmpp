@@ -273,7 +273,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
-        [Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain)]
+        [Send(Xmpp::Presence.new(nil, nil, 1)), Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain)]
       end
 
       #.........................................................................................................
