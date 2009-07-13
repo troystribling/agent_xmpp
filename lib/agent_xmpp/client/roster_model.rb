@@ -64,44 +64,7 @@ module AgentXmpp
         nil
       end
     end 
-    
-    #.........................................................................................................
-    def has_feature?(jid, feature)
-       features.include?(feature)
-    end 
-
-    #.........................................................................................................
-    def identities(jid)
-      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
-        @items[jid.bare.to_s][:resources][jid.to_s][:discoinfo].identities
-      else 
-        []
-      end
-    end 
-
-    #.........................................................................................................
-    def has_identity?(jid, ident)
-      identities.include?(ident)
-    end 
-    
-    #.........................................................................................................
-    def has_discoinfo?(jid)
-      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
-        not @items[jid.bare.to_s][:resources][jid.to_s][:discoinfo].nil?
-      else 
-        false
-      end
-    end 
-
-    #.........................................................................................................
-    def has_discoitems?(jid)
-      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
-        not @items[jid.bare.to_s][:resources][jid.to_s][:discoitems].nil?
-      else 
-        false
-      end
-    end 
-                
+                    
     #.........................................................................................................
     def has_version?(jid)
       if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
@@ -137,31 +100,13 @@ module AgentXmpp
         @items[from_bare_jid][:resources][from_jid][:version] = version.query
       end        
     end
-    
-    #.........................................................................................................
-    def update_resource_discoinfo(disco)
-      from_jid = disco.from.to_s     
-      from_bare_jid = disco.from.bare.to_s   
-      if @items[from_bare_jid][:resources][from_jid]    
-        @items[from_bare_jid][:resources][from_jid][:discoinfo] = disco.query 
-      end        
-    end
- 
-    #.........................................................................................................
-    def update_resource_discoitems(disco)      
-      from_jid = disco.from.to_s     
-      from_bare_jid = disco.from.bare.to_s     
-      if @items[from_bare_jid][:resources][from_jid]    
-        @items[from_bare_jid][:resources][from_jid][:discoitems] = disco.query 
-      end        
-    end
-    
+        
     #.........................................................................................................
     def method_missing(meth, *args, &blk)
       @items.send(meth, *args, &blk)
     end
 
-  #### Roster
+  #### RosterModel
   end
 
   #####-------------------------------------------------------------------------------------------------------
@@ -175,7 +120,7 @@ module AgentXmpp
       @status = item[:status]
     end
 
-  #### Roster
+  #### RosterItemModel
   end
 
 #### AgentXmpp

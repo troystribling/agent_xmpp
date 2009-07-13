@@ -16,9 +16,10 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def get(pipe, to=nil)
+        def get(pipe, to=nil, node=nil)
           iq = Iq.new(:get, to)
           iq.query = new
+          iq.query.node = node if node
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoItems)
               pipe.broadcast_to_delegates(:did_receive_discoitems_result, pipe, r)
@@ -37,7 +38,7 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def command_nodes(pipe, request)
+        def result_command_nodes(pipe, request)
           iq = Xmpp::Iq.new(:result, request.from.to_s)
           iq.id = request.id unless request.id.nil?
           iq.query = new
@@ -51,7 +52,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def items
-        get_elements('item')
+        elements.to_a('item')
       end
 
       #.........................................................................................................
@@ -73,10 +74,10 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def get(pipe, to=nil)
+        def get(pipe, to=nil, node=nil)
           iq = Iq.new(:get, to)
-          query = IqDiscoInfo.new
-          iq.add(query)
+          iq.query = new
+          iq.query.node = node if node
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoInfo)
               pipe.broadcast_to_delegates(:did_receive_discoinfo_result, pipe, r)
@@ -101,12 +102,12 @@ module AgentXmpp
       
       #.........................................................................................................
       def identities
-        get_elements('identity')
+        elements.to_a('identity')
       end
 
       #.........................................................................................................
       def features
-        elements.inject('feature', []) { |r, f| r.push(f.var)}
+        elements.to_a('feature')
       end
   
       #.........................................................................................................
@@ -127,9 +128,9 @@ module AgentXmpp
       #.........................................................................................................
       def initialize(jid=nil, iname=nil, node=nil)
         super()
-        self.jid = jid
-        self.iname = iname
-        self.node = node
+        self.jid = jid if jid
+        self.iname = iname if iname
+        self.node = node if node
       end
 
       #.........................................................................................................
