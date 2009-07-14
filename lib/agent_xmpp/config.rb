@@ -1,5 +1,6 @@
 module AgentXmpp
 
+  #.........................................................................................................
   VERSION = "0.0.0"
   AGENT_XMPP_NAME = 'AgentXMPP'
   OS_VERSION = IO.popen('uname -sr').readlines.to_s.strip
@@ -14,12 +15,14 @@ module AgentXmpp
   @app_path = File.dirname($0)
   @log_file = STDOUT
   
+  #.........................................................................................................
   class << self
     attr_accessor :config_file, :app_path, :log_file
     def logger; @logger ||= Logger.new(STDOUT); end
     def logger=(logger); @logger = logger; end
   end
   
+  #.........................................................................................................
   class AgentXmppError < Exception; end
   
 end

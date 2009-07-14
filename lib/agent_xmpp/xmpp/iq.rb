@@ -45,9 +45,9 @@ module AgentXmpp
         #.......................................................................................................
         def new_bind(jid)
           iq = Iq.new(:set)
-          bind = iq.add(REXML::Element.new('bind'))
-          bind.add_namespace('urn:ietf:params:xml:ns:xmpp-bind')                
-          resource = bind.add(REXML::Element.new('resource'))
+          iq.bind = REXML::Element.new('bind')
+          iq.bind.add_namespace('urn:ietf:params:xml:ns:xmpp-bind')                
+          resource = iq.bind.add(REXML::Element.new('resource'))
           resource.text = jid.resource
           iq
         end
@@ -55,8 +55,8 @@ module AgentXmpp
         #.......................................................................................................
         def new_session
           iq = Iq.new(:set)
-          session = iq.add REXML::Element.new('session')
-          session.add_namespace('urn:ietf:params:xml:ns:xmpp-session')
+          iq.session =REXML::Element.new('session')
+          iq.session.add_namespace('urn:ietf:params:xml:ns:xmpp-session')
           iq
         end
       

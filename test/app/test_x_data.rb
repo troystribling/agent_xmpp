@@ -10,6 +10,11 @@ end
 
 #.........................................................................................................
 after_connected do |pipe|
+  EventMachine::PeriodicTimer.new(10) do
+    tnow = Time.now.to_s
+    AgentXmpp.publish_time(tnow.to_x_data)
+    AgentXmpp.logger.info "FIRING EVENT: #{tnow}"
+  end  
   AgentXmpp.logger.info "after_connected"
 end
 
@@ -45,11 +50,15 @@ end
 #.........................................................................................................
 execute 'array_hash' do
   AgentXmpp.logger.info "ACTION: array_hash"
-  [{:attr1 => 'val11', :attr2 => 'val12'}, {:attr1 => 'val21', :attr2 => 'val22'}, {:attr1 => 'val31', :attr2 => 'val32'}]
+  [{:attr1 => 'val11', :attr2 => 'val12'}, 
+   {:attr1 => 'val21', :attr2 => 'val22'}, 
+   {:attr1 => 'val31', :attr2 => 'val32'}]
 end
 
 #.........................................................................................................
 execute 'array_hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
-  [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
+  [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, 
+   {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, 
+   {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
 end

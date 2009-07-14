@@ -208,12 +208,12 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def did_acknowledge_add_roster_item(pipe, response)
+      def did_acknowledge_add_roster_item(pipe, result)
         AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDEGED"   
       end
 
       #.........................................................................................................
-      def did_acknowledge_remove_roster_item(pipe, response)
+      def did_acknowledge_remove_roster_item(pipe, result)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDEGED"   
       end
 
@@ -279,15 +279,16 @@ module AgentXmpp
       def did_receive_discoinfo_result(pipe, discoinfo)   
         from_jid = discoinfo.from
         if pipe.roster.has_jid?(from_jid) or pipe.services.has_jid?(from_jid)
-          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}"
+          q = discoinfo.query
+          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
           pipe.services.update_with_discoinfo(discoinfo)
-          discoinfo.query.identities.each do |i|
+          q.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
           end
-          discoinfo.query.features.each do |f|
+          q.features.each do |f|
             AgentXmpp.logger.info " FEATURE: #{f}"
           end
-          Xmpp::IqDiscoItems.get(pipe, from_jid.to_s)
+          Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node)
         else
           AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end        
@@ -322,10 +323,11 @@ module AgentXmpp
       def did_receive_discoitems_result(pipe, discoitems)
         from_jid = discoitems.from
         if pipe.roster.has_jid?(from_jid) or pipe.services.has_jid?(from_jid)
-          AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}"
+          q = discoitems.query
+          AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
           pipe.services.update_with_discoitems(discoitems)
-          discoitems.query.items.inject([]) do |r,i|
-            AgentXmpp.logger.info " ITEM JID: #{i.jid}"
+          q.items.inject([]) do |r,i|
+            AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
             pipe.services.create(i.jid)
             r.push(Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node))            
           end
@@ -338,6 +340,18 @@ module AgentXmpp
       def did_receive_discoitems_error(pipe, discoinfo)   
         from_jid = discoinfo.from
         AgentXmpp.logger.warn "RECEIVED DISCO ITEMS ERROR FROM: #{from_jid.to_s}"
+      end
+                
+      #.........................................................................................................
+      # pubsub
+      #.........................................................................................................
+      def did_acknowledge_publish(pipe, result, node)
+        AgentXmpp.logger.info "PUBLISH TO NODE ACKNOWLEDEGED: #{node}, #{result.from.to_s}"
+      end
+
+      #.........................................................................................................
+      def did_receive_publish_error(pipe, result, node)
+        AgentXmpp.logger.warn "ERROR PUBLISING TO NODE: #{node}, #{result.from.to_s}"
       end
         
       #.........................................................................................................

@@ -18,6 +18,7 @@ module AgentXmpp
       @delegates = [Delegate]
       @config = config
       @id_callbacks = {}
+      add_publish_methods
     end
     
     #.........................................................................................................
@@ -195,6 +196,21 @@ module AgentXmpp
       msg = []
       msg.push(Send("<?xml version='1.0' ?>")) if starting
       msg.push(Send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
+    end
+         
+    #.........................................................................................................
+    def add_publish_methods
+      config['publish'].each do |p|
+        if p['node']
+          domian, pipe = jid.domain, self
+          meth = ("publish_" + p['node'].gsub(/-/,'_')).to_sym
+          AgentXmpp.define_meta_class_method(meth) do |payload| 
+            AgentXmpp::Xmpp::PubSub.publish(pipe, :node => p['node'], :to => domian, :payload => payload)
+          end
+        else
+          AgentXmpp.logger.error "NODE NOT SPECIFIED FOR PUBSUB PUBLISH CONFIGURATION"
+        end
+      end
     end
                
   #### MessagePipe

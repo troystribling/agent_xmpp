@@ -191,6 +191,12 @@ The available callback methods are,
 
     did_receive_message_chat(pipe, stanza)
 
+=== PubSub
+
+    did_acknowledge_publish(pipe, result, node)
+
+    did_receive_publish_error(pipe, result, node)
+
 === ERRORS
 
     did_receive_unsupported_message(pipe, stanza)

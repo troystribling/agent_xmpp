@@ -6,7 +6,7 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class IqCommand < Iq
+    class IqCommand < Element
 
       #.....................................................................................................
       name_xmlns 'command', 'http://jabber.org/protocol/commands'
