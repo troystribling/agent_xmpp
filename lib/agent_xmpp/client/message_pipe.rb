@@ -116,7 +116,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def connection_completed
-      Boot.call_if_implemented(:call_after_connected)     
+      Boot.call_if_implemented(:call_after_connected, self)     
       broadcast_to_delegates(:did_connect, self)
       init_connection(jid).collect{|m| send(m)}
     end

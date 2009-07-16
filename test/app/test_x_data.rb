@@ -9,17 +9,17 @@ before_start do
 end
 
 #.........................................................................................................
-after_connected do
+after_connected do |pipe|
   AgentXmpp.logger.info "after_connected"
 end
 
 #.........................................................................................................
-restarting_client do
+restarting_client do |pipe|
   AgentXmpp.logger.info "restarting_client"
 end
 
 #.........................................................................................................
-discovered_user_pubsub_node do 
+discovered_user_pubsub_node do|pipe|
   EventMachine::PeriodicTimer.new(10) do
     tnow = Time.now.to_s
     publish_time(tnow.to_x_data)

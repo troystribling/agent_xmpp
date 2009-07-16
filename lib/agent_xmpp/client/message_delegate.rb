@@ -361,6 +361,7 @@ module AgentXmpp
         
       #.........................................................................................................
       def did_discover_pupsub_service(pipe, ident, jid)
+        add_publish_methods(pipe, jid)
         AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}, #{ident.iname}, #{ident.type}"
       end
 
@@ -376,8 +377,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def did_discover_user_pubsub_node(pipe, ident, jid)
-        add_publish_methods(pipe, jid)
-        Boot.call_if_implemented(:discovered_user_pubsub_node)     
+        Boot.call_if_implemented(:discovered_user_pubsub_node, pipe)     
         AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}, #{ident.iname}, #{ident.type}"
       end
         

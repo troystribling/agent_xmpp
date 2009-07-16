@@ -84,11 +84,11 @@ Startup callback methods are available to applications
 
     before_start{}
 
-    after_connected{}
+    after_connected{|pipe|}
 
-    restarting_client{}
+    restarting_client{|pipe|}
     
-    discovered_pubsub_service{}
+    discovered_user_pubsub_node{|pipe|}
 
 == Logging
 
