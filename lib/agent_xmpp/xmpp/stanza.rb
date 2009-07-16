@@ -97,7 +97,7 @@ module AgentXmpp
         attributes['type'] = t.to_s
       end
 
-    #### XMPPStanza
+    #### Stanza
     end
     
   #### XMPP

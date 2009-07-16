@@ -10,8 +10,13 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def find_all_by_item_category(cat)
+    def find_all_by_category(cat)
       @service.select{|(k,v)| not v[:discoinfo].identities.select{|i| i.category.eql?(cat)}.empty?} 
+    end
+
+    #.........................................................................................................
+    def find_all_by_category_and_type(cat)
+      @service.select{|(k,v)| not v[:discoinfo].identities.select{|i| i.category.eql?(cat) and i.type.eql?(type)}.empty?} 
     end
 
     #.........................................................................................................
@@ -52,13 +57,27 @@ module AgentXmpp
     #.........................................................................................................
     def update_with_discoinfo(disco)
       from_jid = disco.from.to_s  
-      @service[from_jid][:discoinfo] = disco.query 
+      node = disco.query.node
+      if node 
+        @service[from_jid][:discoinfo] = disco.query 
+      else
+        @service[from_jid][:node] = {} if @service[from_jid][:node].nil?
+        @service[from_jid][:node][node] = {} if @service[from_jid][:node][node].nil?
+        @service[from_jid][:node][node][:discoinfo] = disco.query 
+      end
     end
  
     #.........................................................................................................
     def update_with_discoitems(disco)      
       from_jid = disco.from.to_s     
-      @service[from_jid][:discoitems] = disco.query 
+      node = disco.query.node
+      if node 
+        @service[from_jid][:discoitems] = disco.query 
+      else
+        @service[from_jid][:node] = {} if @service[from_jid][:node].nil?
+        @service[from_jid][:node][node] = {} if @service[from_jid][:node][node].nil?
+        @service[from_jid][:node][node][:discoitems] = disco.query 
+      end
     end
 
     #.........................................................................................................

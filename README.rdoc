@@ -82,14 +82,13 @@ Agent XMPP supports mapping scalars, arrays and hashes to jabber:x:data payloads
 
 Startup callback methods are available to applications 
 
-    before_start do
-    end
+    before_start{}
 
-    after_connected do |pipe|
-    end
+    after_connected{}
 
-    restarting_client do |pipe|
-    end
+    restarting_client{}
+    
+    discovered_pubsub_service{}
 
 == Logging
 
@@ -197,6 +196,26 @@ The available callback methods are,
 
     did_receive_publish_error(pipe, result, node)
 
+    did_discover_pupsub_service(pipe, jid, ident)
+    
+    did_discover_pupsub_category(pipe, jid, node)
+      
+    did_discover_pupsub_leaf(pipe, jid, node)
+
+    did_receive_pusub_subscriptions_result(pipe, result)
+    
+    did_receive_pusub_subscriptions_error(pipe, result)
+
+    did_receive_pusub_affiliations_result(pipe, result)
+    
+    did_receive_pusub_affiliations_error(pipe, result)
+
+    did_discover_user_pubsub_node(pipe, result)
+    
+    did_receive_create_user_node_result(pipe, result)    
+
+    did_receive_create_user_node_error(pipe, result)    
+    
 === ERRORS
 
     did_receive_unsupported_message(pipe, stanza)

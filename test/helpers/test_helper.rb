@@ -38,22 +38,20 @@ AgentXmpp.app_path = 'test/helpers'
 AgentXmpp.logger.level = Logger::DEBUG
 
 ####------------------------------------------------------------------------------------------------------
-AgentXmpp::Boot.before_start do
-
+before_start do
   AgentXmpp.logger.info "AgentXmpp::BootApp.before_start"
-  
 end
 
-AgentXmpp::Boot.after_connected do |pipe|
-
+after_connected do
   AgentXmpp.logger.info "AgentXmpp::BootApp.after_connected"
-
 end
 
-AgentXmpp::Boot.restarting_client do |pipe|
-
+restarting_client do 
   AgentXmpp.logger.info "AgentXmpp::BootApp.restarting_client"
+end
 
+discovered_pubsub_service do 
+  AgentXmpp.logger.info "discovered_pubsub_service"
 end
 
 #####-------------------------------------------------------------------------------------------------------

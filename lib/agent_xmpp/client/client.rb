@@ -24,7 +24,7 @@ module AgentXmpp
         EventMachine.run do
           @connection = EventMachine.connect(jid.domain, port, Connection, self)
         end
-        Boot.call_if_implemented(:call_restarting_client, pipe)     
+        Boot.call_if_implemented(:call_restarting_client)     
         sleep(10.0)
         AgentXmpp.logger.warn "RESTARTING CLIENT"
       end
