@@ -42,15 +42,15 @@ before_start do
   AgentXmpp.logger.info "AgentXmpp::BootApp.before_start"
 end
 
-after_connected do
+after_connected do |pipe|
   AgentXmpp.logger.info "AgentXmpp::BootApp.after_connected"
 end
 
-restarting_client do 
+restarting_client do |pipe|
   AgentXmpp.logger.info "AgentXmpp::BootApp.restarting_client"
 end
 
-discovered_pubsub_service do 
+discovered_pubsub_service do |pipe|
   AgentXmpp.logger.info "discovered_pubsub_service"
 end
 

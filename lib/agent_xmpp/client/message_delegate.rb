@@ -3,9 +3,12 @@ module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
   class MessageDelegate
-
+     
     #####-------------------------------------------------------------------------------------------------------
     class << self
+      
+      #.........................................................................................................
+      attr_accessor :pubsub_service
       
       #---------------------------------------------------------------------------------------------------------
       # event flow delegate methods
@@ -285,7 +288,7 @@ module AgentXmpp
           q.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
             if i.category.eql?('pubsub')
-              pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, i, from_jid) if i.type.eql?('service')
+              pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from_jid) if i.type.eql?('service')
               pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from_jid, q.node) if i.type.eql?('collection')
               pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from_jid, q.node) if i.type.eql?('leaf')
             end
@@ -329,9 +332,11 @@ module AgentXmpp
         from_jid = discoitems.from
         if pipe.roster.has_jid?(from_jid) or pipe.services.has_jid?(from_jid)
           q = discoitems.query
-          AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{discoitems.from.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
+          AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
           pipe.services.update_with_discoitems(discoitems)
-          q.items.inject([]) do |r,i|
+          msgs = (from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?("/home/#{pipe.jid.domain}")) ? find_user_pubsub_root(pipe, from_jid, q.items) : []
+          (msgs += update_user_pubsub_nodes(pipe, from_jid, q.items)) if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.user_pubsub_node)
+          q.items.inject(msgs) do |r,i|
             AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
             pipe.services.create(i.jid)
             r.push(Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node))            
@@ -360,9 +365,10 @@ module AgentXmpp
       end
         
       #.........................................................................................................
-      def did_discover_pupsub_service(pipe, ident, jid)
+      def did_discover_pupsub_service(pipe, jid)
         add_publish_methods(pipe, jid)
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}, #{ident.iname}, #{ident.type}"
+        @pubsub_service = jid
+        AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}"
       end
 
       #.........................................................................................................
@@ -376,9 +382,9 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def did_discover_user_pubsub_node(pipe, ident, jid)
-        Boot.call_if_implemented(:discovered_user_pubsub_node, pipe)     
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}, #{ident.iname}, #{ident.type}"
+      def did_discover_user_pubsub_node(pipe, pubsub, node)
+        Boot.call_if_implemented(:call_discovered_user_pubsub_node, pipe)     
+        AgentXmpp.logger.warn "DISCOVERED USER PUBSUB NODE: #{pubsub.to_s}, #{node}"
       end
         
       #.........................................................................................................
@@ -406,15 +412,17 @@ module AgentXmpp
       end  
 
       #.........................................................................................................
-      def did_receive_create_user_node_result(pipe, result) 
+      def did_receive_create_user_node_result(pipe, node, result) 
         from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED CREATE USER NODE RESULT FROM: #{from_jid}"
+        did_discover_user_pubsub_node(pipe, from_jid, node)
+        Boot.call_if_implemented(:call_discovered_user_pubsub_node, pipe)     
+        AgentXmpp.logger.info "RECEIVED CREATE USER NODE RESULT FROM: #{from_jid.to_s}, #{node}"
       end   
 
       #.........................................................................................................
-      def did_receive_create_user_node_error(pipe, result)   
+      def did_receive_create_user_node_error(pipe, node, result)   
         from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED CREATE USER NODE ERROR FROM: #{from_jid}"
+        AgentXmpp.logger.info "RECEIVED CREATE USER NODE ERROR FROM: #{from_jid.to_s}, #{node}"
       end 
 
       #.........................................................................................................
@@ -458,9 +466,25 @@ module AgentXmpp
       end
           
       #.........................................................................................................
-      def update_pubsub_nodes(pipe, pubsub)
+      def find_user_pubsub_root(pipe, pubsub, items)
+        if (roots = items.select{|i| i.node.eql?(pipe.user_pubsub_node)}).empty?      
+          AgentXmpp.logger.info "USER PUBSUB ROOT NOT FOUND CREATING NODE: #{pubsub.to_s}, #{node}"
+          Xmpp::IqPubSub.create_node(pipe, pubsub.to_s, pipe.user_pubsub_node)
+        else
+          AgentXmpp.logger.info "USER PUBSUB ROOT FOUND: #{pubsub}, #{pipe.user_pubsub_node}"
+          did_discover_user_pubsub_node(pipe, pubsub, pipe.user_pubsub_node); [] 
+        end       
       end
-    
+
+      #.........................................................................................................
+      def update_user_pubsub_nodes(pipe, pubsub, items)
+        nodes = items.map{|i| i.node}
+        pipe.published.find_all.inject([]) do |m,p|
+          user_node= "#{pipe.user_pubsub_node}/#{p.node}"
+          nodes.include?(user_node) ? m : m.push(Xmpp::IqPubSub.create_node(pipe, pubsub.to_s, user_node))  
+        end
+      end
+          
     #### self
     end
      

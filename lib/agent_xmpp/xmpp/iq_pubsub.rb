@@ -16,17 +16,17 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def create_user_node(pipe, pubsub)
-          node = '/home/' + pipe.jid.domain + pipe.jid.node
-          iq = Xmpp::Iq.new(:get, pubsub)  
-          create = REXML::Element.new('create') 
-          create.add_attribute('node', node)      
+        def create_node(pipe, pubsub, node)
+          iq = Xmpp::Iq.new(:set, pubsub)  
+          create = REXML::Element.new('create')
+          create.add_attribute('node', node) 
           iq.pubsub = IqPubSub.new << create
+          iq.pubsub << REXML::Element.new('configure') 
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_create_user_node_result, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_create_user_node_result, pipe, node, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_create_user_node_error, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_create_user_node_error, pipe, node, r)
             end
           end     
         end
@@ -82,7 +82,7 @@ module AgentXmpp
         def set(pipe, args)
           iq = Xmpp::Iq.new(:set, args[:to])
           item =  Item.new << args[:payload]
-          pub = IqPublish.new(args[:node]) << item
+          pub = IqPublish.new("#{pipe.user_pubsub_node}/#{args[:node]}") << item
           iq.pubsub = IqPubSub.new << pub
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)

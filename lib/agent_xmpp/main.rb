@@ -36,7 +36,7 @@ module AgentXmpp
     end
 
     delegate AgentXmpp::BaseController, :execute, :chat
-    delegate AgentXmpp::Boot, :before_start, :after_connected, :restarting_client, :discovered_pubsub_service
+    delegate AgentXmpp::Boot, :before_start, :after_connected, :restarting_client, :discovered_user_pubsub_node
 
   #### Delegator 
   end
