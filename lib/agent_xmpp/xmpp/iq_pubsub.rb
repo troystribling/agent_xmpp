@@ -24,9 +24,9 @@ module AgentXmpp
           iq.pubsub << REXML::Element.new('configure') 
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_create_user_node_result, pipe, node, r)
+              pipe.broadcast_to_delegates(:did_receive_create_node_result, pipe, node, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_create_user_node_error, pipe, node, r)
+              pipe.broadcast_to_delegates(:did_receive_create_node_error, pipe, node, r)
             end
           end     
         end
@@ -63,9 +63,33 @@ module AgentXmpp
     #### IqPubSub 
     end
 
-    #####-------------------------------------------------------------------------------------------------------
+    #####--------------------------------------------------------------------------------------------------------
     class IqPubSubOwner < Element
+
+      #..........................................................................................................
       name_xmlns 'pubsub', 'http://jabber.org/protocol/pubsub' + '#owner'
+
+      #####-------------------------------------------------------------------------------------------------------
+      class << self
+
+        #.........................................................................................................
+        def delete_node(pipe, pubsub, node)
+          iq = Xmpp::Iq.new(:set, pubsub)  
+          delete = REXML::Element.new('delete')
+          delete.add_attribute('node', node) 
+          iq.pubsub = IqPubSubOwner.new << delete
+          pipe.send(iq) do |r|
+            if r.type == :result and r.kind_of?(Xmpp::Iq)
+              pipe.broadcast_to_delegates(:did_receive_delete_node_result, pipe, node, r)
+            elsif r.type.eql?(:error)
+              pipe.broadcast_to_delegates(:did_receive_delete_node_error, pipe, node, r)
+            end
+          end     
+        end
+      
+      #### self
+      end
+
     end
 
     #####-------------------------------------------------------------------------------------------------------

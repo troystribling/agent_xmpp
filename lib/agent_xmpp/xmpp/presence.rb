@@ -33,6 +33,14 @@ module AgentXmpp
           pres.to = contact_jid      
           Send(pres)
         end
+
+        #.........................................................................................................
+        def subscribe(contact_jid)
+          pres = Xmpp::Presence.new
+          pres.type = :subscribe
+          pres.to = contact_jid
+          Send(pres)
+        end
         
       #### self
       end

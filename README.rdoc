@@ -198,7 +198,7 @@ The available callback methods are,
 
     did_discover_pupsub_service(pipe, jid, ident)
     
-    did_discover_pupsub_category(pipe, jid, node)
+    did_discover_pupsub_collection(pipe, jid, node)
       
     did_discover_pupsub_leaf(pipe, jid, node)
 
@@ -212,9 +212,9 @@ The available callback methods are,
 
     did_discover_user_pubsub_node(pipe, result)
     
-    did_receive_create_user_node_result(pipe, node, result)    
+    did_receive_create_node_result(pipe, node, result)    
 
-    did_receive_create_user_node_error(pipe, node, result)    
+    did_receive_create_node_error(pipe, node, result)    
     
 === ERRORS
 
