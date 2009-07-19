@@ -19,6 +19,12 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def event(jid, node, opts = {}, &blk) 
+        j = Xmpp::Jid.new(jid)
+        route(:event, {:node => "/home/#{j.domain}/#{j.node}/#{node}", :opts => opts, :blk => blk}) 
+      end
+
+      #.........................................................................................................
       def chat(opts = {}, &blk) 
         route(:chat, {:opts => opts, :blk => blk})
       end
@@ -30,7 +36,12 @@ module AgentXmpp
      
       #.........................................................................................................
       def command_nodes
-        @routes[:execute].map{|r| r[:node]}
+        (@routes[:execute] ||= []).map{|r| r[:node]}
+      end
+
+      #.........................................................................................................
+      def subscriptions
+        (@routes[:event] ||= []).map{|r| r[:node]}
       end
       
     #### self
@@ -46,8 +57,8 @@ module AgentXmpp
     end
 
     #.......................................................................................................
-     def invoke_command
-       route = command_route
+     def invoke_execute
+       route = get_route(params[:action])
        unless route.nil?
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |result|
@@ -59,6 +70,20 @@ module AgentXmpp
          Xmpp::ErrorResponse.no_route(params)
        end
      end
+
+     #.......................................................................................................
+      def invoke_event
+        route = get_route(:event)
+        unless route.nil?
+          define_meta_class_method(:request, &route[:blk])
+          handle_request
+          define_meta_class_method(:request_callback) do |result|
+            pipe.send_resp(result)
+          end
+        else
+          AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}'}."
+        end
+      end
 
      #.......................................................................................................
      def invoke_chat
@@ -78,7 +103,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def handle_request
-      EventMachine.defer(method(:request).to_proc, method(:request_callback).to_proc)
+      EventMachine.defer(method(:request).to_proc, respond_to?(:request_callback) ? method(:request_callback).to_proc : nil)
     end
 
     #.........................................................................................................
@@ -110,8 +135,8 @@ module AgentXmpp
     #.........................................................................................................
     # routes
     #.........................................................................................................
-    def command_route 
-      (BaseController.routes[params[:action]] || []).select{|r| r[:node].eql?(params[:node].to_s)}.first
+    def get_route(action) 
+      (BaseController.routes[action] || []).select{|r| r[:node].eql?(params[:node].to_s)}.first
     end
 
     #.........................................................................................................

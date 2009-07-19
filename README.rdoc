@@ -196,25 +196,33 @@ The available callback methods are,
 
     did_receive_publish_error(pipe, result, node)
 
-    did_discover_pupsub_service(pipe, jid, ident)
+    did_discover_pubsub_service(pipe, jid, ident)
     
-    did_discover_pupsub_collection(pipe, jid, node)
+    did_discover_pubsub_collection(pipe, jid, node)
       
-    did_discover_pupsub_leaf(pipe, jid, node)
+    did_discover_pubsub_leaf(pipe, jid, node)
 
-    did_receive_pusub_subscriptions_result(pipe, result)
+    did_receive_pubsub_subscriptions_result(pipe, result)
     
-    did_receive_pusub_subscriptions_error(pipe, result)
+    did_receive_pubsub_subscriptions_error(pipe, result)
 
-    did_receive_pusub_affiliations_result(pipe, result)
+    did_receive_pubsub_affiliations_result(pipe, result)
     
-    did_receive_pusub_affiliations_error(pipe, result)
+    did_receive_pubsub_affiliations_error(pipe, result)
 
     did_discover_user_pubsub_node(pipe, result)
     
     did_receive_create_node_result(pipe, node, result)    
 
     did_receive_create_node_error(pipe, node, result)    
+
+    did_receive_pubsub_subscribe_result(pipe, result, node) 
+
+    did_receive_pubsub_subscribe_error(pipe, result, node) 
+
+    did_receive_pubsub_unsubscribe_result(pipe, result, node) 
+
+    did_receive_pubsub_unsubscribe_error(pipe, result, node) 
     
 === ERRORS
 

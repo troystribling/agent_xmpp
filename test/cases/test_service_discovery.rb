@@ -9,9 +9,9 @@ class TestServiceDiscovery < Test::Unit::TestCase
     @client = TestClient.new()
     test_init_roster(@client)
     @delegate = @client.new_delegate
-    @server = AgentXmpp::Xmpp::JID.new(@client.jid.domain)
-    @test = AgentXmpp::Xmpp::JID.new('test@plan-b.ath.cx/home')
-    @noone = AgentXmpp::Xmpp::JID.new('noone@plan-b.ath.cx/nowhere')
+    @server = AgentXmpp::Xmpp::Jid.new(@client.jid.domain)
+    @test = AgentXmpp::Xmpp::Jid.new('test@plan-b.ath.cx/home')
+    @noone = AgentXmpp::Xmpp::Jid.new('noone@plan-b.ath.cx/nowhere')
   end
 
   ####------------------------------------------------------------------------------------------------------

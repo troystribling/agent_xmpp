@@ -10,7 +10,7 @@ module AgentXmpp
 
       #.......................................................................................................
       name_xmlns 'message', 'jabber:client'
-      xmpp_child :actions
+      xmpp_child :actions, :event
 
       #####-----------------------------------------------------------------------------------------------------
       class << self
@@ -33,6 +33,12 @@ module AgentXmpp
         super()
         self.to = to if to
         add_element(REXML::Element.new("body").add_text(body)) if body
+      end
+
+      #.......................................................................................................
+      def type
+        stanza_type = attributes['type']
+        stanza_type.nil? ? :normal : stanza_type.to_sym
       end
 
       #.......................................................................................................

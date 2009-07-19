@@ -6,8 +6,8 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
 
   #.........................................................................................................
   def setup
-    @troy = AgentXmpp::Xmpp::JID.new('troy@nowhere.com/home')
-    @noone = AgentXmpp::Xmpp::JID.new('noone@nowhere.com/nothing')
+    @troy = AgentXmpp::Xmpp::Jid.new('troy@nowhere.com/home')
+    @noone = AgentXmpp::Xmpp::Jid.new('noone@nowhere.com/nothing')
     @config = {'jid' => 'test@nowhere.com', 'roster' =>[@troy.bare.to_s], 'password' => 'nopass'}
     @client = TestClient.new(@config)
     test_init_roster(@client)

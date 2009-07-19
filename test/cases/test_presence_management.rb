@@ -10,9 +10,9 @@ class TestPresenceManagement < Test::Unit::TestCase
     @client = TestClient.new(@config)
     test_init_roster(@client)
     @delegate = @client.new_delegate
-    @home = AgentXmpp::Xmpp::JID.new('troy@nowhere.com/home')
-    @work = AgentXmpp::Xmpp::JID.new('troy@nowhere.com/work')
-    @noone = AgentXmpp::Xmpp::JID.new('noone@nowhere.com/here')
+    @home = AgentXmpp::Xmpp::Jid.new('troy@nowhere.com/home')
+    @work = AgentXmpp::Xmpp::Jid.new('troy@nowhere.com/work')
+    @noone = AgentXmpp::Xmpp::Jid.new('noone@nowhere.com/here')
   end
     
   ####------------------------------------------------------------------------------------------------------

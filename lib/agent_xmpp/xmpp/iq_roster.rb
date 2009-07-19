@@ -31,7 +31,7 @@ module AgentXmpp
           request.query.add(Xmpp::RosterItem.new(roster_item_jid))
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_acknowledge_add_roster_item, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_add_roster_item_result, pipe, r)
             elsif r.type.eql?(:error)
               pipe.broadcast_to_delegates(:did_receive_add_roster_item_error, pipe, roster_item_jid)
             end
@@ -44,7 +44,7 @@ module AgentXmpp
           request.query.add(Xmpp::RosterItem.new(roster_item_jid, nil, :remove))
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_acknowledge_remove_roster_item, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_remove_roster_item_result, pipe, r)
             elsif r.type.eql?(:error)
               pipe.broadcast_to_delegates(:did_receive_remove_roster_item_error, pipe, roster_item_jid)
             end
@@ -135,7 +135,7 @@ module AgentXmpp
 
       #.......................................................................................................
       def jid
-        (a = attributes['jid']) ? JID.new(a) : nil
+        (a = attributes['jid']) ? Jid.new(a) : nil
       end
 
       #.......................................................................................................

@@ -9,7 +9,7 @@ class TestErrors < Test::Unit::TestCase
     @client = TestClient.new()
     test_init_roster(@client)
     @delegate = @client.new_delegate
-    @test = AgentXmpp::Xmpp::JID.new('test@plan-b.ath.cx/home')
+    @test = AgentXmpp::Xmpp::Jid.new('test@plan-b.ath.cx/home')
   end
   
   #.........................................................................................................

@@ -13,14 +13,14 @@ module AgentXmpp
       #---------------------------------------------------------------------------------------------------------
       # event flow delegate methods
       #.........................................................................................................
-      # process commands
+      # process command 
       #.........................................................................................................
       def did_receive_command_set(pipe, stanza)
         command = stanza.command
         params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
           :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-        Controller.new(pipe, params).invoke_command
+        Controller.new(pipe, params).invoke_execute
       end
 
       #.........................................................................................................
@@ -211,27 +211,26 @@ module AgentXmpp
       end
       
       #.........................................................................................................
-      def did_acknowledge_add_roster_item(pipe, result)
+      def did_receive_add_roster_item_result(pipe, result)
         AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"   
         Xmpp::Presence.subscribe(result.from)       
         end
 
-      
-      #.........................................................................................................
-      def did_acknowledge_remove_roster_item(pipe, result)
-        AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"   
-      end
-      
       #.........................................................................................................
       def did_receive_add_roster_item_error(pipe, roster_item_jid)
         AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
-        pipe.roster.destroy_by_jid(Xmpp::JID.new(roster_item_jid))
+        pipe.roster.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
+      end
+      
+      #.........................................................................................................
+      def did_receive_remove_roster_item_result(pipe, result)
+        AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"   
       end
       
       #.........................................................................................................
       def did_receive_remove_roster_item_error(pipe, roster_item_jid)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
-        pipe.roster.destroy_by_jid(Xmpp::JID.new(roster_item_jid))
+        pipe.roster.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
       end
       
       #.........................................................................................................
@@ -284,6 +283,7 @@ module AgentXmpp
       def did_receive_discoinfo_result(pipe, discoinfo)   
         from_jid = discoinfo.from
         do_discoitems = true
+        request = []
         if pipe.roster.has_jid?(from_jid) or pipe.services.has_jid?(from_jid)
           q = discoinfo.query
           AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
@@ -291,18 +291,19 @@ module AgentXmpp
           q.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
             if i.category.eql?('pubsub')
-              pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from_jid) if i.type.eql?('service')
-              pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from_jid, q.node) if i.type.eql?('collection')
+              request << pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from_jid) if i.type.eql?('service')
+              request << pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from_jid, q.node) if i.type.eql?('collection')
               if i.type.eql?('leaf')
                 do_discoitems = false
-                pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from_jid, q.node)
+                request << pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from_jid, q.node)
               end
             end
           end
           q.features.each do |f|
             AgentXmpp.logger.info " FEATURE: #{f}"
           end
-          Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) if do_discoitems or q.node.eql?(pipe.pubsub_root)
+          request << Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) if do_discoitems or q.node.eql?(pipe.pubsub_root)
+          request.smash
         else
           AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end        
@@ -367,7 +368,7 @@ module AgentXmpp
       #.........................................................................................................
       # pubsub
       #.........................................................................................................
-      def did_acknowledge_publish(pipe, result, node)
+      def did_receive_publish_result(pipe, result, node)
         AgentXmpp.logger.info "PUBLISH TO NODE ACKNOWLEDEGED: #{node}, #{result.from.to_s}"
       end
       
@@ -378,9 +379,10 @@ module AgentXmpp
         
       #.........................................................................................................
       def did_discover_pupsub_service(pipe, jid)
+        AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}"
         add_publish_methods(pipe, jid)
         @pubsub_service = jid
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}"
+        Xmpp::IqPubSub.subscriptions(pipe, jid)
       end
 
       #.........................................................................................................
@@ -400,54 +402,102 @@ module AgentXmpp
       end
         
       #.........................................................................................................
-      def did_receive_pusub_subscriptions_result(pipe, result)
-        from_jid = result.from
+      def did_receive_pubsub_subscriptions_result(pipe, result)
+        from_jid = result.from.to_s
         AgentXmpp.logger.info "RECEIVED SUBSCRIPTIONS FROM: #{from_jid}"
+        app_subs = BaseController.subscriptions
+        srvr_subs = result.pubsub.subscriptions.map do |s| 
+          AgentXmpp.logger.info "SUBSCRIBED TO NODE: #{from_jid}, #{s.node}"
+          s.node
+        end
+        reqs = app_subs.inject([]) do |r,s|
+                 unless srvr_subs.include?(s)
+                   AgentXmpp.logger.info "SUBSCRIBING TO NODE: #{from_jid}, #{s}"
+                   r << Xmpp::IqPubSub.subscribe(pipe, from_jid, s)
+                 else 
+                   r
+                 end
+               end
+        srvr_subs.inject(reqs) do |r,s|
+          unless app_subs.include?(s) 
+            AgentXmpp.logger.info "UNSUBSCRIBING TO NODE: #{from_jid}, #{s}"
+            r << Xmpp::IqPubSub.unsubscribe(pipe, from_jid, s)
+          else
+            r
+          end
+        end       
       end
       
       #.........................................................................................................
-      def did_receive_pusub_subscriptions_error(pipe, result)
+      def did_receive_pubsub_subscriptions_error(pipe, result)
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED ERROR ON SUBSCRIPTION REQUEST FROM: #{from_jid}"
       end  
 
       #.........................................................................................................
-      def did_receive_pusub_affiliations_result(pipe, result)
+      def did_receive_pubsub_affiliations_result(pipe, result)
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED AFFILIATIONS FROM: #{from_jid}"
       end
       
       #.........................................................................................................
-      def did_receive_pusub_affiliations_error(pipe, result)
+      def did_receive_pubsub_affiliations_error(pipe, result)
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED ERROR ON AFFILIATIONS REQUEST FROM: #{from_jid}"
       end  
 
       #.........................................................................................................
-      def did_receive_create_node_result(pipe, node, result) 
+      def did_receive_pubsub_create_node_result(pipe, result, node) 
         from_jid = result.from
-        did_discover_user_pubsub_node(pipe, from_jid, node)
-        Boot.call_if_implemented(:call_discovered_user_pubsub_node, pipe)     
         AgentXmpp.logger.info "RECEIVED CREATE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
+        if node.eql?(pipe.user_pubsub_node)
+          did_discover_user_pubsub_node(pipe, from_jid, node)
+          Boot.call_if_implemented(:call_discovered_user_pubsub_node, pipe)
+          Xmpp::IqDiscoInfo.get(pipe, from_jid.to_s, node)   
+        end
       end   
 
       #.........................................................................................................
-      def did_receive_create_node_error(pipe, node, result)   
+      def did_receive_pubsub_create_node_error(pipe, result, node)   
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED CREATE NODE ERROR FROM: #{from_jid.to_s}, #{node}"
       end 
 
       #.........................................................................................................
-      def did_receive_delete_node_result(pipe, node, result) 
+      def did_receive_pubsub_delete_node_result(pipe, result, node) 
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED DELETE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
       end   
 
       #.........................................................................................................
-      def did_receive_delete_node_error(pipe, node, result)   
+      def did_receive_pubsub_delete_node_error(pipe, result, node)   
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED DELETE NODE ERROR FROM: #{from_jid.to_s}, #{node}"
       end 
+
+      #.........................................................................................................
+      def did_receive_pubsub_subscribe_result(pipe, result, node) 
+        from_jid = result.from
+        AgentXmpp.logger.info "RECEIVED SUBSCRIBE RESULT FROM: #{from_jid.to_s}, #{node}"
+      end
+
+      #.........................................................................................................
+      def did_receive_pubsub_subscribe_error(pipe, result, node) 
+        from_jid = result.from
+        AgentXmpp.logger.info "RECEIVED SUBSCRIBE ERROR FROM: #{from_jid.to_s}, #{node}"
+      end
+
+      #.........................................................................................................
+      def did_receive_pubsub_unsubscribe_result(pipe, result, node) 
+        from_jid = result.from
+        AgentXmpp.logger.info "RECEIVED UNSUBSCRIBE RESULT FROM: #{from_jid.to_s}, #{node}"
+      end
+
+      #.........................................................................................................
+      def did_receive_pubsub_unsubscribe_error(pipe, result, node) 
+        from_jid = result.from
+        AgentXmpp.logger.info "RECEIVED UNSUBSCRIBE ERROR FROM: #{from_jid.to_s}, #{node}"
+      end
 
       #.........................................................................................................
       # errors

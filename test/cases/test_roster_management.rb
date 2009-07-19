@@ -6,8 +6,8 @@ class TestRosterManagement < Test::Unit::TestCase
 
   #.........................................................................................................
   def setup
-    @troy = AgentXmpp::Xmpp::JID.new('troy@nowhere.com')
-    @dev = AgentXmpp::Xmpp::JID.new('dev@nowhere.com')
+    @troy = AgentXmpp::Xmpp::Jid.new('troy@nowhere.com')
+    @dev = AgentXmpp::Xmpp::Jid.new('dev@nowhere.com')
   end
     
   #.........................................................................................................

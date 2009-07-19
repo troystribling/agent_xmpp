@@ -27,7 +27,6 @@ module AgentXmpp
             def #{method_name.to_s}(*args, &blk)
               ::#{del}.send(#{method_name.inspect}, *args, &blk)
             end
-            private #{method_name.inspect}
           RUBY
         end
       end
@@ -35,7 +34,7 @@ module AgentXmpp
     #### self
     end
 
-    delegate AgentXmpp::BaseController, :execute, :chat
+    delegate AgentXmpp::BaseController, :execute, :chat, :event
     delegate AgentXmpp::Boot, :before_start, :after_connected, :restarting_client, :discovered_user_pubsub_node
 
   #### Delegator 

@@ -6,7 +6,7 @@ module AgentXmpp
   module Xmpp
 
     #####-------------------------------------------------------------------------------------------------------
-    class JID
+    class Jid
 
       #.......................................................................................................
       include Comparable
@@ -53,7 +53,7 @@ module AgentXmpp
 
       #.......................................................................................................
       def strip
-        JID.new(@node, @domain)
+        Jid.new(@node, @domain)
       end
       alias_method :bare, :strip
 
@@ -125,7 +125,7 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def JID::escape(jid)
+      def Jid::escape(jid)
         return jid.to_s.gsub('@', '%')
       end
 
@@ -140,7 +140,7 @@ module AgentXmpp
       end      
       alias_method :bared?, :stripped?
 
-    #### JID
+    #### Jid
     end
     
   #### XMPP

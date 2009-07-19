@@ -10,54 +10,90 @@ module AgentXmpp
 
       #.......................................................................................................
       name_xmlns 'pubsub', 'http://jabber.org/protocol/pubsub'
-      xmpp_child :subscriptions      
       
       #####-------------------------------------------------------------------------------------------------------
       class << self
 
         #.........................................................................................................
-        def create_node(pipe, pubsub, node)
-          iq = Xmpp::Iq.new(:set, pubsub)  
+        def create_node(pipe, to, node)
+          iq = Xmpp::Iq.new(:set, to)  
           create = REXML::Element.new('create')
           create.add_attribute('node', node) 
           iq.pubsub = IqPubSub.new << create
           iq.pubsub << REXML::Element.new('configure') 
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_create_node_result, pipe, node, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_create_node_result, pipe, r, node)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_create_node_error, pipe, node, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_create_node_error, pipe, r, node)
             end
           end     
         end
 
         #.........................................................................................................
-        def subscriptions_get(pipe, to)
+        def subscriptions(pipe, to)
           iq = Xmpp::Iq.new(:get, to)
           iq.pubsub = IqPubSub.new << REXML::Element.new('subscriptions')
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pusub_subscriptions_result, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_subscriptions_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pusub_subscriptions_error, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_subscriptions_error, pipe, r)
             end
           end     
         end
 
         #.........................................................................................................
-        def affiliations_get(pipe, to)
+        def subscribe(pipe, to, node)
+          iq = Xmpp::Iq.new(:set, to)
+          subscribe = REXML::Element.new('subscribe')
+          subscribe.add_attribute('node', node) 
+          subscribe.add_attribute('jid', pipe.jid.bare.to_s) 
+          iq.pubsub = IqPubSub.new << subscribe
+          pipe.send(iq) do |r|
+            if r.type == :result and r.kind_of?(Xmpp::Iq)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_subscribe_result, pipe, r, node)
+            elsif r.type.eql?(:error)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_subscribe_error, pipe, r, node)
+            end
+          end     
+        end
+
+        #.........................................................................................................
+        def unsubscribe(pipe, to, node)
+          iq = Xmpp::Iq.new(:set, to)
+          unsubscribe = REXML::Element.new('unsubscribe')
+          unsubscribe.add_attribute('node', node) 
+          unsubscribe.add_attribute('jid', pipe.jid.bare.to_s) 
+          iq.pubsub = IqPubSub.new << unsubscribe
+          pipe.send(iq) do |r|
+            if r.type == :result and r.kind_of?(Xmpp::Iq)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_unsubscribe_result, pipe, r, node)
+            elsif r.type.eql?(:error)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_unsubscribe_error, pipe, r, node)
+            end
+          end     
+        end
+
+        #.........................................................................................................
+        def affiliations(pipe, to)
           iq = Xmpp::Iq.new(:get, to)
           iq.pubsub = IqPubSub.new << REXML::Element.new('affiliations')
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pusub_affiliations_result, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_affiliations_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pusub_affiliations_error, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_affiliations_error, pipe, r)
             end
           end     
         end
 
       #### self
+      end
+     
+      #.........................................................................................................
+      def subscriptions
+        first_element('subscriptions').elements.to_a('subscription')
       end
      
     #### IqPubSub 
@@ -73,16 +109,16 @@ module AgentXmpp
       class << self
 
         #.........................................................................................................
-        def delete_node(pipe, pubsub, node)
-          iq = Xmpp::Iq.new(:set, pubsub)  
+        def delete_node(pipe, to, node)
+          iq = Xmpp::Iq.new(:set, to)  
           delete = REXML::Element.new('delete')
           delete.add_attribute('node', node) 
           iq.pubsub = IqPubSubOwner.new << delete
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_delete_node_result, pipe, node, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_delete_node_result, pipe, r, node)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_delete_node_error, pipe, node, r)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_delete_node_error, pipe, r, node)
             end
           end     
         end
@@ -110,9 +146,8 @@ module AgentXmpp
           iq.pubsub = IqPubSub.new << pub
           pipe.send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_acknowledge_publish, pipe, r, args[:node])
+              pipe.broadcast_to_delegates(:did_receive_publish_result, pipe, r, args[:node])
             elsif r.type.eql?(:error)
-              AgentXmpp.logger.error "ERROR PUBLISHING NODE: #{args[:node]}"
               pipe.broadcast_to_delegates(:did_receive_publish_error, pipe, r, args[:node])
             end
           end     
@@ -154,6 +189,13 @@ module AgentXmpp
     end
 
     #####-------------------------------------------------------------------------------------------------------
+    class Subscriptions < Element
+      name_xmlns 'subscriptions', 'http://jabber.org/protocol/pubsub'
+
+
+    end
+
+    #####-------------------------------------------------------------------------------------------------------
     class Subscription < Element
 
       #.........................................................................................................
@@ -171,7 +213,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def jid
-        (a = attribute('jid')).nil? ? a : JID.new(a.value)
+        (a = attribute('jid')).nil? ? a : Jid.new(a.value)
       end
 
       #.........................................................................................................

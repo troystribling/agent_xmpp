@@ -67,3 +67,8 @@ execute 'array_hash_array' do
    {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, 
    {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
 end
+
+##########################################################################################################
+event 'test@plan-b.ath.cx', 'val' do
+  AgentXmpp.logger.info "EVENT: val"
+end

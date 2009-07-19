@@ -81,7 +81,7 @@ module AgentXmpp
             DEF
           end
         end
-        
+
       #### self
       end
       

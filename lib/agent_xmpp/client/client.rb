@@ -15,7 +15,7 @@ module AgentXmpp
       @port = config['port'] || 5222
       resource = config['resource'] || Socket.gethostname
       @config = config
-      @jid = Xmpp::JID.new("#{config['jid']}/#{resource}")
+      @jid = Xmpp::Jid.new("#{config['jid']}/#{resource}")
     end
 
     #.........................................................................................................
