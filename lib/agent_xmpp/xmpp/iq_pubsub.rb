@@ -156,6 +156,7 @@ module AgentXmpp
       #### self
       end
 
+      #.........................................................................................................
       def initialize(node=nil)
         super()
         self.node = node if node
@@ -179,20 +180,31 @@ module AgentXmpp
     end
 
     #####-------------------------------------------------------------------------------------------------------
-    class EventItem < Item
-      name_xmlns 'item', 'http://jabber.org/protocol/pubsub' + "#event"
-    end
+    class Event < Element
+      name_xmlns 'event', 'http://jabber.org/protocol/pubsub' + "#event"
+      def items
+        elements.to_a('items')
+      end
+   end
 
     #####-------------------------------------------------------------------------------------------------------
     class EventItems < Items
       name_xmlns 'items', 'http://jabber.org/protocol/pubsub' + "#event"
+      #.........................................................................................................
+      def item
+        elements.to_a('item')
+      end
+    end
+
+    #####-------------------------------------------------------------------------------------------------------
+    class EventItem < Item
+      name_xmlns 'item', 'http://jabber.org/protocol/pubsub' + "#event"
+      xmpp_child :x
     end
 
     #####-------------------------------------------------------------------------------------------------------
     class Subscriptions < Element
       name_xmlns 'subscriptions', 'http://jabber.org/protocol/pubsub'
-
-
     end
 
     #####-------------------------------------------------------------------------------------------------------
@@ -231,7 +243,6 @@ module AgentXmpp
       def state=(mystate)
         attributes['subscription'] = mystate
       end
-      alias subscription state
 
       #.........................................................................................................
       def need_approval?

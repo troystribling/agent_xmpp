@@ -37,22 +37,13 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      def field(var)
-        elements { |xe|
-          return xe if xe.kind_of?(XDataField) and xe.var == var
-        }
-        nil
+      def fields
+        elements.to_a('field')
       end
 
       #.....................................................................................................
-      def fields(including_hidden=false)
-        fields = []
-        each_element do |xe|
-          if xe.kind_of?(XDataField) and (including_hidden or (xe.type != :hidden and xe.type != :fixed))
-            fields << xe
-          end
-        end
-        fields
+      def items
+        elements.to_a('item')
       end
 
       #.....................................................................................................
@@ -93,6 +84,23 @@ module AgentXmpp
         self << field
       end
 
+      #.....................................................................................................
+      def to_native 
+        f, i = fields, items   
+        if f.length.eql?(1)
+          to_scalar(f.first.values.first)
+        else
+          nil
+        end
+      end
+
+    private
+
+    #.....................................................................................................
+    def to_scalar(vals)
+      vals.length.eql?(1) ? vals.first : vals
+    end
+      
     end
 
     #####-------------------------------------------------------------------------------------------------------

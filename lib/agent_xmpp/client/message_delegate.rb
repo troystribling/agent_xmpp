@@ -18,7 +18,7 @@ module AgentXmpp
       def did_receive_command_set(pipe, stanza)
         command = stanza.command
         params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
-          :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :fields => {}}
+          :from => stanza.from.to_s, :node => command.node, :id => stanza.id}
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
         Controller.new(pipe, params).invoke_execute
       end
@@ -27,10 +27,50 @@ module AgentXmpp
       # process chat messages
       #.........................................................................................................
       def did_receive_message_chat(pipe, stanza)
-        params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, \
+        params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, 
           :body => stanza.body}
-        AgentXmpp.logger.info "RECEIVED MESSAGE BODY: #{stanza.body}"
+        AgentXmpp.logger.info "RECEIVED CHAT MESSAGE FROM: #{stanza.from.to_s}"
         Controller.new(pipe, params).invoke_chat
+      end
+
+      #.........................................................................................................
+      # process normal messages
+      #.........................................................................................................
+      def did_receive_message_normal(pipe, stanza)
+        AgentXmpp.logger.info "RECEIVED NORMAL MESSAGE FROM: #{stanza.from.to_s}"
+        if event = stanza.event
+          did_receive_pubsub_event(pipe, event, stanza.to, stanza.from)
+        else
+          did_receive_unsupported_message(pipe, stanza)
+        end
+      end
+
+      #.........................................................................................................
+      # process events
+      #.........................................................................................................
+      def did_receive_pubsub_event(pipe, event, to, from)
+        AgentXmpp.logger.info "RECEIVED EVENT FROM: #{from.to_s}"
+        event.items.each do |is|
+          is.item.each do |i|
+            if data = i.x          
+              params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :from => from, 
+                :node => is.node, :data => data.to_native}
+              Controller.new(pipe, params).invoke_event
+            else
+              did_receive_unsupported_message(pipe, event)
+            end
+          end
+        end          
+      end
+
+      #.........................................................................................................
+      # errors
+      #.........................................................................................................
+      def did_receive_unsupported_message(pipe, msg)
+        AgentXmpp.logger.info "RECEIVED UNSUPPORTED MESSAGE: #{msg.to_s}"
+        if msg.class.eql?(AgentXmpp::Xmpp::Iq)
+          Xmpp::ErrorResponse.feature_not_implemented(stanza)
+        end
       end
 
       #.........................................................................................................
@@ -497,16 +537,6 @@ module AgentXmpp
       def did_receive_pubsub_unsubscribe_error(pipe, result, node) 
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBE ERROR FROM: #{from_jid.to_s}, #{node}"
-      end
-
-      #.........................................................................................................
-      # errors
-      #.........................................................................................................
-      def did_receive_unsupported_message(pipe, stanza)
-        AgentXmpp.logger.info "RECEIVED UNSUPPORTED MESSAGE: #{stanza.to_s}"
-        if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
-          Xmpp::ErrorResponse.feature_not_implemented(stanza)
-        end
       end
       
     private

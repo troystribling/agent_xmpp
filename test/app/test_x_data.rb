@@ -71,4 +71,5 @@ end
 ##########################################################################################################
 event 'test@plan-b.ath.cx', 'val' do
   AgentXmpp.logger.info "EVENT: val"
+  p params[:data]
 end

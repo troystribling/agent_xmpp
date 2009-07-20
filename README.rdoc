@@ -190,6 +190,10 @@ The available callback methods are,
 
     did_receive_message_chat(pipe, stanza)
 
+    did_receive_message_normal(pipe, stanza)
+
+    did_receive_pubsub_event(pipe, event, to, from)
+
 === PubSub
 
     did_acknowledge_publish(pipe, result, node)
