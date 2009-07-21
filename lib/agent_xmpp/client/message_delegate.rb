@@ -52,7 +52,7 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED EVENT FROM: #{from.to_s}"
         event.items.each do |is|
           is.item.each do |i|
-            if data = i.x          
+            if data = i.x and data.type.eql?(:result)         
               params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :from => from, 
                 :node => is.node, :data => data.to_native}
               Controller.new(pipe, params).invoke_event
