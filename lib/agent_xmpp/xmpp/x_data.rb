@@ -87,8 +87,12 @@ module AgentXmpp
       #.....................................................................................................
       def to_native 
         f, i = fields, items   
-        if f.length.eql?(1)
-          to_scalar(f.first.values.first)
+        if f.length.eql?(1) and i.length.eql?(0)
+          to_scalar(f.first.values)
+        elsif f.length > 1 and i.length.eql?(0)  
+          to_hash(f)
+        elsif i.length > 0 
+           to_array_of_hashes(i)
         else
           nil
         end
@@ -99,6 +103,16 @@ module AgentXmpp
     #.....................................................................................................
     def to_scalar(vals)
       vals.length.eql?(1) ? vals.first : vals
+    end
+      
+    #.....................................................................................................
+    def to_hash(flds)
+      flds.inject({}) {|h,f| h[f.var] = to_scalar(f.values); h}
+    end
+
+    #.....................................................................................................
+    def to_array_of_hashes(itms)
+      itms.map{|i| to_hash(i.fields)}
     end
       
     end
@@ -180,7 +194,7 @@ module AgentXmpp
 
       #.....................................................................................................
       def values
-        elements.inject('value', []) {|r,e| r << e.text}
+        elements.inject('value', []){|r,v| r << v.text}
       end
 
       #.....................................................................................................

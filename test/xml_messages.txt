@@ -28,10 +28,100 @@
 </iq>
 
 **** publish to pubsub node
+.... scalar
 <iq id='36339' to='pubsub.plan-b.ath.cx' type='set' xmlns='jabber:client'>
 <pubsub xmlns='http://jabber.org/protocol/pubsub'>
 <publish node='/home/plan-b.ath.cx/test/val'>
 <item><x type='result' xmlns='jabber:x:data'><field><value>The Value</value></field></x></item>
+</publish>
+</pubsub>
+</iq>
+
+.... scalar array
+<iq id='36339' to='pubsub.plan-b.ath.cx' type='set' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<publish node='/home/plan-b.ath.cx/test/val'>
+<item><x type='result' xmlns='jabber:x:data'>
+<field>
+<value>The Value</value>
+<value>The Other Value</value>
+<value>The Final Value</value>
+</field>
+</x></item>
+</publish>
+</pubsub>
+</iq>
+
+.... hash
+<iq id='36339' to='pubsub.plan-b.ath.cx' type='set' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<publish node='/home/plan-b.ath.cx/test/val'>
+<item><x type='result' xmlns='jabber:x:data'>
+<field var='attr1'>
+  <value>The Value</value>
+</field>
+<field var='attr2'>
+  <value>The Other Value</value>
+</field>
+</x></item>
+</publish>
+</pubsub>
+</iq>
+
+.... hash of arrays
+<iq id='36339' to='pubsub.plan-b.ath.cx' type='set' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<publish node='/home/plan-b.ath.cx/test/val'>
+<item><x type='result' xmlns='jabber:x:data'>
+<field var='attr1'>
+  <value>The Value</value>
+  <value>The Next Value</value>
+  <value>The NeLatxt Value</value>
+</field>
+<field var='attr2'>
+  <value>The Other Value</value>
+  <value>More Values</value>
+</field>
+</x></item>
+</publish>
+</pubsub>
+</iq>
+
+... array of hashes
+<iq id='36339' to='pubsub.plan-b.ath.cx' type='set' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<publish node='/home/plan-b.ath.cx/test/val'>
+<item><x type='result' xmlns='jabber:x:data'>
+<reported>
+  <field var='attr1'/>
+  <field var='attr2'/>
+</reported>
+<item>
+  <field var='attr1'>
+    <value>The Value</value>
+  </field>
+  <field var='attr2'>
+    <value>The Other Value</value>
+  </field>
+</item>
+<item>
+  <field var='attr1'>
+    <value>More Values</value>
+  </field>
+  <field var='attr2'>
+    <value>Even more Values</value>
+  </field>
+</item>
+<item>
+  <field var='attr1'>
+    <value>Jut More Values</value>
+    <value>An array</value>
+  </field>
+  <field var='attr2'>
+    <value>And Even More Value</value>
+  </field>
+</item>
+</x></item>
 </publish>
 </pubsub>
 </iq>
