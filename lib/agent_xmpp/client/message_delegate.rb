@@ -556,7 +556,7 @@ module AgentXmpp
             meth = ("publish_" + p.node.gsub(/-/,'_')).to_sym
             unless AgentXmpp.respond_to?(meth)
               AgentXmpp.define_meta_class_method(meth) do |payload| 
-                Xmpp::IqPublish.set(pipe, :node => p.node, :to => pubsub, :payload => payload)
+                Xmpp::IqPublish.set(pipe, :node => p.node, :to => pubsub, :payload => payload.to_x_data)
               end
               AgentXmpp.logger.info "ADDED PUBLISH METHOD FOR NODE: #{p.node}, #{pubsub}"
               Delegator.delegate(AgentXmpp, meth)
@@ -573,7 +573,7 @@ module AgentXmpp
       def find_user_pubsub_root(pipe, pubsub, items)
         if (roots = items.select{|i| i.node.eql?(pipe.user_pubsub_node)}).empty?      
           AgentXmpp.logger.info "USER PUBSUB ROOT NOT FOUND CREATING NODE: #{pubsub.to_s}, #{pipe.user_pubsub_node}"
-          Xmpp::IqPubSub.create_node(pipe, pubsub.to_s, pipe.user_pubsub_node)
+          [Xmpp::IqPubSub.create_node(pipe, pubsub.to_s, pipe.user_pubsub_node)]
         else
           AgentXmpp.logger.info "USER PUBSUB ROOT FOUND: #{pubsub.to_s}, #{pipe.user_pubsub_node}"
           did_discover_user_pubsub_node(pipe, pubsub, pipe.user_pubsub_node); [] 

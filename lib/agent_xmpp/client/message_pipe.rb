@@ -5,7 +5,7 @@ module AgentXmpp
   class MessagePipe
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader   :connection_status, :delegates, :id_callbacks, :connection, :stream_features, \
+    attr_reader   :connection_status, :delegates, :id_callbacks, :connection, :stream_features, 
                   :stream_mechanisms, :config, :user_pubsub_node, :pubsub_root
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send

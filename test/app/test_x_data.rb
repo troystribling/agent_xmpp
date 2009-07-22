@@ -23,7 +23,7 @@ discovered_user_pubsub_node do |pipe|
   AgentXmpp.logger.info "discovered_user_pubsub_node"
   EventMachine::PeriodicTimer.new(60) do
     tnow = Time.now.to_s
-    publish_time(tnow.to_x_data)
+    publish_time(tnow)
     AgentXmpp.logger.info "FIRING EVENT: #{tnow}"
   end  
 end

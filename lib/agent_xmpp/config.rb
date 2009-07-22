@@ -14,6 +14,23 @@ module AgentXmpp
   @config_file = "agent_xmpp.yml"
   @app_path = File.dirname($0)
   @log_file = STDOUT
+  DEFAULT_PUBSUB_CONFIG = {
+    :title                    => 'event',
+    :access_model             => 'presence',
+    :publish_model            => 'publishers',
+    :send_last_published_item => 'on_sub_and_presence',
+    :max_items                => 100,
+    :max_payload_size         => 10240,
+    :deliver_notifications    => 1,
+    :deliver_payloads         => 1,
+    :persist_items            => 1,
+    :subscribe                => 1,
+    :presence_based_delivery  => 0,
+    :notify_config            => 0,
+    :notify_delete            => 0,
+    :notify_retract           => 0,
+    :notify_sub               => 0,
+  }
   
   #.........................................................................................................
   class << self
