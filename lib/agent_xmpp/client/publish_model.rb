@@ -2,34 +2,42 @@
 module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
-  class PublishedModel
+  class PublishModel
 
     #.........................................................................................................
     def initialize(items)
-      @items = items
+      @items = items.map{|i| i.update('status' => :unknown)}
     end
 
     #.........................................................................................................
     def find_all
-      @items.collect{|i| PublishedItem.new(i)}
+      @items.collect{|i| PublishNode.new(i)}
+    end
+
+    #.........................................................................................................
+    def find_all_by_status(status)
+      @items.select{|i| i['status'].eql?(status.to_s)}
+    end
+
+    #.........................................................................................................
+    def all_are_active?
+      find_all_by_status('active').count.eql?(@items.count)
     end
 
     #.........................................................................................................
     def find_by_node(node)
-p node
-p node.split('/').last      
-      item = @items.select{|i| node.split('/').last.eql?(i[:node])}.first
-      item.nil? ? nil : PublishedItem.new(item)
+      item = @items.select{|i| node.split('/').last.eql?(i['node'])}.first
+      item.nil? ? nil : PublishNode.new(item)
     end
 
-  #### PublishedModel
+  #### PublishModel
   end
 
   #####-------------------------------------------------------------------------------------------------------
-  class PublishedItem
+  class PublishNode
 
     #.........................................................................................................
-    attr_reader :node, :title, :access_model, :publish_model, :send_last_published_item, :max_items,
+    attr_reader :node, :status, :title, :access_model, :publish_model, :send_last_published_item, :max_items,
                 :max_payload_size, :deliver_notifications, :deliver_payloads, :persist_items, 
                 :subscribe, :presence_based_delivery, :notify_config, :notify_delete, :notify_retract,
                 :notify_sub
@@ -37,6 +45,7 @@ p node.split('/').last
     #.........................................................................................................
     def initialize(pub)
       @node = pub['node']
+      @status = pub['status']
       @title = pub['title']
       @access_model = pub['access_model']
       @publish_model = pub['publish_model']
@@ -54,7 +63,12 @@ p node.split('/').last
       @notify_sub = pub['notify_sub']
     end
 
-  #### PublishedItem
+    #.........................................................................................................
+    def update_status(status)
+      @status = status
+    end
+
+  #### PublishNode
   end
 
 #### AgentXmpp

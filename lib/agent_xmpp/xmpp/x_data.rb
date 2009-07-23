@@ -200,7 +200,7 @@ module AgentXmpp
       #.....................................................................................................
       def values=(ary)
         delete_elements('value')
-        ary.each {|v| add(REXML::Element.new('value')).text = v}
+        [ary].flatten.each {|v| add(REXML::Element.new('value')).text = v}
       end
 
       #.....................................................................................................

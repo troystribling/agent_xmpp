@@ -54,8 +54,8 @@ module AgentXmpp
       end
 
       #.......................................................................................................
-      def discovered_user_pubsub_node(&blk)
-         define_meta_class_method(:call_discovered_user_pubsub_node, &blk)
+      def discovered_publish_nodes(&blk)
+         define_meta_class_method(:call_discovered_publish_nodes, &blk)
       end
 
       #.......................................................................................................

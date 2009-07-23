@@ -21,12 +21,6 @@ module AgentXmpp
           create.add_attribute('node', node) 
           iq.pubsub = IqPubSub.new << create
           configure = REXML::Element.new('configure')
-          user_config = pipe.published.find_by_node(node)
-          if user_config
-            configure << AgentXmpp::DEFAULT_PUBSUB_CONFIG.inject(Xmpp::XData.new(:submit)) do |config, (var, val)|             
-              config.add_field_with_value("pubsub##{var.to_s}", user_config.send(var) || val)
-            end
-          end
           iq.pubsub << configure 
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
@@ -126,6 +120,27 @@ module AgentXmpp
               pipe.broadcast_to_delegates(:did_receive_pubsub_delete_node_result, pipe, r, node)
             elsif r.type.eql?(:error)
               pipe.broadcast_to_delegates(:did_receive_pubsub_delete_node_error, pipe, r, node)
+            end
+          end     
+        end
+      
+        #.........................................................................................................
+        def configure_node(pipe, to, node)
+          iq = Xmpp::Iq.new(:set, to)  
+          iq.pubsub = IqPubSub.new << create
+          configure = REXML::Element.new('configure')
+          user_config = pipe.published.find_by_node(node)
+          if user_config
+            configure << AgentXmpp::DEFAULT_PUBSUB_CONFIG.inject(Xmpp::XData.new(:submit)) do |config, (var, val)|             
+              config.add_field_with_value("pubsub##{var.to_s}", user_config.send(var) || val)
+            end
+          end
+          iq.pubsub << configure 
+          Send(iq) do |r|
+            if r.type == :result and r.kind_of?(Xmpp::Iq)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_configure_node_result, pipe, r, node)
+            elsif r.type.eql?(:error)
+              pipe.broadcast_to_delegates(:did_receive_pubsub_configure_node_error, pipe, r, node)
             end
           end     
         end

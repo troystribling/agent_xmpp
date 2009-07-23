@@ -19,8 +19,8 @@ restarting_client do |pipe|
 end
 
 #.........................................................................................................
-discovered_user_pubsub_node do |pipe|
-  AgentXmpp.logger.info "discovered_user_pubsub_node"
+discovered_publish_nodes do |pipe|
+  AgentXmpp.logger.info "discovered_publish_nodes"
   EventMachine::PeriodicTimer.new(60) do
     tnow = Time.now.to_s
     publish_time(tnow)
