@@ -513,18 +513,6 @@ module AgentXmpp
       end 
 
       #.........................................................................................................
-      def did_receive_pubsub_configure_node_result(pipe, result, node) 
-        from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED CONFIGURE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
-      end   
-
-      #.........................................................................................................
-      def did_receive_pubsub_configure_node_error(pipe, result, node)   
-        from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED CONFIGURE NODE ERROR FROM: #{from_jid.to_s}, #{node}"
-      end 
-
-      #.........................................................................................................
       def did_receive_pubsub_subscribe_result(pipe, result, node) 
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE RESULT FROM: #{from_jid.to_s}, #{node}"
