@@ -15,19 +15,34 @@ module AgentXmpp
     end
 
     #.........................................................................................................
+    def find_by_node(node)
+      item = @items.select{|i| node.split('/').last.eql?(i['node'])}.first
+      item.nil? ? nil : PublishNode.new(item)
+    end
+
+    #.........................................................................................................
     def find_all_by_status(status)
-      @items.select{|i| i['status'].eql?(status.to_s)}
+      @items.select{|i| i['status'].eql?(status.to_sym)}
+    end
+
+    #.........................................................................................................
+    def delete_by_node(node)
+      @items.delete_if{|i| node.split('/').last.eql?(i['node'])}
+    end
+
+    #.........................................................................................................
+    def update_status(node, status)
+      i = @items.select{|i| node.split('/').last.eql?(i['node'])}.first
+      if i
+        delete_by_node(node)
+        i['status'] = status
+        @items << i; true
+      else; false; end
     end
 
     #.........................................................................................................
     def all_are_active?
-      find_all_by_status('active').count.eql?(@items.count)
-    end
-
-    #.........................................................................................................
-    def find_by_node(node)
-      item = @items.select{|i| node.split('/').last.eql?(i['node'])}.first
-      item.nil? ? nil : PublishNode.new(item)
+      find_all_by_status(:active).count.eql?(@items.count)
     end
 
   #### PublishModel
@@ -61,11 +76,6 @@ module AgentXmpp
       @notify_delete = pub['notify_delete']
       @notify_retract = pub['notify_retract']
       @notify_sub = pub['notify_sub']
-    end
-
-    #.........................................................................................................
-    def update_status(status)
-      @status = status
     end
 
   #### PublishNode

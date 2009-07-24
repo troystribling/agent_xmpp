@@ -19,7 +19,7 @@ module AgentXmpp
     :access_model             => 'presence',
     :publish_model            => 'publishers',
     :send_last_published_item => 'on_sub_and_presence',
-    :max_items                => 100,
+    :max_items                => 20,
     :max_payload_size         => 10240,
     :deliver_notifications    => 1,
     :deliver_payloads         => 1,
@@ -29,7 +29,6 @@ module AgentXmpp
     :notify_config            => 0,
     :notify_delete            => 0,
     :notify_retract           => 0,
-    :notify_sub               => 0,
   }
   
   #.........................................................................................................

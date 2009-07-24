@@ -24,10 +24,10 @@ module AgentXmpp
           user_config = pipe.published.find_by_node(node)
           if user_config
             form = Xmpp::XData.new(:submit)
-            configure << form.add_field_with_value('FORM_TYPE', 'http://jabber.org/protocol/pubsub#node_config', :hidden)
-            # configure << AgentXmpp::DEFAULT_PUBSUB_CONFIG.inject(form) do |f, (var, val)|             
-            #   f.add_field_with_value("pubsub##{var.to_s}", user_config.send(var) || val)
-            # end
+            form.add_field_with_value('FORM_TYPE', 'http://jabber.org/protocol/pubsub#node_config', :hidden)
+            configure << AgentXmpp::DEFAULT_PUBSUB_CONFIG.inject(form) do |f, (var, val)|             
+              f.add_field_with_value("pubsub##{var.to_s}", user_config.send(var) || val)
+            end
           end
           iq.pubsub << configure 
           Send(iq) do |r|

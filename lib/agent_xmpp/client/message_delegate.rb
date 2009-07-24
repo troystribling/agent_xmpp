@@ -485,8 +485,7 @@ module AgentXmpp
       def did_receive_pubsub_create_node_result(pipe, result, node) 
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED CREATE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
-        if config_node = pipe.published.find_by_node(node)
-          config_node.update_status(:active)
+        if pipe.published.update_status(node, :active)
           Boot.call_if_implemented(:call_discovered_publish_nodes, pipe) if pipe.published.all_are_active?
         end
         if node.eql?(pipe.user_pubsub_node)
@@ -553,7 +552,7 @@ module AgentXmpp
             meth = ("publish_" + p.node.gsub(/-/,'_')).to_sym
             unless AgentXmpp.respond_to?(meth)
               AgentXmpp.define_meta_class_method(meth) do |payload| 
-                Xmpp::IqPublish.set(pipe, :node => p.node, :to => pubsub, :payload => payload.to_x_data)
+                pipe.send_resp(Xmpp::IqPublish.set(pipe, :node => p.node, :to => pubsub, :payload => payload.to_x_data))
               end
               AgentXmpp.logger.info "ADDED PUBLISH METHOD FOR NODE: #{p.node}, #{pubsub}"
               Delegator.delegate(AgentXmpp, meth)
@@ -586,7 +585,7 @@ module AgentXmpp
                       AgentXmpp.logger.warn "DELETING PUBSUB NODE: #{pubsub.to_s}, #{n}"
                       u << Xmpp::IqPubSubOwner.delete_node(pipe, pubsub.to_s, n)
                     else
-                      pipe.published.find_by_node(n).update_status(:active)
+                      pipe.published.update_status(n, :active)
                     end; u
                   end                          
         Boot.call_if_implemented(:call_discovered_publish_nodes, pipe) if pipe.published.all_are_active?
