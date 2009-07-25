@@ -21,7 +21,7 @@ module AgentXmpp
       #.........................................................................................................
       def event(jid, node, opts = {}, &blk) 
         j = Xmpp::Jid.new(jid)
-        route(:event, {:node => "/home/#{j.domain}/#{j.node}/#{node}", :opts => opts, :blk => blk}) 
+        route(:event, {:node => "/home/#{j.domain}/#{j.node}/#{node}", :domain => j.domain, :opts => opts, :blk => blk}) 
       end
 
       #.........................................................................................................
@@ -40,8 +40,13 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def subscriptions
-        (@routes[:event] ||= []).map{|r| r[:node]}
+      def subscriptions(domain)
+        (@routes[:event] ||= []).inject([]){|s,r| r[:domain].eql?(domain) ? s << r[:node] : s}
+      end
+      
+      #.........................................................................................................
+      def event_domains
+        (@routes[:event] ||= []).map{|r| r[:domain]}.uniq
       end
       
     #### self

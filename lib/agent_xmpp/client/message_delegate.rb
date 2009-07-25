@@ -338,20 +338,18 @@ module AgentXmpp
           pipe.services.update_with_discoinfo(discoinfo)
           q.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
-            if i.category.eql?('pubsub')
-              request << pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from_jid) if i.type.eql?('service')
-              request << pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from_jid, q.node) if i.type.eql?('collection')
-              if i.type.eql?('leaf')
-                do_discoitems = false
-                request << pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from_jid, q.node)
-              end
-            end
+            request << if i.category.eql?('pubsub')
+                         case i.type
+                         when 'service'    then pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from_jid)
+                         when 'collection' then pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from_jid, q.node)
+                         when 'leaf'       then pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from_jid, q.node)
+                         end
+                       else
+                         Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
+                       end
           end
           q.features.each do |f|
             AgentXmpp.logger.info " FEATURE: #{f}"
-          end
-          if do_discoitems or q.node.eql?(pipe.pubsub_root) or q.node.eql?(pipe.user_pubsub_node)
-            request << Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
           end
           request.smash
         else
@@ -430,17 +428,19 @@ module AgentXmpp
         AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}"
         add_publish_methods(pipe, jid)
         @pubsub_service = jid
-        Xmpp::IqPubSub.subscriptions(pipe, jid)
+        [Xmpp::IqPubSub.subscriptions(pipe, jid), Xmpp::IqDiscoItems.get(pipe, jid)]
       end
 
       #.........................................................................................................
       def did_discover_pupsub_collection(pipe, jid, node)
         AgentXmpp.logger.warn "DISCOVERED PUBSUB COLLECTION: #{jid}, #{node}"
+        Xmpp::IqDiscoItems.get(pipe, jid, node)
       end
         
      #.........................................................................................................
       def did_discover_pupsub_leaf(pipe, jid, node)
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB LEAF: #{jid}, #{node}"
+        AgentXmpp.logger.warn "DISCOVERED PUBSUB LEAF: #{jid}, #{node}"        
+        Xmpp::IqDiscoItems.get(pipe, jid, node) if node.eql?(pipe.pubsub_root) or node.eql?(pipe.user_pubsub_node)
       end
 
       #.........................................................................................................
@@ -452,7 +452,7 @@ module AgentXmpp
       def did_receive_pubsub_subscriptions_result(pipe, result)
         from_jid = result.from.to_s
         AgentXmpp.logger.info "RECEIVED SUBSCRIPTIONS FROM: #{from_jid}"
-        app_subs = BaseController.subscriptions
+        app_subs = BaseController.subscriptions(result.from.domain)
         srvr_subs = result.pubsub.subscriptions.map do |s| 
           AgentXmpp.logger.info "SUBSCRIBED TO NODE: #{from_jid}, #{s.node}"
           s.node
