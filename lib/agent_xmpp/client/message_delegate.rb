@@ -187,7 +187,16 @@ module AgentXmpp
           AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
         end
       end
-      
+
+      #.........................................................................................................
+      def did_receive_presence_error(pipe, presence)
+        AgentXmpp.logger.warn "RECEIVED PRESENCE ERROR FROM: #{presence.from.to_s}" 
+        if pipe.roster.has_jid?(presence.from)
+          AgentXmpp.logger.warn "REMOVING '#{presence.from.to_s}' FROM ROSTER" 
+          Xmpp::IqRoster.remove(pipe, presence.from.to_s)
+        end
+      end
+            
       #.........................................................................................................
       # roster management
       #.........................................................................................................
@@ -246,15 +255,14 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
         pipe.roster.find_all_by_status(:inactive).collect do |j, r|
           AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-          Xmpp::IqRoster.add(pipe, j)  
+          [Xmpp::IqRoster.add(pipe, j), Xmpp::Presence.subscribe(j)]  
         end
       end
       
       #.........................................................................................................
       def did_receive_add_roster_item_result(pipe, result)
-        AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"   
-        Xmpp::Presence.subscribe(result.from)       
-        end
+        AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"                  
+      end
 
       #.........................................................................................................
       def did_receive_add_roster_item_error(pipe, roster_item_jid)

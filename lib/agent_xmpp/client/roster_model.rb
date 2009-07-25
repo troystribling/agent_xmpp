@@ -7,7 +7,7 @@ module AgentXmpp
     #.........................................................................................................
     def initialize(jid, roster)
       @items = Hash.new{|hash, key| hash[key] = {:status => :inactive, :resources => {}}}
-      roster.each{|r| @items[r]}
+      roster.each{|r| @items[r]} if roster
       @items[jid.bare.to_s] = {:status => :both, :resources => {}}
       @items[jid.domain] = {:status => :host, :resources => {jid.domain => {}}}
     end
