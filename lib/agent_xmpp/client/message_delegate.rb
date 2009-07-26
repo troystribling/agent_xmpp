@@ -8,7 +8,7 @@ module AgentXmpp
     class << self
       
       #.........................................................................................................
-      attr_accessor :pubsub_service
+      attr_reader :pubsub_service
       
       #---------------------------------------------------------------------------------------------------------
       # event flow delegate methods
@@ -126,7 +126,8 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
-        [Send(Xmpp::Presence.new(nil, nil, 1)), Xmpp::IqRoster.get(pipe), Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain), 
+        [Send(Xmpp::Presence.new(nil, nil, 1)), Xmpp::IqRoster.get(pipe),  
+         Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain), 
          Xmpp::IqDiscoInfo.get(pipe, pipe.jid.bare)]
       end
 
@@ -338,14 +339,12 @@ module AgentXmpp
           pipe.services.update_with_discoinfo(discoinfo)
           q.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
-            request << if i.category.eql?('pubsub')
-                         case i.type
-                         when 'service'    then pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from_jid)
-                         when 'collection' then pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from_jid, q.node)
-                         when 'leaf'       then pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from_jid, q.node)
-                         end
-                       else
-                         Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
+            request << case i.category
+                         when 'server'     then Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
+                         when 'pubsub'     then process_pubsub_discoinfo(i.type, pipe, from_jid, q.node)
+                         when 'conference'
+                         when 'proxy'
+                         when 'directory'
                        end
           end
           q.features.each do |f|
@@ -420,20 +419,22 @@ module AgentXmpp
       
       #.........................................................................................................
       def did_receive_publish_error(pipe, result, node)
-        AgentXmpp.logger.warn "ERROR PUBLISING TO NODE: #{node}, #{result.from.to_s}"
+        AgentXmpp.logger.info "ERROR PUBLISING TO NODE: #{node}, #{result.from.to_s}"
       end
         
       #.........................................................................................................
       def did_discover_pupsub_service(pipe, jid)
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB SERVICE: #{jid}"
-        add_publish_methods(pipe, jid)
-        @pubsub_service = jid
-        [Xmpp::IqPubSub.subscriptions(pipe, jid), Xmpp::IqDiscoItems.get(pipe, jid)]
+        AgentXmpp.logger.info "DISCOVERED PUBSUB SERVICE: #{jid}"
+        unless pubsub_service
+          add_publish_methods(pipe, jid)
+          @pubsub_service = jid
+          [Xmpp::IqDiscoItems.get(pipe, jid.to_s)] + (BaseController.event_domains - [pipe.jid.domain]).map{|d| Xmpp::IqDiscoItems.get(pipe, d)}
+        else; []; end << Xmpp::IqPubSub.subscriptions(pipe, jid.to_s)
       end
 
       #.........................................................................................................
       def did_discover_pupsub_collection(pipe, jid, node)
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB COLLECTION: #{jid}, #{node}"
+        AgentXmpp.logger.info "DISCOVERED PUBSUB COLLECTION: #{jid}, #{node}"
         Xmpp::IqDiscoItems.get(pipe, jid, node)
       end
         
@@ -445,7 +446,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def did_discover_user_pubsub_node(pipe, pubsub, node)
-        AgentXmpp.logger.warn "DISCOVERED USER PUBSUB NODE: #{pubsub.to_s}, #{node}"
+        AgentXmpp.logger.info "DISCOVERED USER PUBSUB NODE: #{pubsub.to_s}, #{node}"
       end
         
       #.........................................................................................................
@@ -545,6 +546,15 @@ module AgentXmpp
       
     private
     
+      #.........................................................................................................
+      def process_pubsub_discoinfo(type, pipe, from, node)
+        case type
+          when 'service'    then pipe.broadcast_to_delegates(:did_discover_pupsub_service, pipe, from)
+          when 'collection' then pipe.broadcast_to_delegates(:did_discover_pupsub_collection, pipe, from, node)
+          when 'leaf'       then pipe.broadcast_to_delegates(:did_discover_pupsub_leaf, pipe, from, node)
+        end
+      end
+
       #.........................................................................................................
       def process_roster_items(pipe, stanza)
         [stanza.query.inject([]) do |r, i|  

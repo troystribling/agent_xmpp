@@ -69,13 +69,13 @@ execute 'array_hash_array' do
 end
 
 ##########################################################################################################
-# event 'test@planbresearch.com', 'val' do
-#   AgentXmpp.logger.info "EVENT: val"
-#   p params[:data]
-# end
+event 'test@planbresearch.com', 'val' do
+  AgentXmpp.logger.info "EVENT: val"
+  p params[:data]
+end
 
 #.........................................................................................................
-event 'test@plan-b.ath.cx.com', 'val' do
+event 'test@plan-b.ath.cx', 'val' do
   AgentXmpp.logger.info "EVENT: val"
   p params[:data]
 end

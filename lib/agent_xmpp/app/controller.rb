@@ -36,17 +36,17 @@ module AgentXmpp
      
       #.........................................................................................................
       def command_nodes
-        (@routes[:execute] ||= []).map{|r| r[:node]}
+        (routes[:execute] ||= []).map{|r| r[:node]}
       end
 
       #.........................................................................................................
       def subscriptions(domain)
-        (@routes[:event] ||= []).inject([]){|s,r| r[:domain].eql?(domain) ? s << r[:node] : s}
+        (routes[:event] ||= []).inject([]){|s,r| r[:domain].eql?(domain) ? s << r[:node] : s}
       end
       
       #.........................................................................................................
       def event_domains
-        (@routes[:event] ||= []).map{|r| r[:domain]}.uniq
+        (routes[:event] ||= []).map{|r| r[:domain]}.uniq
       end
       
     #### self
