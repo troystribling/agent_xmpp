@@ -70,12 +70,12 @@ end
 
 ##########################################################################################################
 event 'test@planbresearch.com', 'val' do
-  AgentXmpp.logger.info "EVENT: val"
-  p params[:data]
+  AgentXmpp.logger.info "EVENT: test@planbresearch.com/val"
+  p params
 end
 
 #.........................................................................................................
 event 'test@plan-b.ath.cx', 'val' do
-  AgentXmpp.logger.info "EVENT: val"
-  p params[:data]
+  AgentXmpp.logger.info "EVENT: test@plan-b.ath.cx/val"
+  p params
 end

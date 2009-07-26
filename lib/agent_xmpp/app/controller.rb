@@ -40,8 +40,8 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def subscriptions(domain)
-        (routes[:event] ||= []).inject([]){|s,r| r[:domain].eql?(domain) ? s << r[:node] : s}
+      def subscriptions(service)
+        (routes[:event] ||= []).inject([]){|s,r| /#{r[:domain]}/.match(service) ? s << r[:node] : s}
       end
       
       #.........................................................................................................

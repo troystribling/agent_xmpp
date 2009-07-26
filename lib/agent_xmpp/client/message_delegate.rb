@@ -39,7 +39,7 @@ module AgentXmpp
       def did_receive_message_normal(pipe, stanza)
         AgentXmpp.logger.info "RECEIVED NORMAL MESSAGE FROM: #{stanza.from.to_s}"
         if event = stanza.event
-          did_receive_pubsub_event(pipe, event, stanza.to, stanza.from)
+          did_receive_pubsub_event(pipe, event, stanza.to.to_s, stanza.from.to_s)
         else
           did_receive_unsupported_message(pipe, stanza)
         end
@@ -340,19 +340,28 @@ module AgentXmpp
           q.identities.each do |i|
             AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
             request << case i.category
-                         when 'server'     then Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
-                         when 'pubsub'     then process_pubsub_discoinfo(i.type, pipe, from_jid, q.node)
+                         when 'server'        then Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
+                         when 'pubsub'        then process_pubsub_discoinfo(i.type, pipe, from_jid, q.node)
                          when 'conference'
                          when 'proxy'
                          when 'directory'
+                         when 'client'
+                         when 'automation'
+                         when 'auth'
+                         when 'collaboration'
+                         when 'componenet'
+                         when 'gateway'
+                         when 'hierarchy'
+                         when 'headline'
+                         when 'store'
                        end
-          end
+                     end
           q.features.each do |f|
             AgentXmpp.logger.info " FEATURE: #{f}"
           end
           request.smash
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+          AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT A ROSTER ITEM OR SERVICE: #{from_jid.to_s}"
         end        
       end
       
@@ -400,7 +409,7 @@ module AgentXmpp
             r << Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node)         
           end
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO ITEMS FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+          AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT A ROSTER ITEM OR SERVICE: #{from_jid.to_s}"
         end        
       end
       
@@ -425,17 +434,18 @@ module AgentXmpp
       #.........................................................................................................
       def did_discover_pupsub_service(pipe, jid)
         AgentXmpp.logger.info "DISCOVERED PUBSUB SERVICE: #{jid}"
+        req = [Xmpp::IqPubSub.subscriptions(pipe, jid.to_s)]
         unless pubsub_service
           add_publish_methods(pipe, jid)
           @pubsub_service = jid
-          [Xmpp::IqDiscoItems.get(pipe, jid.to_s)] + (BaseController.event_domains - [pipe.jid.domain]).map{|d| Xmpp::IqDiscoItems.get(pipe, d)}
-        else; []; end << Xmpp::IqPubSub.subscriptions(pipe, jid.to_s)
+           req += [Xmpp::IqDiscoItems.get(pipe, jid.to_s)] + init_remote_services(pipe)
+        end; req
       end
 
       #.........................................................................................................
       def did_discover_pupsub_collection(pipe, jid, node)
         AgentXmpp.logger.info "DISCOVERED PUBSUB COLLECTION: #{jid}, #{node}"
-        Xmpp::IqDiscoItems.get(pipe, jid, node)
+        Xmpp::IqDiscoItems.get(pipe, jid, node) if pubsub_service.eql?(jid)
       end
         
      #.........................................................................................................
@@ -613,6 +623,14 @@ module AgentXmpp
             u << Xmpp::IqPubSub.create_node(pipe, pubsub.to_s, n)
           end; u
         end                          
+      end
+          
+      #.........................................................................................................
+      def init_remote_services(pipe)
+        (BaseController.event_domains-[pipe.jid.domain]).map do |d| 
+          pipe.services.create(d)
+          Xmpp::IqDiscoInfo.get(pipe, d)
+        end
       end
           
     #### self
