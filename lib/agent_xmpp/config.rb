@@ -4,6 +4,7 @@ module AgentXmpp
   VERSION = "0.0.0"
   AGENT_XMPP_NAME = 'AgentXMPP'
   OS_VERSION = IO.popen('uname -sr').readlines.to_s.strip
+  SUBSCRIBE_RETRY_PERIOD = 60
   IDENTITY = {:category => 'client', :name => AGENT_XMPP_NAME, :type => 'bot'}
   FEATURES = ['http://jabber.org/protocol/disco#info', 
               'http://jabber.org/protocol/disco#items',
@@ -11,9 +12,6 @@ module AgentXmpp
               'jabber:x:data',
               'http://jabber.org/protocol/commands',
               'http://jabber.org/protocol/muc']
-  @config_file = "agent_xmpp.yml"
-  @app_path = File.dirname($0)
-  @log_file = STDOUT
   DEFAULT_PUBSUB_CONFIG = {
     :title                    => 'event',
     :access_model             => 'presence',
@@ -27,6 +25,11 @@ module AgentXmpp
     :notify_delete            => 0,
     :notify_retract           => 0,
   }
+
+  #.........................................................................................................
+  @config_file = "agent_xmpp.yml"
+  @app_path = File.dirname($0)
+  @log_file = STDOUT
   
   #.........................................................................................................
   class << self

@@ -75,6 +75,12 @@ event 'test@planbresearch.com', 'val' do
 end
 
 #.........................................................................................................
+event 'test@planbresearch.com', 'waiting' do
+  AgentXmpp.logger.info "EVENT: test@planbresearch.com/waiting"
+  p params
+end
+
+#.........................................................................................................
 event 'test@plan-b.ath.cx', 'val' do
   AgentXmpp.logger.info "EVENT: test@plan-b.ath.cx/val"
   p params

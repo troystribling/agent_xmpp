@@ -26,6 +26,7 @@ module AgentXmpp
         AgentXmpp.logger.info "APPLICATION PATH: #{AgentXmpp.app_path}"
         AgentXmpp.logger.info "LOG FILE: #{AgentXmpp.log_file.kind_of?(String) ? AgentXmpp.log_file : "STDOUT"}"
         AgentXmpp.logger.info "CONFIGURATION FILE: #{AgentXmpp.config_file}"
+        AgentXmpp.logger.level = Logger::WARN 
 
         ####..............
         raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 

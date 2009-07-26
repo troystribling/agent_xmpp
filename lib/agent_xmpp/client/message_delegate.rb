@@ -450,7 +450,7 @@ module AgentXmpp
         
      #.........................................................................................................
       def did_discover_pupsub_leaf(pipe, jid, node)
-        AgentXmpp.logger.warn "DISCOVERED PUBSUB LEAF: #{jid}, #{node}"        
+        AgentXmpp.logger.info "DISCOVERED PUBSUB LEAF: #{jid}, #{node}"        
         Xmpp::IqDiscoItems.get(pipe, jid, node) if node.eql?(pipe.pubsub_root) or node.eql?(pipe.user_pubsub_node)
       end
 
@@ -476,7 +476,7 @@ module AgentXmpp
                end
         srvr_subs.inject(reqs) do |r,s|
           unless app_subs.include?(s) 
-            AgentXmpp.logger.info "UNSUBSCRIBING TO NODE: #{from_jid}, #{s}"
+            AgentXmpp.logger.warn "UNSUBSCRIBING TO NODE: #{from_jid}, #{s}"
             r << Xmpp::IqPubSub.unsubscribe(pipe, from_jid, s)
           end; r
         end       
@@ -485,7 +485,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_pubsub_subscriptions_error(pipe, result)
         from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED ERROR ON SUBSCRIPTION REQUEST FROM: #{from_jid}"
+        AgentXmpp.logger.warn "RECEIVED ERROR ON SUBSCRIPTION REQUEST FROM: #{from_jid}"
       end  
 
       #.........................................................................................................
@@ -539,9 +539,19 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_pubsub_subscribe_error(pipe, result, node) 
         from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED SUBSCRIBE ERROR FROM: #{from_jid.to_s}, #{node}"
+        AgentXmpp.logger.warn "RECEIVED SUBSCRIBE ERROR FROM: #{from_jid.to_s}, #{node}"
+        did_receive_pubsub_subscribe_error_item_not_found(pipe, result, node) if result.error.error.eql?('item-not-found')
       end
 
+      #.........................................................................................................
+      def did_receive_pubsub_subscribe_error_item_not_found(pipe, result, node) 
+        from_jid = result.from
+        AgentXmpp.logger.warn "RECEIVED SUBSCRIBE ERROR ITEM-NOT-FOUND FROM: #{from_jid.to_s}, #{node}; RETRYING SUBSCRIPTION IN #{AgentXmpp::SUBSCRIBE_RETRY_PERIOD}s"
+        EventMachine::Timer.new(AgentXmpp::SUBSCRIBE_RETRY_PERIOD) do
+          pipe.send_resp(Xmpp::IqPubSub.subscribe(pipe, from_jid.to_s, node))
+        end        
+      end
+    
       #.........................................................................................................
       def did_receive_pubsub_unsubscribe_result(pipe, result, node) 
         from_jid = result.from

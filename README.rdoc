@@ -224,6 +224,8 @@ The available callback methods are,
 
     did_receive_pubsub_subscribe_error(pipe, result, node) 
 
+    did_receive_pubsub_subscribe_error_item_not_found(pipe, result, node) 
+
     did_receive_pubsub_unsubscribe_result(pipe, result, node) 
 
     did_receive_pubsub_unsubscribe_error(pipe, result, node) 
