@@ -12,14 +12,14 @@ module AgentXmpp
       name_xmlns 'command', 'http://jabber.org/protocol/commands'
       xmpp_attribute :node, :sessionid
       xmpp_attribute :action, :status, :sym => true
-      xmpp_child :actions
+      xmpp_child :actions, :x
 
       #####-------------------------------------------------------------------------------------------------------
       class << self
         
         #.........................................................................................................
         def result(args)
-          iq = Xmpp::Iq.new(:result, args[:to])
+          iq = Iq.new(:result, args[:to])
           iq.id = args[:id] unless args[:id].nil?
           iq.command = new(args[:node])
           iq.command.status = 'completed'

@@ -4,6 +4,28 @@ module AgentXmpp
   #####-------------------------------------------------------------------------------------------------------
   class Client
 
+    #####-------------------------------------------------------------------------------------------------------
+    class << self
+
+      #.........................................................................................................
+      def command(args)
+        raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
+        iq = Xmpp::Iq.new(:set, args[:to])
+        iq.command = Xmpp::IqCommand.new(args[:node])
+        iq.command.action = :execute
+        iq.command << args[:params].to_x_data(:submit) if args[:params]
+        Send(iq) do |r|
+          if block_given?
+            status = r.type
+            data = (status.eql?(:result) and r.command and r.command.x) ? r.command.x.to_natve : nil
+            yield(status, data) 
+          end
+        end     
+      end
+
+    #### self
+    end
+    
     #---------------------------------------------------------------------------------------------------------
     attr_reader :port, :password, :connection, :config
     attr_accessor :jid
