@@ -19,13 +19,26 @@ restarting_client do |pipe|
 end
 
 #.........................................................................................................
-discovered_publish_nodes do |pipe|
+discovered_all_publish_nodes do |pipe|
   AgentXmpp.logger.info "discovered_publish_nodes"
   EventMachine::PeriodicTimer.new(60) do
     tnow = Time.now.to_s
     publish_time(tnow)
     AgentXmpp.logger.info "FIRING EVENT: #{tnow}"
   end  
+end
+
+#.........................................................................................................
+discovered_pubsub_node do |pipe, service, node|
+  AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
+end
+
+#.........................................................................................................
+discovered_command_nodes do |pipe, nodes|
+  AgentXmpp.logger.info "discovered_command_nodes"
+  nodes.each do |n|
+    AgentXmpp.logger.info "NODE: #{n.jid}, #{n.node}"
+  end
 end
 
 ##########################################################################################################

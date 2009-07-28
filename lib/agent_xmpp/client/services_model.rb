@@ -40,44 +40,34 @@ module AgentXmpp
     end 
 
     #.........................................................................................................
-    def identities(jid)
-      has_jid?(jid.to_s) ? @service[from_jid][:discoinfo].identities : []
+    def identities(jid, node=nil)
+      if has_jid?(jid.to_s) 
+        node.nil ? @service[from_jid][:discoinfo].identities : @service[from_jid][:node][node][:discoinfo].identities
+      else; []; end
     end 
 
     #.........................................................................................................
-    def features(jid)
-      has_jid?(jid.to_s) ? @service[from_jid][:discoinfo].features : []
+    def features(jid, node=nil)
+      if has_jid?(jid.to_s) 
+        node.nil ? @service[from_jid][:discoinfo].features : @service[from_jid][:node][node][:discoinfo].features 
+      else; []; end
     end 
         
     #.........................................................................................................
-    def items(jid)
-      has_jid?(jid.to_s) ? @service[from_jid][:discoitems].items : []
+    def items(jid, node=nil)
+      if has_jid?(jid.to_s) 
+        node.nil ? @service[from_jid][:discoitems].items : @service[from_jid][:node][node][:discoitems].items 
+      else; []; end
     end 
         
     #.........................................................................................................
     def update_with_discoinfo(disco)
-      from_jid = disco.from.to_s  
-      node = disco.query.node
-      if node 
-        @service[from_jid][:discoinfo] = disco.query 
-      else
-        @service[from_jid][:node] = {} if @service[from_jid][:node].nil?
-        @service[from_jid][:node][node] = {} if @service[from_jid][:node][node].nil?
-        @service[from_jid][:node][node][:discoinfo] = disco.query 
-      end
+      save_item_disco(:discoinfo, disco)
     end
  
     #.........................................................................................................
     def update_with_discoitems(disco)      
-      from_jid = disco.from.to_s     
-      node = disco.query.node
-      if node 
-        @service[from_jid][:discoitems] = disco.query 
-      else
-        @service[from_jid][:node] = {} if @service[from_jid][:node].nil?
-        @service[from_jid][:node][node] = {} if @service[from_jid][:node][node].nil?
-        @service[from_jid][:node][node][:discoitems] = disco.query 
-      end
+      save_item_disco(:discoitems, disco)
     end
 
     #.........................................................................................................
@@ -85,6 +75,21 @@ module AgentXmpp
       @service.send(meth, *args, &blk)
     end
 
+  private
+  
+    #.........................................................................................................
+    def save_item_disco(item, disco)
+      from_jid = disco.from.to_s  
+      node = disco.query.node
+      unless node 
+        @service[from_jid][:node] = {} if @service[from_jid][:node].nil?
+        @service[from_jid][:node][node] = {} if @service[from_jid][:node][node].nil?
+        @service[from_jid][:node][node][item] = disco.query 
+      else
+        @service[from_jid][item] = disco.query 
+      end
+    end
+  
   #### ServicesModel
   end
 

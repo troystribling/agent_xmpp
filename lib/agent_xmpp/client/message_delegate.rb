@@ -142,9 +142,11 @@ module AgentXmpp
           response = []
           unless from_jid.to_s.eql?(pipe.jid.to_s)
             response << Xmpp::IqVersion.request(pipe, from_jid) unless pipe.roster.has_version?(from_jid)
-            response << Xmpp::IqDiscoInfo.get(pipe, from_jid) unless pipe.services.has_jid?(from_jid)
-          end
-          response
+            unless pipe.services.has_jid?(from_jid)
+              response << Xmpp::IqDiscoInfo.get(pipe, from_jid)
+              response << Xmpp::IqDiscoItems.get(pipe, from_jid, 'http://jabber.org/protocol/commands')
+            end
+          end; response
         else
           AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
         end
@@ -397,6 +399,9 @@ module AgentXmpp
           q = discoitems.query
           AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
           pipe.services.update_with_discoitems(discoitems)
+          if q.node.eql?('http://jabber.org/protocol/commands') and not q.items.empty?
+            Boot.call_if_implemented(:call_discovered_command_nodes, pipe, q.items) 
+          end
           msgs = if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.pubsub_root)
                    create_user_pubsub_root(pipe, from_jid, q.items)
                  else ; []; end
@@ -451,7 +456,11 @@ module AgentXmpp
      #.........................................................................................................
       def did_discover_pupsub_leaf(pipe, jid, node)
         AgentXmpp.logger.info "DISCOVERED PUBSUB LEAF: #{jid}, #{node}"        
-        Xmpp::IqDiscoItems.get(pipe, jid, node) if node.eql?(pipe.pubsub_root) or node.eql?(pipe.user_pubsub_node)
+        if node.eql?(pipe.pubsub_root) or node.eql?(pipe.user_pubsub_node)          
+          Xmpp::IqDiscoItems.get(pipe, jid, node)
+        else
+          Boot.call_if_implemented(:call_discovered_pubsub_node, pipe, jid, node)
+        end
       end
 
       #.........................................................................................................
@@ -505,7 +514,7 @@ module AgentXmpp
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED CREATE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
         if pipe.published.update_status(node, :active)
-          Boot.call_if_implemented(:call_discovered_publish_nodes, pipe) if pipe.published.all_are_active?
+          Boot.call_if_implemented(:call_discovered_all_publish_nodes, pipe) if pipe.published.all_are_active?
         end
         if node.eql?(pipe.user_pubsub_node)
           [did_discover_user_pubsub_node(pipe, from_jid, node), Xmpp::IqDiscoInfo.get(pipe, from_jid.to_s, node)]   
@@ -626,7 +635,7 @@ module AgentXmpp
                       pipe.published.update_status(n, :active)
                     end; u
                   end                          
-        Boot.call_if_implemented(:call_discovered_publish_nodes, pipe) if pipe.published.all_are_active?
+        Boot.call_if_implemented(:call_discovered_all_publish_nodes, pipe) if pipe.published.all_are_active?
         config_nodes.inject(updates) do |u,n|
           unless disco_nodes.include?(n) 
             AgentXmpp.logger.warn "ADDING PUBSUB NODE: #{pubsub.to_s}, #{n}"
