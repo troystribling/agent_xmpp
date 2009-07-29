@@ -138,9 +138,10 @@ module AgentXmpp
         if pipe.roster.has_jid?(presence.from) 
           from_jid = presence.from    
           pipe.roster.update_resource(presence)
-          AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s }"
+          AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s}"
           response = []
           unless from_jid.to_s.eql?(pipe.jid.to_s)
+            Boot.call_if_implemented(:call_received_presence, pipe, from_jid.to_s, :available)             
             response << Xmpp::IqVersion.request(pipe, from_jid) unless pipe.roster.has_version?(from_jid)
             unless pipe.services.has_jid?(from_jid)
               response << Xmpp::IqDiscoInfo.get(pipe, from_jid)
@@ -174,6 +175,7 @@ module AgentXmpp
         from_jid = presence.from    
         if pipe.roster.has_jid?(from_jid) 
           pipe.roster.update_resource(presence)
+          Boot.call_if_implemented(:call_received_presence, pipe, from_jid.to_s, :unavailable)             
           AgentXmpp.logger.info "RECEIVED UNAVAILABLE PRESENCE FROM: #{from_jid.to_s }"
         else
           AgentXmpp.logger.warn "RECEIVED UNAVAILABLE PRESENCE FROM JID NOT IN ROSTER: #{from_jid}"   
@@ -256,20 +258,20 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_all_roster_items(pipe)
         AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
-        pipe.roster.find_all_by_status(:inactive).collect do |j, r|
-          AgentXmpp.logger.info "ADDING CONTACT: #{j}" 
-          [Xmpp::IqRoster.add(pipe, j), Xmpp::Presence.subscribe(j)]  
+        pipe.roster.find_all_by_status(:inactive).map do |r|
+          AgentXmpp.logger.info "ADDING CONTACT: #{r.jid}" 
+          [Xmpp::IqRoster.update(pipe, r.jid, r.groups), Xmpp::Presence.subscribe(r.jid)]  
         end
       end
       
       #.........................................................................................................
-      def did_receive_add_roster_item_result(pipe, result)
-        AgentXmpp.logger.info "ADD ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"                  
+      def did_receive_update_roster_item_result(pipe, result)
+        AgentXmpp.logger.info "UPDATE ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"                  
       end
 
       #.........................................................................................................
-      def did_receive_add_roster_item_error(pipe, roster_item_jid)
-        AgentXmpp.logger.info "ADD ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
+      def did_receive_update_roster_item_error(pipe, roster_item_jid)
+        AgentXmpp.logger.info "UPDATE ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
         pipe.roster.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
       end
       

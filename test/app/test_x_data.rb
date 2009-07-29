@@ -41,6 +41,11 @@ discovered_command_nodes do |pipe, nodes|
   end
 end
 
+#.........................................................................................................
+received_presence do |pipe, from, status|
+  AgentXmpp.logger.info "received_presence: #{from}, #{status}"
+end
+
 ##########################################################################################################
 execute 'scalar' do
   AgentXmpp.logger.info "ACTION: scalar"

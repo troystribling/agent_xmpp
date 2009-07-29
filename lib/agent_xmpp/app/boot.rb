@@ -44,36 +44,17 @@ module AgentXmpp
         send(method, *args) if respond_to?(method)
       end
       
-      #.......................................................................................................
-      def before_start(&blk)
-         define_meta_class_method(:call_before_start, &blk)
-      end
-
-      #.......................................................................................................
-      def after_connected(&blk)
-         define_meta_class_method(:call_after_connected, &blk)
-      end
-
-      #.......................................................................................................
-      def discovered_all_publish_nodes(&blk)
-         define_meta_class_method(:call_discovered_all_publish_nodes, &blk)
-      end
-
-      #.......................................................................................................
-      def discovered_command_nodes(&blk)
-         define_meta_class_method(:call_discovered_command_nodes, &blk)
-      end
-
-      #.......................................................................................................
-      def discovered_pubsub_node(&blk)
-         define_meta_class_method(:call_discovered_pubsub_node, &blk)
-      end
-
-      #.......................................................................................................
-      def restarting_client(&blk)
-         define_meta_class_method(:call_restarting_client, &blk)
-      end
-                    
+      #.........................................................................................................
+      def callbacks(*args)
+        args.each do |meth| 
+          instance_eval <<-do_eval
+            def #{meth}(&blk)
+              define_meta_class_method(:call_#{meth}, &blk)
+            end
+          do_eval
+        end
+      end 
+                          
     ####......................................................................................................
     private
 
@@ -84,6 +65,10 @@ module AgentXmpp
     
     #### self
     end
+
+    #.........................................................................................................
+    callbacks(:before_start, :after_connected, :discovered_all_publish_nodes, :discovered_command_nodes, 
+              :discovered_pubsub_node, :received_presence, :restarting_client)
 
   #### Boot
   end

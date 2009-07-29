@@ -156,13 +156,13 @@ The available callback methods are,
 
     did_receive_all_roster_items(pipe)
 
-    did_acknowledge_add_roster_item(pipe, response)
+    did_receive_update_roster_item_result(pipe, response)
 
-    did_acknowledge_remove_roster_item(pipe, response)
+    did_receive_remove_roster_item(pipe, response)
 
     did_receive_remove_roster_item_error(pipe, response)
 
-    did_receive_add_roster_item_error(pipe, response)
+    did_receive_update_roster_item_error(pipe, response)
 
 === Service Discovery
 

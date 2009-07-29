@@ -6,10 +6,9 @@ module AgentXmpp
 
     #.........................................................................................................
     def initialize(jid, roster)
-      @items = Hash.new{|hash, key| hash[key] = {:status => :inactive, :resources => {}}}
-      roster.each{|r| @items[r]} if roster
-      @items[jid.bare.to_s] = {:status => :both, :resources => {}}
-      @items[jid.domain] = {:status => :host, :resources => {jid.domain => {}}}
+      roster.each{|r| @items[r['jid']] = {:status => :inactive, :resources => {}, :groups => r['groups'], :jid => r['jid']}} if roster
+      @items[jid.bare.to_s] = {:status => :both, :resources => {}, :groups => []}
+      @items[jid.domain] = {:status => :host, :resources => {jid.domain => {}}, :groups => []}
     end
 
     #.........................................................................................................
@@ -24,12 +23,12 @@ module AgentXmpp
 
     #.........................................................................................................
     def find_by_jid(jid)
-      @items[jid.bare.to_s].nil? ? nil : RosterItemModel.new(@items[jid])   
+      @items[jid.bare.to_s].nil? ? nil : RosterItemModel.new(@items[jid.bare.to_s])   
     end
 
     #.........................................................................................................
     def find_all_by_status(status)
-      @items.select{|j,r| r[:status].eql?(status)}    
+      @items.select{|j,r| r[:status].eql?(status)}.map{|i| RosterItemModel.new(r)}    
     end
 
     #.........................................................................................................
@@ -37,15 +36,6 @@ module AgentXmpp
       @items.delete(jid.bare.to_s)
     end 
     
-    #.........................................................................................................
-    def features(jid)
-      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
-        @items[jid.bare.to_s][:resources][jid.to_s][:discoinfo].features
-      else 
-        []
-      end
-    end 
-
     #.........................................................................................................
     def has_resource?(jid)
       not @items[jid.bare.to_s][:resources][jid.to_s].nil?
@@ -113,11 +103,13 @@ module AgentXmpp
   class RosterItemModel
 
     #.........................................................................................................
-    attr_reader :status
+    attr_reader :status, :groups, :jid
     
     #.........................................................................................................
     def initialize(item)
       @status = item[:status]
+      @groups = item[:groups]
+      @jid = item[:jid]
     end
 
   #### RosterItemModel

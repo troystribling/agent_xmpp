@@ -26,14 +26,16 @@ module AgentXmpp
         end
 
         #.........................................................................................................
-        def add(pipe, roster_item_jid)
+        def update(pipe, roster_item_jid, groups=nil)
           request = new_rosterset
-          request.query.add(Xmpp::RosterItem.new(roster_item_jid))
+          item = Xmpp::RosterItem.new(roster_item_jid)
+          item.goups = groups unless groups.nil?
+          request.query.add(item)
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_add_roster_item_result, pipe, r)
+              pipe.broadcast_to_delegates(:did_receive_update_roster_item_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_add_roster_item_error, pipe, roster_item_jid)
+              pipe.broadcast_to_delegates(:did_receive_update_roster_item_error, pipe, roster_item_jid)
             end
           end
         end
@@ -161,7 +163,7 @@ module AgentXmpp
 
       #.......................................................................................................
       def groups
-        elements.inject('group', []) {|r, group| r.push(group.text)}.uniq
+        elements.inject('group', []) {|r, g| r << g.text}.uniq
       end
 
       #.......................................................................................................
