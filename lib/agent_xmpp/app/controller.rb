@@ -66,7 +66,8 @@ module AgentXmpp
        route = get_route(params[:action])
        unless route.nil?
          define_meta_class_method(:request, &route[:blk])
-         define_meta_class_method(:request_callback) do |result|
+         define_meta_class_method(:request_callback) do |*result|
+           result = result.first if result.length.eql?(1)           
            add_payload_to_container(result.to_x_data)
          end
          handle_request
@@ -81,10 +82,11 @@ module AgentXmpp
         route = get_route(:event)
         unless route.nil?
           define_meta_class_method(:request, &route[:blk])
-          handle_request
-          define_meta_class_method(:request_callback) do |result|
+          define_meta_class_method(:request_callback) do |*result|
+            result = result.first if result.length.eql?(1)           
             pipe.send_resp(result)
           end
+          handle_request
         else
           AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}'}."
         end

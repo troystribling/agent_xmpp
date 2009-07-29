@@ -40,6 +40,19 @@
 </pubsub>
 </iq>
 
+**** get subscriptions
+<iq id='24272' to='pubsub.plan-b.ath.cx' type='get' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<subscriptions/>
+</pubsub>
+</iq>
+
+<iq id='24272' to='pubsub.planbresearch.com' type='get' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<subscriptions/>
+</pubsub>
+</iq>
+ 
 **** get pubsub node subscriber configuration
 <iq type='get' to='pubsub.plan-b.ath.cx' id='23513'>
 <pubsub xmlns='http://jabber.org/protocol/pubsub'>
@@ -84,6 +97,20 @@
 <iq id='36339' to='pubsub.planbresearch.com' type='set' xmlns='jabber:client'>
 <pubsub xmlns='http://jabber.org/protocol/pubsub'>
 <publish node='/home/planbresearch.com/test/val'>
+<item><x type='result' xmlns='jabber:x:data'>
+<field>
+<value>The Value</value>
+<value>The Other Value</value>
+<value>The Final Value</value>
+</field>
+</x></item>
+</publish>
+</pubsub>
+</iq>
+
+<iq id='36339' to='pubsub.plan-b.ath.cx' type='set' xmlns='jabber:client'>
+<pubsub xmlns='http://jabber.org/protocol/pubsub'>
+<publish node='/home/plan-b.ath.cx/test/val'>
 <item><x type='result' xmlns='jabber:x:data'>
 <field>
 <value>The Value</value>
