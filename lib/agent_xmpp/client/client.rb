@@ -27,7 +27,7 @@ module AgentXmpp
     end
     
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :port, :password, :connection, :config
+    attr_reader :port, :password, :connection, :config, :priority
     attr_accessor :jid
     #---------------------------------------------------------------------------------------------------------
 
@@ -35,6 +35,7 @@ module AgentXmpp
     def initialize(config)
       @password = config['password']
       @port = config['port'] || 5222
+      @priority = set_priority(config['priority'])
       resource = config['resource'] || Socket.gethostname
       @config = config
       @jid = Xmpp::Jid.new("#{config['jid']}/#{resource}")
@@ -79,6 +80,17 @@ module AgentXmpp
       connection.pipe.remove_delegate(delegate)
     end
     
+  private
+  
+    #.........................................................................................................
+    def set_priority(pri)
+      if pri
+        pri = -127 if pri < -127
+        pri = 128 if pri > 128
+        pri
+      else; 1; end
+    end
+      
   #### Client
   end
 

@@ -6,8 +6,10 @@ module AgentXmpp
 
     #.........................................................................................................
     def initialize(jid, roster)
-      roster.each{|r| @items[r['jid']] = {:status => :inactive, :resources => {}, :groups => r['groups'], :jid => r['jid']}} if roster
-      @items[jid.bare.to_s] = {:status => :both, :resources => {}, :groups => []}
+      @items = {}
+      roster.each{|r| @items[r['jid']] = {:status => :inactive, :resources => {},
+        :groups => r['groups'].nil? ? [] : r['groups'].uniq, :jid => r['jid']}} if roster
+      @items[jid.bare.to_s] = {:status => :both, :resources => {}, :groups => [],}
       @items[jid.domain] = {:status => :host, :resources => {jid.domain => {}}, :groups => []}
     end
 
@@ -28,7 +30,12 @@ module AgentXmpp
 
     #.........................................................................................................
     def find_all_by_status(status)
-      @items.select{|j,r| r[:status].eql?(status)}.map{|i| RosterItemModel.new(r)}    
+      @items.select{|j,r| r[:status].eql?(status)}.map{|j,r| RosterItemModel.new(r)}    
+    end
+
+    #.........................................................................................................
+    def find_all_by_group(group)
+      @items.select{|j,r| r[:group].include?(group)}.map{|j,r| RosterItemModel.new(r)}    
     end
 
     #.........................................................................................................
@@ -103,13 +110,14 @@ module AgentXmpp
   class RosterItemModel
 
     #.........................................................................................................
-    attr_reader :status, :groups, :jid
+    attr_reader :status, :groups, :jid, :priority
     
     #.........................................................................................................
     def initialize(item)
       @status = item[:status]
       @groups = item[:groups]
       @jid = item[:jid]
+      @priority = item[:priority]
     end
 
   #### RosterItemModel

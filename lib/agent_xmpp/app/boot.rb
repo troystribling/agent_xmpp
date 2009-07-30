@@ -62,7 +62,7 @@ module AgentXmpp
       def add_path(dir)
         File.join(AgentXmpp.app_path, dir)
       end
-    
+        
     #### self
     end
 

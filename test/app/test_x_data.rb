@@ -34,10 +34,10 @@ discovered_pubsub_node do |pipe, service, node|
 end
 
 #.........................................................................................................
-discovered_command_nodes do |pipe, nodes|
+discovered_command_nodes do |pipe, jid, nodes|
   AgentXmpp.logger.info "discovered_command_nodes"
   nodes.each do |n|
-    AgentXmpp.logger.info "NODE: #{n.jid}, #{n.node}"
+    AgentXmpp.logger.info "NODE: #{jid}, #{n}"
   end
 end
 

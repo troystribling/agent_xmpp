@@ -126,7 +126,8 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
-        [Send(Xmpp::Presence.new(nil, nil, 1)), Xmpp::IqRoster.get(pipe),  
+        config_roster_item = pipe.roster.find_by_jid(pipe.jid)
+        [Send(Xmpp::Presence.new(nil, nil, pipe.priority)), Xmpp::IqRoster.get(pipe),  
          Xmpp::IqDiscoInfo.get(pipe, pipe.jid.domain), 
          Xmpp::IqDiscoInfo.get(pipe, pipe.jid.bare)]
       end
@@ -237,8 +238,9 @@ module AgentXmpp
           when :both    
             AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid.to_s}"   
             pipe.roster.update_status(roster_item_jid, :both) 
-            pipe.roster.update_roster_item(roster_item)
           end
+          pipe.roster.update_roster_item(roster_item)
+          check_roster_item_group(pipe, roster_item)
         else
           AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid.to_s}"   
           Xmpp::IqRoster.remove(pipe, roster_item_jid)  
@@ -402,7 +404,7 @@ module AgentXmpp
           AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
           pipe.services.update_with_discoitems(discoitems)
           if q.node.eql?('http://jabber.org/protocol/commands') and not q.items.empty?
-            Boot.call_if_implemented(:call_discovered_command_nodes, pipe, q.items) 
+            Boot.call_if_implemented(:call_discovered_command_nodes, pipe, from_jid.to_s, q.items.map{|i| i.node}) 
           end
           msgs = if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.pubsub_root)
                    create_user_pubsub_root(pipe, from_jid, q.items)
@@ -557,7 +559,8 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_pubsub_subscribe_error_item_not_found(pipe, result, node) 
         from_jid = result.from
-        AgentXmpp.logger.warn "RECEIVED SUBSCRIBE ERROR ITEM-NOT-FOUND FROM: #{from_jid.to_s}, #{node}; RETRYING SUBSCRIPTION IN #{AgentXmpp::SUBSCRIBE_RETRY_PERIOD}s"
+        AgentXmpp.logger.warn "RECEIVED SUBSCRIBE ERROR ITEM-NOT-FOUND FROM: #{from_jid.to_s}, #{node}; " +
+                              "RETRYING SUBSCRIPTION IN #{AgentXmpp::SUBSCRIBE_RETRY_PERIOD}s"
         EventMachine::Timer.new(AgentXmpp::SUBSCRIBE_RETRY_PERIOD) do
           pipe.send_resp(Xmpp::IqPubSub.subscribe(pipe, from_jid.to_s, node))
         end        
@@ -577,6 +580,16 @@ module AgentXmpp
       
     private
     
+      #.........................................................................................................
+      def check_roster_item_group(pipe, roster_item)
+        roster_item_jid = roster_item.jid
+        config_roster_item = pipe.roster.find_by_jid(roster_item_jid)
+        unless roster_item.groups.sort.eql?(config_roster_item.groups.sort)
+          AgentXmpp.logger.info "CHANGE IN ROSTER ITEM GROUP FOUND UPDATING: #{roster_item_jid.to_s} to '#{config_roster_item.groups.join(', ')}'"
+          Xmpp::IqRoster.update(pipe, roster_item_jid.to_s, config_roster_item.groups)
+        end
+      end
+
       #.........................................................................................................
       def process_pubsub_discoinfo(type, pipe, from, node)
         case type

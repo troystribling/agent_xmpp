@@ -29,7 +29,7 @@ module AgentXmpp
         def update(pipe, roster_item_jid, groups=nil)
           request = new_rosterset
           item = Xmpp::RosterItem.new(roster_item_jid)
-          item.goups = groups unless groups.nil?
+          item.groups = groups unless groups.nil?
           request.query.add(item)
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
