@@ -9,40 +9,43 @@ before_start do
 end
 
 #.........................................................................................................
-after_connected do |pipe|
+after_connected do
   AgentXmpp.logger.info "after_connected"
 end
 
 #.........................................................................................................
-restarting_client do |pipe|
+restarting_client do
   AgentXmpp.logger.info "restarting_client"
 end
 
 #.........................................................................................................
-discovered_all_publish_nodes do |pipe|
+discovered_all_publish_nodes do
   AgentXmpp.logger.info "discovered_publish_nodes"
   EventMachine::PeriodicTimer.new(60) do
-    tnow = Time.now.to_s
-    publish_time(tnow)
-    AgentXmpp.logger.info "FIRING EVENT: #{tnow}"
+    publish_time(Time.now.to_s)
+    AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
+  end  
+  EventMachine::Timer.new(30) do
+    publish_shot(Time.now.to_s)
+    AgentXmpp.logger.info "FIRING EVENT SHOT: #{Time.now.to_s}"
   end  
 end
 
 #.........................................................................................................
-discovered_pubsub_node do |pipe, service, node|
+discovered_pubsub_node do |service, node|
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
 end
 
 #.........................................................................................................
-discovered_command_nodes do |pipe, jid, nodes|
+discovered_command_nodes do |jid, nodes|
   AgentXmpp.logger.info "discovered_command_nodes"
   nodes.each do |n|
-    AgentXmpp.logger.info "NODE: #{jid}, #{n}"
+    AgentXmpp.logger.info "COMMAND NODE: #{jid}, #{n}"
   end
 end
 
 #.........................................................................................................
-received_presence do |pipe, from, status|
+received_presence do |from, status|
   AgentXmpp.logger.info "received_presence: #{from}, #{status}"
 end
 
@@ -89,7 +92,7 @@ end
 ##########################################################################################################
 event 'test@planbresearch.com', 'val' do
   AgentXmpp.logger.info "EVENT: test@planbresearch.com/val"
-  p params
+  message(:to=>params[:from], :body=>"Got the message at: " + Time.now.to_s)
 end
 
 #.........................................................................................................

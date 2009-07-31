@@ -54,12 +54,17 @@ module AgentXmpp
     end 
     
     #.........................................................................................................
+    def available_resources(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources]
+        @items[jid.bare.to_s][:resources].inject([]) {|r,(j,h)| h[:presence].status.nil? ? r << j : r}
+      else; []; end
+    end 
+    
+    #.........................................................................................................
     def resource(jid)
       if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
         @items[jid.bare.to_s][:resources][jid.to_s][:presence]
-      else 
-        nil
-      end
+      else; nil; end
     end 
                     
     #.........................................................................................................

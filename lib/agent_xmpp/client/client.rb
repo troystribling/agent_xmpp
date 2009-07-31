@@ -8,19 +8,23 @@ module AgentXmpp
     class << self
 
       #.........................................................................................................
-      def command(args)
+      def command(args={})
         raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
         iq = Xmpp::Iq.new(:set, args[:to])
         iq.command = Xmpp::IqCommand.new(args[:node])
-        iq.command.action = :execute
+        iq.command.action = args[:action] || :execute
         iq.command << args[:params].to_x_data(:submit) if args[:params]
-        Send(iq) do |r|
-          if block_given?
-            status = r.type
-            data = (status.eql?(:result) and r.command and r.command.x) ? r.command.x.to_natve : nil
-            yield(status, data) 
-          end
+        Send(iq) do |r|          
+          yield(r.type, (r.type.eql?(:result) and r.command and r.command.x) ? r.command.x.to_native : nil) if block_given?
         end     
+      end
+
+      #.........................................................................................................
+      def message(args={})
+        raise ArgmentError ':to and :body are required' unless args[:to] and args[:body]
+        message = Xmpp::Message.new(args[:to], args[:body])
+        message.type = args[:type] || :chat
+        Send(message)  
       end
 
     #### self
@@ -47,7 +51,7 @@ module AgentXmpp
         EventMachine.run do
           @connection = EventMachine.connect(jid.domain, port, Connection, self)
         end
-        Boot.call_if_implemented(:call_restarting_client, pipe)     
+        Boot.call_if_implemented(:call_restarting_client)     
         sleep(10.0)
         AgentXmpp.logger.warn "RESTARTING CLIENT"
       end

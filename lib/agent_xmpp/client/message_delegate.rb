@@ -52,9 +52,12 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED EVENT FROM: #{from.to_s}"
         event.items.each do |is|
           is.item.each do |i|
-            if data = i.x and data.type.eql?(:result)         
-              params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :from => from, 
-                :node => is.node, :data => data.to_native}
+            if data = i.x and data.type.eql?(:result)    
+              src = is.node.split('/')  
+              src_jid = "#{src[3]}@#{src[2]}"                
+              params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :pubsub => from, 
+                :node => is.node, :data => data.to_native, :from => src_jid,
+                :resources => pipe.roster.available_resources(Xmpp::Jid.new(src_jid))}
               Controller.new(pipe, params).invoke_event
             else
               did_receive_unsupported_message(pipe, event)
@@ -121,7 +124,6 @@ module AgentXmpp
         AgentXmpp.logger.info "SESSION STARTED"
         Xmpp::Iq.bind(pipe) if pipe.stream_features.has_key?('bind')
       end
-
  
       #.........................................................................................................
       def did_start_session(pipe)
@@ -142,7 +144,7 @@ module AgentXmpp
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s}"
           response = []
           unless from_jid.to_s.eql?(pipe.jid.to_s)
-            Boot.call_if_implemented(:call_received_presence, pipe, from_jid.to_s, :available)             
+            Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :available)             
             response << Xmpp::IqVersion.request(pipe, from_jid) unless pipe.roster.has_version?(from_jid)
             unless pipe.services.has_jid?(from_jid)
               response << Xmpp::IqDiscoInfo.get(pipe, from_jid)
@@ -176,7 +178,7 @@ module AgentXmpp
         from_jid = presence.from    
         if pipe.roster.has_jid?(from_jid) 
           pipe.roster.update_resource(presence)
-          Boot.call_if_implemented(:call_received_presence, pipe, from_jid.to_s, :unavailable)             
+          Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :unavailable)             
           AgentXmpp.logger.info "RECEIVED UNAVAILABLE PRESENCE FROM: #{from_jid.to_s }"
         else
           AgentXmpp.logger.warn "RECEIVED UNAVAILABLE PRESENCE FROM JID NOT IN ROSTER: #{from_jid}"   
@@ -403,19 +405,21 @@ module AgentXmpp
           q = discoitems.query
           AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
           pipe.services.update_with_discoitems(discoitems)
-          if q.node.eql?('http://jabber.org/protocol/commands') and not q.items.empty?
-            Boot.call_if_implemented(:call_discovered_command_nodes, pipe, from_jid.to_s, q.items.map{|i| i.node}) 
-          end
-          msgs = if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.pubsub_root)
-                   create_user_pubsub_root(pipe, from_jid, q.items)
-                 else ; []; end
-          if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.user_pubsub_node)
-            msgs += update_publish_nodes(pipe, from_jid, q.items)
-          end
-          q.items.inject(msgs) do |r,i|
-            AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
-            pipe.services.create(i.jid)
-            r << Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node)         
+          case q.node
+            when 'http://jabber.org/protocol/commands' 
+              Boot.call_if_implemented(:call_discovered_command_nodes, from_jid.to_s, q.items.map{|i| i.node}) unless q.items.empty?
+          else
+            msgs = if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.pubsub_root)
+                     create_user_pubsub_root(pipe, from_jid, q.items)
+                   else ; []; end
+            if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(pipe.user_pubsub_node)
+              msgs += update_publish_nodes(pipe, from_jid, q.items)
+            end
+            q.items.inject(msgs) do |r,i|
+              AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
+              pipe.services.create(i.jid)
+              r << Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node)         
+            end
           end
         else
           AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT A ROSTER ITEM OR SERVICE: #{from_jid.to_s}"
@@ -463,7 +467,7 @@ module AgentXmpp
         if node.eql?(pipe.pubsub_root) or node.eql?(pipe.user_pubsub_node)          
           Xmpp::IqDiscoItems.get(pipe, jid, node)
         else
-          Boot.call_if_implemented(:call_discovered_pubsub_node, pipe, jid, node)
+          Boot.call_if_implemented(:call_discovered_pubsub_node, jid, node)
         end
       end
 
@@ -518,7 +522,7 @@ module AgentXmpp
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED CREATE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
         if pipe.published.update_status(node, :active)
-          Boot.call_if_implemented(:call_discovered_all_publish_nodes, pipe) if pipe.published.all_are_active?
+          Boot.call_if_implemented(:call_discovered_all_publish_nodes) if pipe.published.all_are_active?
         end
         if node.eql?(pipe.user_pubsub_node)
           [did_discover_user_pubsub_node(pipe, from_jid, node), Xmpp::IqDiscoInfo.get(pipe, from_jid.to_s, node)]   
@@ -650,7 +654,7 @@ module AgentXmpp
                       pipe.published.update_status(n, :active)
                     end; u
                   end                          
-        Boot.call_if_implemented(:call_discovered_all_publish_nodes, pipe) if pipe.published.all_are_active?
+        Boot.call_if_implemented(:call_discovered_all_publish_nodes) if pipe.published.all_are_active?
         config_nodes.inject(updates) do |u,n|
           unless disco_nodes.include?(n) 
             AgentXmpp.logger.warn "ADDING PUBSUB NODE: #{pubsub.to_s}, #{n}"
