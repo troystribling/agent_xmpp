@@ -17,10 +17,10 @@ module AgentXmpp
         
         #.........................................................................................................
         def bind(pipe)
-          iq = new_bind(pipe.jid)
+          iq = new_bind(AgentXmpp.jid)
           Send(iq) do |r|
             if r.type == :result and full_jid = r.first_element('//jid') and full_jid.text
-              pipe.jid = Jid.new(full_jid.text)                
+              AgentXmpp.jid = Jid.new(full_jid.text)                
               pipe.broadcast_to_delegates(:did_bind, pipe)
             elsif r.type.eql?(:error) and r.bind
               raise AgentXmppError, "resource bind failed"

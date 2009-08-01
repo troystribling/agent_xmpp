@@ -21,7 +21,7 @@ module AgentXmpp
           create.add_attribute('node', node) 
           iq.pubsub = IqPubSub.new << create
           configure = REXML::Element.new('configure')
-          user_config = pipe.published.find_by_node(node)
+          user_config = AgentXmpp.published.find_by_node(node)
           if user_config
             form = Xmpp::XData.new(:submit)
             form.add_field_with_value('FORM_TYPE', 'http://jabber.org/protocol/pubsub#node_config', :hidden)
@@ -57,7 +57,7 @@ module AgentXmpp
           iq = Xmpp::Iq.new(:set, to)
           subscribe = REXML::Element.new('subscribe')
           subscribe.add_attribute('node', node) 
-          subscribe.add_attribute('jid', pipe.jid.bare.to_s) 
+          subscribe.add_attribute('jid', AgentXmpp.jid.bare.to_s) 
           iq.pubsub = IqPubSub.new << subscribe
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
@@ -73,7 +73,7 @@ module AgentXmpp
           iq = Xmpp::Iq.new(:set, to)
           unsubscribe = REXML::Element.new('unsubscribe')
           unsubscribe.add_attribute('node', node) 
-          unsubscribe.add_attribute('jid', pipe.jid.bare.to_s) 
+          unsubscribe.add_attribute('jid', AgentXmpp.jid.bare.to_s) 
           iq.pubsub = IqPubSub.new << unsubscribe
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)

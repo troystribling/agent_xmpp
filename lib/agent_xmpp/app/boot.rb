@@ -32,8 +32,9 @@ module AgentXmpp
         raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
 
         ####..............
+        AgentXmpp.config = File.open(AgentXmpp.config_file) {|yf| YAML::load(yf)}
         call_if_implemented(:call_before_start)
-        AgentXmpp::Client.new(File.open(AgentXmpp.config_file) {|yf| YAML::load(yf)}).connect
+        AgentXmpp::Client.new().connect
         
       end
       

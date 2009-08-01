@@ -6,55 +6,19 @@ module AgentXmpp
 
     #---------------------------------------------------------------------------------------------------------
     attr_reader   :connection_status, :delegates, :id_callbacks, :connection, :stream_features, 
-                  :stream_mechanisms, :config, :user_pubsub_node, :pubsub_root
+                  :stream_mechanisms, :user_pubsub_node, :pubsub_root
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
-    def initialize(connection, config)
+    def initialize(connection)
       @connection = connection
       @connection_status = :offline;
       @delegates = [MessageDelegate]
-      @config = config
-      @pubsub_root = "/home/#{jid.domain}"       
-      @user_pubsub_node = "#{@pubsub_root}/#{jid.node}" 
+      @pubsub_root = "/home/#{AgentXmpp.jid.domain}"       
+      @user_pubsub_node = "#{@pubsub_root}/#{AgentXmpp.jid.node}" 
       @id_callbacks = {}
-    end
-    
-    #.........................................................................................................
-    def roster
-      @roster ||= RosterModel.new(connection.jid, config['roster'])
-    end
-
-    #.........................................................................................................
-    def services
-      @services ||= ServicesModel.new
-    end
-    
-    #.........................................................................................................
-    def published
-      @published ||= PublishModel.new(config['publish'])
-    end
-        
-    #.........................................................................................................
-    def jid
-      connection.jid
-    end
-
-    #.........................................................................................................
-    def jid=(jid)
-      connection.jid = jid
-    end
-
-    #.........................................................................................................
-    def priority
-      connection.priority
-    end
-
-    #.........................................................................................................
-    def password
-      connection.password
     end
     
     #.........................................................................................................
@@ -97,9 +61,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def send_resp(resp)
-      [resp].flatten.inject([]) do |m, r| 
-        r.kind_of?(AgentXmpp::Response) ? m.push(send(r.message, &r.responds_with)) : m
-      end
+      [resp].flatten.map {|r| r.kind_of?(AgentXmpp::Response) ? send(r.message, &r.responds_with) : r}
     end
 
     #.........................................................................................................
@@ -125,7 +87,7 @@ module AgentXmpp
     def connection_completed
       Boot.call_if_implemented(:call_after_connected)     
       broadcast_to_delegates(:did_connect, self)
-      init_connection(jid).collect{|m| send(m)}
+      init_connection.collect{|m| send(m)}
     end
 
     #.........................................................................................................
@@ -152,7 +114,7 @@ module AgentXmpp
           @connection.reset_parser
           @connection_status = :authenticated
           broadcast_to_delegates(:did_authenticate, self)
-          init_connection(jid, false)
+          init_connection(false)
         end
       when 'failure'
         if connection_status.eql?(:offline)
@@ -203,10 +165,10 @@ module AgentXmpp
     end
   
     #.........................................................................................................
-    def init_connection(jid, starting = true)
+    def init_connection(starting = true)
       msg = []
       msg.push(Send("<?xml version='1.0' ?>")) if starting
-      msg.push(Send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{jid.domain}'>"))
+      msg.push(Send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{AgentXmpp.jid.domain}'>"))
     end
          
   #### MessagePipe

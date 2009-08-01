@@ -17,12 +17,23 @@ discovered_command_nodes do |jid, nodes|
 end
 
 ##########################################################################################################
-#.........................................................................................................
+chat do
+  AgentXmpp.logger.info "CHAT MESSAGE"
+  puts params[:body]  
+end
+
+##########################################################################################################
+execute 'hello' do
+  AgentXmpp.logger.info "EXECUTE: hello"
+  'hello'
+end
+  
+##########################################################################################################
 event 'dev@plan-b.ath.cx', 'shot' do
   AgentXmpp.logger.info "EVENT: dev@plan-b.ath.cx/shot"
   params[:resources].map do |r| 
-    AgentXmpp.logger.info "COMMAND REQUEST: #{r}, hash"
-    command(:to=>r, :node=> 'hash') do |status, data|
+    AgentXmpp.logger.info "COMMAND REQUEST: #{r}, hash_hola"
+    command(:to=>r, :node=> 'hash_hello') do |status, data|
       AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
     end
   end

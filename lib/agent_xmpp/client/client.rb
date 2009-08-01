@@ -31,25 +31,18 @@ module AgentXmpp
     end
     
     #---------------------------------------------------------------------------------------------------------
-    attr_reader :port, :password, :connection, :config, :priority
-    attr_accessor :jid
+    attr_reader :connection
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
-    def initialize(config)
-      @password = config['password']
-      @port = config['port'] || 5222
-      @priority = set_priority(config['priority'])
-      resource = config['resource'] || Socket.gethostname
-      @config = config
-      @jid = Xmpp::Jid.new("#{config['jid']}/#{resource}")
+    def initialize
     end
 
     #.........................................................................................................
     def connect
       while (true)
         EventMachine.run do
-          @connection = EventMachine.connect(jid.domain, port, Connection, self)
+          @connection = EventMachine.connect(AgentXmpp.jid.domain, AgentXmpp.port, Connection, self)
         end
         Boot.call_if_implemented(:call_restarting_client)     
         sleep(10.0)
@@ -84,17 +77,6 @@ module AgentXmpp
       connection.pipe.remove_delegate(delegate)
     end
     
-  private
-  
-    #.........................................................................................................
-    def set_priority(pri)
-      if pri
-        pri = -127 if pri < -127
-        pri = 128 if pri > 128
-        pri
-      else; 1; end
-    end
-      
   #### Client
   end
 

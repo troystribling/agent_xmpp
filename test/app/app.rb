@@ -89,6 +89,21 @@ execute 'array_hash_array' do
    {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
 end
 
+#.........................................................................................................
+execute 'hash_hello' do
+  AgentXmpp.logger.info "ACTION: hash_hello"
+  [{:attr1 => 'val1', :attr2 => 'val2'}, 
+    command(:to=>params[:from], :node=> 'hello') do |status, data|
+            AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
+    end]
+end
+
+##########################################################################################################
+chat do
+  AgentXmpp.logger.info "CHAT MESSAGE"
+  puts params[:body]  
+end
+
 ##########################################################################################################
 event 'test@planbresearch.com', 'val' do
   AgentXmpp.logger.info "EVENT: test@planbresearch.com/val"

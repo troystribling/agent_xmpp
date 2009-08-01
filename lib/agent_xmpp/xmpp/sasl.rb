@@ -29,9 +29,9 @@ module AgentXmpp
         end
       
         #.........................................................................................................
-        def authenticate(pipe, stream_mechanisms)
+        def authenticate(stream_mechanisms)
           if stream_mechanisms.include?('PLAIN')
-            Send(new('PLAIN').auth(pipe.jid, pipe.password))
+            Send(new('PLAIN').auth(AgentXmpp.jid, AgentXmpp.password))
           else
             raise AgentXmppError, "PLAIN authentication required"
           end
