@@ -18,8 +18,8 @@ end
 
 ##########################################################################################################
 chat do
-  AgentXmpp.logger.info "CHAT MESSAGE"
-  puts params[:body]  
+  AgentXmpp.logger.info "CHAT MESSAGE: #{params[:from]}, #{params[:body]}"
+  'leave me alone'  
 end
 
 ##########################################################################################################

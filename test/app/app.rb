@@ -3,6 +3,7 @@ require 'rubygems'
 require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 
 ##########################################################################################################
+# callbacks
 before_start do
   AgentXmpp.logger.level = Logger::DEBUG
   AgentXmpp.logger.info "before_start"
@@ -50,6 +51,8 @@ received_presence do |from, status|
 end
 
 ##########################################################################################################
+# command prcosessing
+#.........................................................................................................
 execute 'scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 
@@ -90,6 +93,7 @@ execute 'array_hash_array' do
 end
 
 #.........................................................................................................
+# respond with a result and another command resquest
 execute 'hash_hello' do
   AgentXmpp.logger.info "ACTION: hash_hello"
   [{:attr1 => 'val1', :attr2 => 'val2'}, 
@@ -99,12 +103,16 @@ execute 'hash_hello' do
 end
 
 ##########################################################################################################
+# chat messages
 chat do
-  AgentXmpp.logger.info "CHAT MESSAGE"
-  puts params[:body]  
+  AgentXmpp.logger.info "CHAT MESSAGE: #{params[:from]}, #{params[:body]}"
+  params[:body].reverse  
 end
 
 ##########################################################################################################
+# pubsub events
+#.........................................................................................................
+# respond with a chat message
 event 'test@planbresearch.com', 'val' do
   AgentXmpp.logger.info "EVENT: test@planbresearch.com/val"
   message(:to=>params[:from], :body=>"Got the message at: " + Time.now.to_s)

@@ -68,7 +68,7 @@ module AgentXmpp
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |*result|
            result = result.first if result.length.eql?(1)  
-           agent_xmpp_resp = result.select{|r| r.kind_of?(AgentXmpp::Response)}
+           agent_xmpp_resp = result.kind_of?(Array) ? result.select{|r| r.kind_of?(AgentXmpp::Response)} : []
            result = if agent_xmpp_resp.empty? or not result.kind_of?(Array) 
                       add_payload_to_container(result.to_x_data)
                     else                              
@@ -109,7 +109,7 @@ module AgentXmpp
          end
        end
        define_meta_class_method(:request_callback) do |result|
-         add_payload_to_container(result)
+         pipe.send_resp(add_payload_to_container(result))
        end
        handle_request
      end
@@ -136,11 +136,11 @@ module AgentXmpp
     #.........................................................................................................
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
+p meth      
       if respond_to?(meth) 
         send(meth, params, payload) 
       else
-        AgentXmpp.logger.error \
-          "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
+        AgentXmpp.logger.error "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
         Xmpp::ErrorResponse.unsupported_payload(params)
       end
     end
@@ -154,7 +154,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def chat_route 
-      (routes[:chat] ||= []).first
+      (BaseController.routes[:chat] ||= []).first
     end
     
   #### BaseController
