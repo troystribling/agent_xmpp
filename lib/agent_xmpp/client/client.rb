@@ -7,26 +7,6 @@ module AgentXmpp
     #####-------------------------------------------------------------------------------------------------------
     class << self
 
-      #.........................................................................................................
-      def command(args={})
-        raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
-        iq = Xmpp::Iq.new(:set, args[:to])
-        iq.command = Xmpp::IqCommand.new(args[:node])
-        iq.command.action = args[:action] || :execute
-        iq.command << args[:params].to_x_data(:submit) if args[:params]
-        Send(iq) do |r|          
-          yield(r.type, (r.type.eql?(:result) and r.command and r.command.x) ? r.command.x.to_native : nil) if block_given?
-        end     
-      end
-
-      #.........................................................................................................
-      def message(args={})
-        raise ArgmentError ':to and :body are required' unless args[:to] and args[:body]
-        message = Xmpp::Message.new(args[:to], args[:body])
-        message.type = args[:type] || :chat
-        Send(message)  
-      end
-
     #### self
     end
     

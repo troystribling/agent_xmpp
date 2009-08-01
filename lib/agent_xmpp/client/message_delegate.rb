@@ -129,6 +129,8 @@ module AgentXmpp
       def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
         config_roster_item = AgentXmpp.roster.find_by_jid(AgentXmpp.jid)
+        add_command_method(pipe)
+        add_message_method(pipe)
         [Send(Xmpp::Presence.new(nil, nil, AgentXmpp.priority)), Xmpp::IqRoster.get(pipe),  
          Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.domain), 
          Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.bare)]
@@ -629,6 +631,35 @@ module AgentXmpp
             AgentXmpp.logger.warn "NODE NOT SPECIFIED FOR PUBSUB PUBLISH CONFIGURATION"
           end
         end
+      end
+          
+      #.........................................................................................................
+      def add_command_method(pipe)
+        AgentXmpp.define_meta_class_method(:command) do |args, &blk| 
+          raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
+          iq = Xmpp::Iq.new(:set, args[:to])
+          iq.command = Xmpp::IqCommand.new(args[:node])
+          iq.command.action = args[:action] || :execute
+          iq.command << args[:params].to_x_data(:submit) if args[:params]
+          pipe.send_resp(Send(iq) do |r|  
+                           AgentXmpp.logger.info "RECEIVED RESPONSE: #{r.type}, #{r.id}"
+                           blk.call(r.type, (r.type.eql?(:result) and r.command and r.command.x) ? r.command.x.to_native : nil) if blk
+                         end) 
+        end    
+        Delegator.delegate(AgentXmpp, :command)
+        AgentXmpp.logger.info "ADDED COMMAND METHOD"
+      end
+
+      #.........................................................................................................
+      def add_message_method(pipe)
+        AgentXmpp.define_meta_class_method(:message) do |args| 
+          raise ArgmentError ':to and :body are required' unless args[:to] and args[:body]
+          message = Xmpp::Message.new(args[:to], args[:body])
+          message.type = args[:type] || :chat
+          pipe.send_resp(Send(message)) 
+        end   
+        Delegator.delegate(AgentXmpp, :message)
+        AgentXmpp.logger.info "ADDED MESSAGE METHOD"
       end
           
       #.........................................................................................................

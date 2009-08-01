@@ -68,13 +68,7 @@ module AgentXmpp
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |*result|
            result = result.first if result.length.eql?(1)  
-           agent_xmpp_resp = result.kind_of?(Array) ? result.select{|r| r.kind_of?(AgentXmpp::Response)} : []
-           result = if agent_xmpp_resp.empty? or not result.kind_of?(Array) 
-                      add_payload_to_container(result.to_x_data)
-                    else                              
-                      (result - agent_xmpp_resp).map{|r| add_payload_to_container(r.to_x_data)} + agent_xmpp_resp
-                    end
-           pipe.send_resp(result)
+            add_payload_to_container(result.to_x_data)
          end
          handle_request
        else
@@ -88,10 +82,6 @@ module AgentXmpp
         route = get_route(:event)
         unless route.nil?
           define_meta_class_method(:request, &route[:blk])
-          define_meta_class_method(:request_callback) do |*result|
-            result = result.first if result.length.eql?(1)           
-            pipe.send_resp(result)
-          end
           handle_request
         else
           AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}'}."
@@ -109,7 +99,7 @@ module AgentXmpp
          end
        end
        define_meta_class_method(:request_callback) do |result|
-         pipe.send_resp(add_payload_to_container(result))
+         add_payload_to_container(result)
        end
        handle_request
      end
@@ -136,9 +126,8 @@ module AgentXmpp
     #.........................................................................................................
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
-p meth      
       if respond_to?(meth) 
-        send(meth, params, payload) 
+        pipe.send_resp(send(meth, params, payload))
       else
         AgentXmpp.logger.error "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
         Xmpp::ErrorResponse.unsupported_payload(params)

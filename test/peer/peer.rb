@@ -17,20 +17,16 @@ discovered_command_nodes do |jid, nodes|
 end
 
 ##########################################################################################################
-chat do
-  AgentXmpp.logger.info "CHAT MESSAGE: #{params[:from]}, #{params[:body]}"
-  'leave me alone'  
-end
-
-##########################################################################################################
 execute 'hello' do
   AgentXmpp.logger.info "EXECUTE: hello"
   'hello'
 end
   
 ##########################################################################################################
+# send commands to all available resources of publisher
 event 'dev@plan-b.ath.cx', 'shot' do
   AgentXmpp.logger.info "EVENT: dev@plan-b.ath.cx/shot"
+  AgentXmpp.logger.info "ONLINE RESOURCES: #{params[:resources].inspect}"
   params[:resources].map do |r| 
     AgentXmpp.logger.info "COMMAND REQUEST: #{r}, hash_hola"
     command(:to=>r, :node=> 'hash_hello') do |status, data|

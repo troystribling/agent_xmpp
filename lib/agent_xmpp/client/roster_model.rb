@@ -66,6 +66,13 @@ module AgentXmpp
         @items[jid.bare.to_s][:resources][jid.to_s][:presence]
       else; nil; end
     end 
+
+    #.........................................................................................................
+    def version(jid)
+      if @items[jid.bare.to_s] and @items[jid.bare.to_s][:resources][jid.to_s]
+        @items[jid.bare.to_s][:resources][jid.to_s][:version]
+      else; nil; end
+    end 
                     
     #.........................................................................................................
     def has_version?(jid)
