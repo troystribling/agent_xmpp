@@ -68,7 +68,7 @@ module AgentXmpp
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |*result|
            result = result.first if result.length.eql?(1)  
-            add_payload_to_container(result.to_x_data)
+           add_payload_to_container(result.nil? ? nil : result.to_x_data)
          end
          handle_request
        else
@@ -99,7 +99,7 @@ module AgentXmpp
          end
        end
        define_meta_class_method(:request_callback) do |result|
-         add_payload_to_container(result)
+         add_payload_to_container(result) if result.kind_of?(String)
        end
        handle_request
      end
