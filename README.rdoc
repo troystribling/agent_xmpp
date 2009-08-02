@@ -11,7 +11,7 @@ Events. An application that responds to an Ad-Hoc command can be written with fe
       'Hello World' 
     end
 
-Specify the application Jabber ID (JID), password and roster in +agent_xmpp.yml+.
+Specify the application Jabber ID (JID), password and roster in *agent_xmpp.yml*.
 
     jid: myapp@nowhere.com
     password: pass
@@ -30,7 +30,7 @@ Install the Gajim XMPP Client, http://www.gajim.org, and connect to _you@home.co
 
 When started for the first time +myapp.rb+ will automatically send buddy requests to all contacts specified
 in +agent_xmpp.yml+. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
-in the roster and select _execute commands_. _hello_ will be in the list of Ad-Hoc Commands. Select _hello_ from the 
+in the roster and select _execute_ _commands_. _hello_ will be in the list of Ad-Hoc Commands. Select _hello_ from the 
 list and click the _forward_ _button_ to execute _hello_.
 
 == More Examples
