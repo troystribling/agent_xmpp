@@ -248,11 +248,11 @@ The logger can be accessed and configured.
 
 == Supported XEPs
 
-1. XEP-0004 jabber:x:data Forms    http://xmpp.org/extensions/xep-0004.html
-2. XEP-0030 Service Discovery      http://xmpp.org/extensions/xep-0030.html
-3. XEP-0050 Ad-Hoc Commands        http://xmpp.org/extensions/xep-0050.html
-4. XEP-0060 Publish Subscribe      http://xmpp.org/extensions/xep-0060.html
-5. XEP-0092 Software Version       http://xmpp.org/extensions/xep-0092.html
+    XEP-0004 jabber:x:data Forms    http://xmpp.org/extensions/xep-0004.html
+    XEP-0030 Service Discovery      http://xmpp.org/extensions/xep-0030.html
+    XEP-0050 Ad-Hoc Commands        http://xmpp.org/extensions/xep-0050.html
+    XEP-0060 Publish Subscribe      http://xmpp.org/extensions/xep-0060.html
+    XEP-0092 Software Version       http://xmpp.org/extensions/xep-0092.html
 
 == Message Processing Callbacks
 
