@@ -18,8 +18,6 @@ Specify the application Jabber ID (JID), password and roster in *agent_xmpp.yml*
     roster:
         - 
             jid:you@home.com
-        - 
-            jid: someone@somewhere.com
 
 Install the gem and run
 
@@ -28,8 +26,8 @@ Install the gem and run
 
 Install the Gajim XMPP Client, http://www.gajim.org, and connect to _you@home.com_.
 
-When started for the first time +myapp.rb+ will automatically send buddy requests to all contacts specified
-in +agent_xmpp.yml+. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
+When started for the first time <tt>myapp.rb</tt> will automatically send buddy requests to all contacts specified
+in <tt>agent_xmpp.yml<tt>. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
 in the roster and select _execute_ _commands_. _hello_ will be in the list of Ad-Hoc Commands. Select _hello_ from the 
 list and click the _forward_ _button_ to execute _hello_.
 
@@ -100,8 +98,6 @@ Publish nodes are configured in +agent_xmpp.yml+.
     roster:
         - 
             jid:you@home.com
-        - 
-            jid: someone@somewhere.com
     publish:
         - 
             node: time
