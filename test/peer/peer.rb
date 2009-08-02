@@ -25,10 +25,10 @@ end
 ##########################################################################################################
 # send commands to all available resources of publisher
 event 'dev@plan-b.ath.cx', 'shot' do
-  AgentXmpp.logger.info "EVENT: dev@plan-b.ath.cx/shot"
+  AgentXmpp.logger.info "EVENT: dev@plan-b.ath.cx/shot, #{params[:id]}"
   AgentXmpp.logger.info "ONLINE RESOURCES: #{params[:resources].inspect}"
   params[:resources].map do |r| 
-    AgentXmpp.logger.info "COMMAND REQUEST: #{r}, hash_hola"
+    AgentXmpp.logger.info "COMMAND REQUEST: #{r}, hash_hello"
     command(:to=>r, :node=> 'hash_hello') do |status, data|
       AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
     end

@@ -1,7 +1,7 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
-Events. An application that responds to an Ad-Hoc command can be written with as few as five lines of code.
+Agent XMPP is a simple DSL for writing XMPP automated clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
+Events. An application that responds to an Ad-Hoc command can be written with few lines of code.
 
     # myapp.rb
     require 'rubygems'
@@ -11,7 +11,7 @@ Events. An application that responds to an Ad-Hoc command can be written with as
       'Hello World' 
     end
 
-Specify the application Jabber ID (JID), password and roster in agent_xmpp.yml.
+Specify the application Jabber ID (JID), password and roster in +agent_xmpp.yml+.
 
     jid: myapp@nowhere.com
     password: pass
@@ -26,32 +26,21 @@ Install the gem and run
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
     ruby myapp.rb
 
-Request and response payloads use the jabber:x:data protocol described in XMPP extension 
-XEP-0004.
+Install the Gajim XMPP Client, http://www.gajim.org, and connect to _you@home.com_.
 
-When first started myapp.rb will automatically send buddy requests to all contacts specified
-in the agent_xmpp.yml. You should accept the buddy request and send a command.
+When started for the first time +myapp.rb+ will automatically send buddy requests to all contacts specified
+in +agent_xmpp.yml+. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
+in the roster and select _execute commands_. _hello_ will be in the list of Ad-Hoc Commands. Select _hello_ from the 
+list and click the _forward_ _button_ to execute _hello_.
 
-myapp.rb will respond to the command,
+== More Examples
 
-    <iq id='5644' to='mybot@nowhere.com/mybot-host' type='set' xmlns='jabber:client'>
-        <command node='hello' action='execute' xmlns='http://jabber.org/protocol/commands'/>
-    </iq>
-    
-with
+More examples can be found at 
 
-    <iq from='myapp@nowhere.com/myapp-host' to='you@home.com/your-host' id='5644' type='result' xmlns='jabber:client'>
-        <command node='hello' status='completed' xmlns='http://jabber.org/protocol/commands'>
-            <x type='result' xmlns='jabber:x:data'>
-                <field><value>Hello World</value></field>
-            </x>
-        </command>
-    </iq>    
+== Ad-Hoc Command Response Payload
 
-== Response Payload
-
-Agent XMPP will automatically map scalars, arrays and hashes returned by execute blocks to jabber:x:data command 
-response payloads.  
+Agent XMPP will map scalars, arrays and hashes returned by +execute+ blocks to jabber:x:data command 
+response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
 
     execute 'scalar' do
       'scalar' 
@@ -81,34 +70,30 @@ response payloads.
        {:a1 => ['v31', 'v31'], :a2 => 'v32'}]
     end
 
-a params structure is available within the execute block containing routing information.
+a +params+ structure is available within the +execute+ block containing routing information.
 
 == Send Command
 
 Commands may be sent with or without a response callback,
 
     command(:to=>'thatapp@a-place.com/ahost', :node=> 'hello') do |status, data|
-      AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
+      puts "COMMAND RESPONSE: #{status}, #{data.inspect}"
     end
 
     command(:to=>'thatapp@a-place.com/ahost', :node=> 'bye')
 
-and within execute blocks.
+and within +execute+ blocks.
 
     execute 'hash_hello' do
       command(:to=>params[:from], :node=> 'hello') do |status, data|
-        AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
+        puts "COMMAND RESPONSE: #{status}, #{data.inspect}"
       end
       {:a1 => 'v1', :a2 => 'v2'}
     end
 
-== Send Messages
+== Publish
 
-    message(:to=>'thatapp@a-place.com/ahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
-    
-== Publish Subscribe
-
-Publish nodes are configured in agent_xmpp.yml.
+Publish nodes are configured in +agent_xmpp.yml+.
 
     jid: myapp@nowhere.com
     password: pass
@@ -131,9 +116,30 @@ The nodes are created if they do not exist and publish methods are generated for
     
     publish_alarm({:severity => :major, :description => "A really bad failure"})
 
-Publish nodes discovered that are not provisioned in agent_xmpp.yml will be deleted.
+Publish nodes discovered that are not in +agent_xmpp.yml+ will be deleted. The following options
 
-To receive events declare event blocks in myapp.rb.
+== Publish Options
+
+The following publish options are available with the indicated default values. The options may be changed in
++agent_xmpp.yml+.
+
+    :title                    => 'event',
+    :access_model             => 'presence',
+    :publish_model            => 'publishers',
+    :max_items                => 20,
+    :deliver_notifications    => 1,
+    :deliver_payloads         => 1,
+    :persist_items            => 1,
+    :subscribe                => 1,
+    :notify_config            => 0,
+    :notify_delete            => 0,
+    :notify_retract           => 0,
+
+See http://xmpp.org/extensions/xep-0060.html#registrar-formtypes-config for a detailed description.
+
+== Subscribe
+
+Declare +event+ blocks in +myapp.rb+ to subscribe to published events .
 
     # myapp.rb
     require 'rubygems'
@@ -143,9 +149,58 @@ To receive events declare event blocks in myapp.rb.
       message(:to=>'someone@somewhere.com', :body=>"Got the event at: " + Time.now.to_s)
     end
 
-Agent XMPP will automatically verify the subscription to the event and subscribe if required. Subscriptions
-discovered that are not declared by an event block in the application will be deleted.
+Agent XMPP will verify subscription to the event and subscribe if required. Subscriptions
+discovered that are not declared by an event block in +myapp.rb+ will be deleted.
 
+== Receive Chat Messages
+
+Declare +chat+ blocks in +myapp.rb+ to receive and respond to chat messages.
+  
+    # myapp.rb
+    require 'rubygems'
+    require 'agent_xmpp'
+
+    chat do
+      params[:body].reverse
+    end
+
+If the +chat+ block returns a +String+ a response will be sent to the message sender.
+
+== Send Chat Messages
+
+    message(:to=>'thatapp@a-place.com/ahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
+    
+== Roster
+
+Roster groups may be specified in +agent_xmpp.yml+.
+
+    jid: myapp@nowhere.com
+    password: pass
+    roster:
+        - 
+            jid:you@home.com
+            groups: [good group, owners]
+        
+        - 
+            jid: someone@somewhere.com
+            groups: [bad group]
+     
+Agent XMPP will update the roster maintained on the XMPP server to be consistent with to the roster specified in +agent_xmpp.yml+. 
+
+== Routing Priority
+
+The routing priority may be configured in +agnet_xmpp.yml+. The default value is 1. Valid values are -127
+
+    jid: myapp@nowhere.com
+    password: pass
+    priority: 128
+    roster:
+        - 
+            jid:you@home.com
+            groups: [good group, owners]
+    
+See http://xmpp.org/rfcs/rfc3921.html for a details.
+    
 == Major Event Callbacks
 
 Agent XMPP provides callbacks for applications to respond to major events that occur during execution.
@@ -159,9 +214,6 @@ Agent XMPP provides callbacks for applications to respond to major events that o
     # client restarts when disconnected form server
     restarting_client{|connection|}
     
-    # all configured publish nodes have been discovered
-    discovered_all_publish_nodes{}
-
     # a pubsub node was discovered at service
     discovered_pubsub_node{|service, node|}
     
@@ -177,18 +229,18 @@ Agent XMPP provides callbacks for applications to respond to major events that o
 
 == Development with XMPP Clients
 
-None of Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and Publish-Subscribe 
-is not supported. Gajim http://www.gajim.org/Psi provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery,
-which is useful for Publish-Subscibe development, is supported by Gajim but is buggy, Psi http://psi-im.org/ provides good much better
-support. Both Gajim and Psi provide an interface for manual entry of XML messages which is required for Publish-Subscribe development.
+Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and Publish-Subscribe 
+is not supported by any client. Gajim http://www.gajim.org provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery,
+which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better
+implementation. Both Gajim and Psi provide an interface for manual entry of XML messages which is currently required for Publish-Subscribe development.
 
 == Logging
 
-    By default log messages are written to STDOUT. A log file can be specified with the -l option.
+By default log messages are written to STDOUT. A log file can be specified with the -l option.
 
         ruby mybot.rb -l file.log
 
-    The logger can be accessed and configured.
+The logger can be accessed and configured.
         
         before_start do
           AgentXmpp.logger.level = Logger::WARN 
@@ -196,16 +248,16 @@ support. Both Gajim and Psi provide an interface for manual entry of XML message
 
 == Supported XEPs
 
-    XEP-0004 jabber:x:data Forms    http://xmpp.org/extensions/xep-0004.html
-    XEP-0030 Service Discovery      http://xmpp.org/extensions/xep-0030.html
-    XEP-0050 Ad-Hoc Commands        http://xmpp.org/extensions/xep-0050.html
-    XEP-0060 Publish Subscribe      http://xmpp.org/extensions/xep-0060.html
-    XEP-0092 Software Version       http://xmpp.org/extensions/xep-0092.html
+1. XEP-0004 jabber:x:data Forms    http://xmpp.org/extensions/xep-0004.html
+2. XEP-0030 Service Discovery      http://xmpp.org/extensions/xep-0030.html
+3. XEP-0050 Ad-Hoc Commands        http://xmpp.org/extensions/xep-0050.html
+4. XEP-0060 Publish Subscribe      http://xmpp.org/extensions/xep-0060.html
+5. XEP-0092 Software Version       http://xmpp.org/extensions/xep-0092.html
 
 == Message Processing Callbacks
 
 Message processing callbacks are available to applications to extend the message processing work flow. To receive
-callbacks a delegate object must be provided.   
+callbacks a delegate object must be provided that implements the callbacks of interest.   
 
     after_connected do |connection|
       connection.add_delegate(YourDelegate)
@@ -225,13 +277,13 @@ The available callback methods are,
 
     did_bind(connection)
 
-    did_receive_pre_authenticate_features(connection)
+    did_receive_preauthenticate_features(connection)
 
     did_authenticate(connection)
 
     did_not_authenticate(connection)
 
-    did_receive_post_authenticate_features(connection)
+    did_receive_postauthenticate_features(connection)
 
     did_start_session(connection)
 
@@ -246,6 +298,8 @@ The available callback methods are,
     did_receive_presence_unavailable(connection, presence)
 
     did_receive_presence_unsubscribed(connection, presence)
+    
+    did_receive_presence_error(pipe, presence)
 
 === Roster
 
@@ -261,11 +315,11 @@ The available callback methods are,
 
     did_receive_update_roster_item_result(connection, response)
 
+    did_receive_update_roster_item_error(connection, response)
+
     did_receive_remove_roster_item(connection, response)
 
     did_receive_remove_roster_item_error(connection, response)
-
-    did_receive_update_roster_item_error(connection, response)
 
 === Service Discovery
 
@@ -275,17 +329,17 @@ The available callback methods are,
 
     did_receive_version_error(connection, error)
     
-    did_receive_discoinfo_result(connection, discoinfo)
-    
     did_receive_discoinfo_get(connection, request) 
 
+    did_receive_discoinfo_result(connection, discoinfo)
+    
     did_receive_discoinfo_error(connection, error)
     
     did_receive_discoitems_result(connection, discoitems)
     
     did_receive_discoitems_get(connection, request)
 
-    did_receive_discoitems_error(connection, error)
+    did_receive_discoitems_error(connection, result)
             
 === Applications
 
@@ -299,7 +353,7 @@ The available callback methods are,
 
 === PubSub
 
-    did_acknowledge_publish(connection, result, node)
+    did_receive_publish_result(connection, result, node)
 
     did_receive_publish_error(connection, result, node)
 
@@ -309,6 +363,8 @@ The available callback methods are,
       
     did_discover_pubsub_leaf(connection, jid, node)
 
+    did_discover_user_pubsub_root(pipe, pubsub, node)
+
     did_receive_pubsub_subscriptions_result(connection, result)
     
     did_receive_pubsub_subscriptions_error(connection, result)
@@ -317,11 +373,15 @@ The available callback methods are,
     
     did_receive_pubsub_affiliations_error(connection, result)
 
-    did_discover_user_pubsub_node(connection, result)
+    did_discover_user_pubsub_root(connection, result)
     
     did_receive_create_node_result(connection, node, result)    
 
     did_receive_create_node_error(connection, node, result)    
+
+    did_receive_delete_node_result(connection, node, result)    
+
+    did_receive_delete_node_error(connection, node, result)    
 
     did_receive_pubsub_subscribe_result(connection, result, node) 
 

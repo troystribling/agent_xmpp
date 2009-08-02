@@ -151,7 +151,7 @@ module AgentXmpp
         def set(pipe, args)
           iq = Xmpp::Iq.new(:set, args[:to])
           item =  Item.new << args[:payload]
-          pub = IqPublish.new("#{pipe.user_pubsub_node}/#{args[:node]}") << item
+          pub = IqPublish.new("#{AgentXmpp.user_pubsub_root}/#{args[:node]}") << item
           iq.pubsub = IqPubSub.new << pub
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)

@@ -20,21 +20,21 @@ restarting_client do |connection|
 end
 
 #.........................................................................................................
-discovered_all_publish_nodes do
-  AgentXmpp.logger.info "discovered_publish_nodes"
-  EventMachine::PeriodicTimer.new(60) do
-    publish_time(Time.now.to_s)
-    AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
-  end  
-  EventMachine::Timer.new(30) do
-    publish_shot(Time.now.to_s)
-    AgentXmpp.logger.info "FIRING EVENT SHOT: #{Time.now.to_s}"
-  end  
-end
-
-#.........................................................................................................
 discovered_pubsub_node do |service, node|
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
+  if node.eql?(AgentXmpp.user_pubsub_root+'/time')
+    AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
+    EventMachine::PeriodicTimer.new(60) do
+      publish_time(Time.now.to_s)
+      AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
+    end  
+  elsif node.eql?(AgentXmpp.user_pubsub_root+'/shot')
+    AgentXmpp.logger.info "LAUNCHING SHOT PUBLISH TASK"
+    EventMachine::Timer.new(30) do
+      publish_shot(Time.now.to_s)
+      AgentXmpp.logger.info "FIRING EVENT SHOT: #{Time.now.to_s}"
+    end  
+  end
 end
 
 #.........................................................................................................

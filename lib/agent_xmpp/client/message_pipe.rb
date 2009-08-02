@@ -6,7 +6,7 @@ module AgentXmpp
 
     #---------------------------------------------------------------------------------------------------------
     attr_reader   :connection_status, :delegates, :id_callbacks, :connection, :stream_features, 
-                  :stream_mechanisms, :user_pubsub_node, :pubsub_root
+                  :stream_mechanisms
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
     #---------------------------------------------------------------------------------------------------------
@@ -16,8 +16,6 @@ module AgentXmpp
       @connection = connection
       @connection_status = :offline;
       @delegates = [MessageDelegate]
-      @pubsub_root = "/home/#{AgentXmpp.jid.domain}"       
-      @user_pubsub_node = "#{@pubsub_root}/#{AgentXmpp.jid.node}" 
       @id_callbacks = {}
     end
     
