@@ -4,18 +4,18 @@ require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 
 ##########################################################################################################
 # callbacks
-before_start do
+before_start do 
   AgentXmpp.logger.level = Logger::DEBUG
   AgentXmpp.logger.info "before_start"
 end
 
 #.........................................................................................................
-after_connected do
+after_connected do |connection|
   AgentXmpp.logger.info "after_connected"
 end
 
 #.........................................................................................................
-restarting_client do
+restarting_client do |connection|
   AgentXmpp.logger.info "restarting_client"
 end
 
@@ -55,7 +55,7 @@ received_presence do |from, status|
 end
 
 ##########################################################################################################
-# command prcosessing
+# command processing
 #.........................................................................................................
 execute 'scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
