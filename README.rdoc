@@ -23,7 +23,7 @@ Install the gem
 
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
 
-Install the Gajim XMPP Client, http://www.gajim.org, and connect to <i>you@home.com</i> (Be warned that installing Gajim on OS X can painful.
+Install the Gajim XMPP Client, http://www.gajim.org, and connect to <i>you@home.com</i> (Be warned that installing Gajim on OS X can be painful.
 Linux is recommended. Also, for Ubuntu installs, download the tar ball from the site. The version in the Ubuntu repositories is
 older and does not have a completed Ad-Hoc Command implementation). 
 
