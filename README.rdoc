@@ -19,6 +19,10 @@ Specify the application Jabber ID (JID), password and roster in <tt>agent_xmpp.y
         - 
             jid:you@home.com
 
+Be sure linxml2 headers are available,
+
+    sudo apt-get install libxml2-dev
+
 Install the gem
 
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
