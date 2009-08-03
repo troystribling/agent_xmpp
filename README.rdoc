@@ -19,19 +19,22 @@ Specify the application Jabber ID (JID), password and roster in <tt>agent_xmpp.y
         - 
             jid:you@home.com
 
-Install the gem and run
+Install the gem
 
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
-    ruby myapp.rb
 
 Install the Gajim XMPP Client, http://www.gajim.org, and connect to <i>you@home.com</i> (Be warned that installing Gajim on OS X can painful.
 Linux is recommended. Also, for Ubuntu installs, download the tar ball from the site. The version in the Ubuntu repositories is
-is older and does not have a completed Ad-Hoc command implementation). 
+older and does not have a completed Ad-Hoc Command implementation). 
+
+Run the application
+
+    ruby myapp.rb
 
 When started for the first time <tt>myapp.rb</tt> will automatically send buddy requests to all contacts specified
 in <tt>agent_xmpp.yml</tt>. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
-in the roster and select _execute_ _commands_. _hello_ will be in the list of Ad-Hoc Commands. Select _hello_ from the 
-list and click the _forward_ _button_ to execute _hello_.
+and select _execute_ _commands_ from the drop down menu. A list of Ad-Hoc Commands will be displayed containing _hello_. 
+Select it and click the _forward_ _button_ to execute.
 
 == More Examples
 
@@ -41,7 +44,7 @@ More examples can be found at http://gist.github.com/160338
 
 Agent XMPP will map scalars, arrays and hashes returned by <tt>execute</tt> blocks to jabber:x:data command 
 response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
-All scalars have to_s applied prior to building the command response payload.
+All scalars have <tt>to_s</tt> applied prior to building the command response payload.
 
     execute 'scalar' do
       'scalar' 
@@ -115,7 +118,7 @@ The nodes are created if they do not exist and publish methods are generated for
     
     publish_alarm({:severity => :major, :description => "A really bad failure"})
 
-Publish nodes discovered that are not in <tt>agent_xmpp.yml</tt> will be deleted. The following options
+Publish nodes discovered that are not in <tt>agent_xmpp.yml</tt> will be deleted.
 
 == Publish Options
 
@@ -149,7 +152,7 @@ Declare <tt>event</tt> blocks in <tt>myapp.rb</tt> to subscribe to published eve
     end
 
 Agent XMPP will verify subscription to the event and subscribe if required. Subscriptions
-discovered that are not declared by an event block in <tt>myapp.rb</tt> will be deleted.
+discovered that are not declared by an event block will be deleted.
 
 == Receive Chat Messages
 
@@ -188,7 +191,8 @@ Agent XMPP will update the roster maintained on the XMPP server to be consistent
 
 == Routing Priority
 
-The routing priority may be configured in <tt>agent_xmpp.yml</tt>. The default value is 1. Valid values are -127
+The routing priority may be configured in <tt>agent_xmpp.yml</tt>. The default value is 1. Valid values are between -127 and 128. 
+See http://xmpp.org/rfcs/rfc3921.html for a details.
 
     jid: myapp@nowhere.com
     password: pass
@@ -197,9 +201,7 @@ The routing priority may be configured in <tt>agent_xmpp.yml</tt>. The default v
         - 
             jid:you@home.com
             groups: [good group, owners]
-    
-See http://xmpp.org/rfcs/rfc3921.html for a details.
-    
+        
 == Major Event Callbacks
 
 Agent XMPP provides callbacks for applications to respond to major events that occur during execution.
@@ -228,11 +230,11 @@ Agent XMPP provides callbacks for applications to respond to major events that o
 
 == Development with XMPP Clients
 
-Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and Publish-Subscribe 
-is not supported by any client. Gajim http://www.gajim.org provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery,
+Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and I have not found
+a client that supports Publish-Subscribe. Gajim http://www.gajim.org provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery,
 which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better
-implementation. Both Gajim and Psi provide an interface for manual entry of XML messages which is currently required for Publish-Subscribe 
-development. Example Publish-Subscribe messages can be found at http://gist.github.com/160344
+implementation. Both Gajim and Psi provide an interface for manual entry of XML messages. Since Publish-Subscribe is not supported on
+the user interface manual entry of messages is required for development. Example messages can be found at http://gist.github.com/160344
 
 == Logging
 
@@ -262,8 +264,6 @@ callbacks a delegate object must be provided that implements the callbacks of in
     after_connected do |connection|
       connection.add_delegate(YourDelegate)
     end
-
-The available callback methods are,
 
 === Connection
 
