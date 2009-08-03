@@ -2,14 +2,12 @@
 
 Gem::Specification.new do |s|
   s.name = %q{agent_xmpp}
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Troy Stribling"]
-  s.date = %q{2009-06-02}
-  s.default_executable = %q{agent_xmpp}
+  s.date = %q{2009-08-03}
   s.email = %q{troy.stribling@gmail.com}
-  s.executables = ["agent_xmpp"]
   s.extra_rdoc_files = [
     "LICENSE",
      "README.rdoc"
@@ -21,48 +19,98 @@ Gem::Specification.new do |s|
      "README.rdoc",
      "Rakefile",
      "VERSION",
+     "VERSION",
      "agent_xmpp.gemspec",
-     "bin/agent_xmpp",
      "lib/agent_xmpp.rb",
      "lib/agent_xmpp/app.rb",
      "lib/agent_xmpp/app/boot.rb",
-     "lib/agent_xmpp/app/chat_message_body_controller.rb",
      "lib/agent_xmpp/app/controller.rb",
-     "lib/agent_xmpp/app/format.rb",
-     "lib/agent_xmpp/app/map.rb",
-     "lib/agent_xmpp/app/routes.rb",
-     "lib/agent_xmpp/app/view.rb",
      "lib/agent_xmpp/client.rb",
      "lib/agent_xmpp/client/client.rb",
      "lib/agent_xmpp/client/connection.rb",
-     "lib/agent_xmpp/client/parser.rb",
+     "lib/agent_xmpp/client/message_delegate.rb",
+     "lib/agent_xmpp/client/message_pipe.rb",
+     "lib/agent_xmpp/client/publish_model.rb",
+     "lib/agent_xmpp/client/response.rb",
+     "lib/agent_xmpp/client/roster_model.rb",
+     "lib/agent_xmpp/client/services_model.rb",
+     "lib/agent_xmpp/config.rb",
+     "lib/agent_xmpp/main.rb",
      "lib/agent_xmpp/patches.rb",
-     "lib/agent_xmpp/patches/standard_library_patches.rb",
-     "lib/agent_xmpp/patches/standard_library_patches/array.rb",
-     "lib/agent_xmpp/patches/standard_library_patches/float.rb",
-     "lib/agent_xmpp/patches/standard_library_patches/hash.rb",
-     "lib/agent_xmpp/patches/standard_library_patches/object.rb",
-     "lib/agent_xmpp/patches/standard_library_patches/string.rb",
-     "lib/agent_xmpp/patches/xmpp4r_patches.rb",
-     "lib/agent_xmpp/patches/xmpp4r_patches/command.rb",
-     "lib/agent_xmpp/patches/xmpp4r_patches/iq.rb",
-     "lib/agent_xmpp/patches/xmpp4r_patches/x_data.rb",
-     "lib/agent_xmpp/utils.rb",
-     "lib/agent_xmpp/utils/logger.rb",
-     "lib/agent_xmpp/utils/roster.rb",
-     "lib/agent_xmpp/version.rb",
-     "test/agent_xmpp_test.rb",
-     "test/test_helper.rb"
+     "lib/agent_xmpp/patches/array.rb",
+     "lib/agent_xmpp/patches/float.rb",
+     "lib/agent_xmpp/patches/hash.rb",
+     "lib/agent_xmpp/patches/object.rb",
+     "lib/agent_xmpp/patches/rexml.rb",
+     "lib/agent_xmpp/patches/string.rb",
+     "lib/agent_xmpp/xmpp.rb",
+     "lib/agent_xmpp/xmpp/element.rb",
+     "lib/agent_xmpp/xmpp/error_response.rb",
+     "lib/agent_xmpp/xmpp/iq.rb",
+     "lib/agent_xmpp/xmpp/iq_command.rb",
+     "lib/agent_xmpp/xmpp/iq_disco.rb",
+     "lib/agent_xmpp/xmpp/iq_pubsub.rb",
+     "lib/agent_xmpp/xmpp/iq_roster.rb",
+     "lib/agent_xmpp/xmpp/iq_version.rb",
+     "lib/agent_xmpp/xmpp/jid.rb",
+     "lib/agent_xmpp/xmpp/message.rb",
+     "lib/agent_xmpp/xmpp/presence.rb",
+     "lib/agent_xmpp/xmpp/sasl.rb",
+     "lib/agent_xmpp/xmpp/stanza.rb",
+     "lib/agent_xmpp/xmpp/x_data.rb",
+     "test/app/app.rb",
+     "test/cases/test_application_message_processing.rb",
+     "test/cases/test_errors.rb",
+     "test/cases/test_presence_management.rb",
+     "test/cases/test_roster_management.rb",
+     "test/cases/test_service_discovery.rb",
+     "test/cases/test_session_management.rb",
+     "test/cases/test_version_discovery.rb",
+     "test/helpers/matchers.rb",
+     "test/helpers/mocks.rb",
+     "test/helpers/test_case_extensions.rb",
+     "test/helpers/test_client.rb",
+     "test/helpers/test_delegate.rb",
+     "test/helpers/test_helper.rb",
+     "test/messages/application_messages.rb",
+     "test/messages/error_messages.rb",
+     "test/messages/presence_messages.rb",
+     "test/messages/roster_messages.rb",
+     "test/messages/service_discovery_messages.rb",
+     "test/messages/session_messages.rb",
+     "test/messages/version_discovery_messages.rb",
+     "test/peer/peer.rb",
+     "test/xml_messages.txt"
   ]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/troystribling/agent_xmpp}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.1}
-  s.summary = %q{TODO}
+  s.summary = %q{Agent XMPP is a ruby XMPP bot framework inspired by MVC web frameworks.}
   s.test_files = [
-    "test/agent_xmpp_test.rb",
-     "test/test_helper.rb"
+    "test/app/app.rb",
+     "test/cases/test_application_message_processing.rb",
+     "test/cases/test_errors.rb",
+     "test/cases/test_presence_management.rb",
+     "test/cases/test_roster_management.rb",
+     "test/cases/test_service_discovery.rb",
+     "test/cases/test_session_management.rb",
+     "test/cases/test_version_discovery.rb",
+     "test/helpers/matchers.rb",
+     "test/helpers/mocks.rb",
+     "test/helpers/test_case_extensions.rb",
+     "test/helpers/test_client.rb",
+     "test/helpers/test_delegate.rb",
+     "test/helpers/test_helper.rb",
+     "test/messages/application_messages.rb",
+     "test/messages/error_messages.rb",
+     "test/messages/presence_messages.rb",
+     "test/messages/roster_messages.rb",
+     "test/messages/service_discovery_messages.rb",
+     "test/messages/session_messages.rb",
+     "test/messages/version_discovery_messages.rb",
+     "test/peer/peer.rb"
   ]
 
   if s.respond_to? :specification_version then
@@ -73,17 +121,14 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rake>, [">= 0.8.3"])
       s.add_runtime_dependency(%q<eventmachine>, ["= 0.12.6"])
       s.add_runtime_dependency(%q<troystribling-evma_xmlpushparser>, ["= 0.0.1"])
-      s.add_runtime_dependency(%q<xmpp4r>, ["= 0.4"])
     else
       s.add_dependency(%q<rake>, [">= 0.8.3"])
       s.add_dependency(%q<eventmachine>, ["= 0.12.6"])
       s.add_dependency(%q<troystribling-evma_xmlpushparser>, ["= 0.0.1"])
-      s.add_dependency(%q<xmpp4r>, ["= 0.4"])
     end
   else
     s.add_dependency(%q<rake>, [">= 0.8.3"])
     s.add_dependency(%q<eventmachine>, ["= 0.12.6"])
     s.add_dependency(%q<troystribling-evma_xmlpushparser>, ["= 0.0.1"])
-    s.add_dependency(%q<xmpp4r>, ["= 0.4"])
   end
 end
