@@ -51,7 +51,6 @@ end
 #.........................................................................................................
 received_presence do |from, status|
   AgentXmpp.logger.info "received_presence: #{from}, #{status}"
-  # message(:to=>from, :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s) unless from.include?('peer')
 end
 
 ##########################################################################################################

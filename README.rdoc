@@ -11,7 +11,7 @@ Events. An application that responds to an Ad-Hoc command can be written with fe
       'Hello World' 
     end
 
-Specify the application Jabber ID (JID), password and roster in *agent_xmpp.yml*.
+Specify the application Jabber ID (JID), password and roster in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
     password: pass
@@ -24,21 +24,24 @@ Install the gem and run
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
     ruby myapp.rb
 
-Install the Gajim XMPP Client, http://www.gajim.org, and connect to _you@home.com_.
+Install the Gajim XMPP Client, http://www.gajim.org, and connect to <i>you@home.com</i> (Be warned that installing Gajim on OS X can painful.
+Linux is recommended. Also, for Ubuntu installs, download the tar ball from the site. The version in the Ubuntu repositories is
+is older and does not have a completed Ad-Hoc command implementation). 
 
 When started for the first time <tt>myapp.rb</tt> will automatically send buddy requests to all contacts specified
-in <tt>agent_xmpp.yml<tt>. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
+in <tt>agent_xmpp.yml</tt>. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
 in the roster and select _execute_ _commands_. _hello_ will be in the list of Ad-Hoc Commands. Select _hello_ from the 
 list and click the _forward_ _button_ to execute _hello_.
 
 == More Examples
 
-More examples can be found at 
+More examples can be found at http://gist.github.com/160338
 
 == Ad-Hoc Command Response Payload
 
-Agent XMPP will map scalars, arrays and hashes returned by +execute+ blocks to jabber:x:data command 
+Agent XMPP will map scalars, arrays and hashes returned by <tt>execute</tt> blocks to jabber:x:data command 
 response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
+All scalars have to_s applied prior to building the command response payload.
 
     execute 'scalar' do
       'scalar' 
@@ -68,7 +71,7 @@ response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a d
        {:a1 => ['v31', 'v31'], :a2 => 'v32'}]
     end
 
-a +params+ structure is available within the +execute+ block containing routing information.
+a <tt>params</tt> structure is available within the <tt>execute</tt> block containing routing information.
 
 == Send Command
 
@@ -80,7 +83,7 @@ Commands may be sent with or without a response callback,
 
     command(:to=>'thatapp@a-place.com/ahost', :node=> 'bye')
 
-and within +execute+ blocks.
+and within <tt>execute</tt> blocks.
 
     execute 'hash_hello' do
       command(:to=>params[:from], :node=> 'hello') do |status, data|
@@ -91,7 +94,7 @@ and within +execute+ blocks.
 
 == Publish
 
-Publish nodes are configured in +agent_xmpp.yml+.
+Publish nodes are configured in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
     password: pass
@@ -112,12 +115,12 @@ The nodes are created if they do not exist and publish methods are generated for
     
     publish_alarm({:severity => :major, :description => "A really bad failure"})
 
-Publish nodes discovered that are not in +agent_xmpp.yml+ will be deleted. The following options
+Publish nodes discovered that are not in <tt>agent_xmpp.yml</tt> will be deleted. The following options
 
 == Publish Options
 
 The following publish options are available with the indicated default values. The options may be changed in
-+agent_xmpp.yml+.
+<tt>agent_xmpp.yml</tt>.
 
     :title                    => 'event',
     :access_model             => 'presence',
@@ -135,7 +138,7 @@ See http://xmpp.org/extensions/xep-0060.html#registrar-formtypes-config for a de
 
 == Subscribe
 
-Declare +event+ blocks in +myapp.rb+ to subscribe to published events .
+Declare <tt>event</tt> blocks in <tt>myapp.rb</tt> to subscribe to published events .
 
     # myapp.rb
     require 'rubygems'
@@ -146,11 +149,11 @@ Declare +event+ blocks in +myapp.rb+ to subscribe to published events .
     end
 
 Agent XMPP will verify subscription to the event and subscribe if required. Subscriptions
-discovered that are not declared by an event block in +myapp.rb+ will be deleted.
+discovered that are not declared by an event block in <tt>myapp.rb</tt> will be deleted.
 
 == Receive Chat Messages
 
-Declare +chat+ blocks in +myapp.rb+ to receive and respond to chat messages.
+Declare <tt>chat</tt> blocks in <tt>myapp.rb</tt> to receive and respond to chat messages.
   
     # myapp.rb
     require 'rubygems'
@@ -160,15 +163,15 @@ Declare +chat+ blocks in +myapp.rb+ to receive and respond to chat messages.
       params[:body].reverse
     end
 
-If the +chat+ block returns a +String+ a response will be sent to the message sender.
+If the <tt>chat</tt> block returns a <tt>String</tt> a response will be sent to the message sender.
 
 == Send Chat Messages
 
-    message(:to=>'thatapp@a-place.com/ahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
+    message(:to=>'thatapp@a-place.com/onahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
     
 == Roster
 
-Roster groups may be specified in +agent_xmpp.yml+.
+Roster groups may be specified in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
     password: pass
@@ -181,11 +184,11 @@ Roster groups may be specified in +agent_xmpp.yml+.
             jid: someone@somewhere.com
             groups: [bad group]
      
-Agent XMPP will update the roster maintained on the XMPP server to be consistent with to the roster specified in +agent_xmpp.yml+. 
+Agent XMPP will update the roster maintained on the XMPP server to be consistent with to the roster specified in <tt>agent_xmpp.yml</tt>. 
 
 == Routing Priority
 
-The routing priority may be configured in +agnet_xmpp.yml+. The default value is 1. Valid values are -127
+The routing priority may be configured in <tt>agent_xmpp.yml</tt>. The default value is 1. Valid values are -127
 
     jid: myapp@nowhere.com
     password: pass
@@ -228,7 +231,8 @@ Agent XMPP provides callbacks for applications to respond to major events that o
 Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and Publish-Subscribe 
 is not supported by any client. Gajim http://www.gajim.org provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery,
 which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better
-implementation. Both Gajim and Psi provide an interface for manual entry of XML messages which is currently required for Publish-Subscribe development.
+implementation. Both Gajim and Psi provide an interface for manual entry of XML messages which is currently required for Publish-Subscribe 
+development. Example Publish-Subscribe messages can be found at http://gist.github.com/160344
 
 == Logging
 

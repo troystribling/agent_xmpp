@@ -195,10 +195,3 @@
 </publish>
 </pubsub>
 </iq>
-
-**** retrieve subscriptions
-<iq id='19617' to='pubsub.plan-b.ath.cx' type='get' xmlns='jabber:client'>
-<pubsub xmlns='http://jabber.org/protocol/pubsub'>
-<subscriptions/>
-</pubsub>
-</iq>
