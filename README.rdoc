@@ -78,7 +78,7 @@ All scalars have <tt>to_s</tt> applied prior to building the command response pa
 
 a <tt>params</tt> structure is available within the <tt>execute</tt> block containing routing information.
 
-== Send Command
+== Send Commands
 
 Commands may be sent with or without a response callback,
 
