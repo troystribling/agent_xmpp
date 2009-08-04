@@ -14,7 +14,7 @@ Events. An application that responds to an Ad-Hoc command can be written with fe
 Specify the application Jabber ID (JID), password and roster in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
-    password: pass
+    password: none
     roster:
         - 
             jid:you@home.com
@@ -23,15 +23,15 @@ Be sure libxml2 headers are available,
 
     sudo apt-get install libxml2-dev
 
-Install the gem
+Install the gem,
 
     sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
 
-Install the Gajim XMPP Client, http://www.gajim.org, and connect to <i>you@home.com</i> (Be warned that installing Gajim on OS X can be painful.
-Linux is recommended. Also, for Ubuntu installs, download the tar ball from the site. The version in the Ubuntu repositories is
-older and does not have a completed Ad-Hoc Command implementation). 
+Install the Gajim XMPP Client version 0.12.3 or higher, http://www.gajim.org, and connect to <i>you@home.com</i> (Installing Gajim on OS X can be painful.
+Linux is recommended. Also, for Ubuntu installs, download the tar ball from the site. The version in the Ubuntu repositories
+old and does not have a completed Ad-Hoc Command implementation). 
 
-Run the application
+Run the application,
 
     ruby myapp.rb
 
@@ -104,7 +104,7 @@ and within <tt>execute</tt> blocks.
 Publish nodes are configured in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
-    password: pass
+    password: none
     roster:
         - 
             jid:you@home.com
@@ -145,7 +145,7 @@ See http://xmpp.org/extensions/xep-0060.html#registrar-formtypes-config for a de
 
 == Subscribe
 
-Declare <tt>event</tt> blocks in <tt>myapp.rb</tt> to subscribe to published events .
+Declare <tt>event</tt> blocks in <tt>myapp.rb</tt> to subscribe to published events.
 
     # myapp.rb
     require 'rubygems'
@@ -181,7 +181,7 @@ If the <tt>chat</tt> block returns a <tt>String</tt> a response will be sent to 
 Roster groups may be specified in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
-    password: pass
+    password: none
     roster:
         - 
             jid:you@home.com
@@ -199,7 +199,7 @@ The routing priority may be configured in <tt>agent_xmpp.yml</tt>. The default v
 See http://xmpp.org/rfcs/rfc3921.html for a details.
 
     jid: myapp@nowhere.com
-    password: pass
+    password: none
     priority: 128
     roster:
         - 
