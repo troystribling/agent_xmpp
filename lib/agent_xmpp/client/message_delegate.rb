@@ -172,7 +172,7 @@ module AgentXmpp
       
       #.........................................................................................................
       def did_receive_presence_subscribed(pipe, presence)
-        AgentXmpp.logger.warn "SUBSCRIPTION ACCEPTED: #{presence.from.to_s}" 
+        AgentXmpp.logger.info "SUBSCRIPTION ACCEPTED: #{presence.from.to_s}" 
       end
       
       #.........................................................................................................
@@ -495,7 +495,7 @@ module AgentXmpp
                end
         srvr_subs.inject(reqs) do |r,s|
           unless app_subs.include?(s) 
-            AgentXmpp.logger.warn "UNSUBSCRIBING TO NODE: #{from_jid}, #{s}"
+            AgentXmpp.logger.warn "UNSUBSCRIBING FROM NODE: #{from_jid}, #{s}"
             r << Xmpp::IqPubSub.unsubscribe(pipe, from_jid, s)
           end; r
         end       
@@ -682,7 +682,7 @@ module AgentXmpp
                   end                          
         config_nodes.inject(updates) do |u,n|
           unless disco_nodes.include?(n) 
-            AgentXmpp.logger.warn "ADDING PUBSUB NODE: #{pubsub.to_s}, #{n}"
+            AgentXmpp.logger.info "ADDING PUBSUB NODE: #{pubsub.to_s}, #{n}"
             u << Xmpp::IqPubSub.create_node(pipe, pubsub.to_s, n)
           end; u
         end                          
