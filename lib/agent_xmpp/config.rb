@@ -15,7 +15,6 @@ module AgentXmpp
   DEFAULT_PUBSUB_CONFIG = {
     :title                    => 'event',
     :access_model             => 'presence',
-    :publish_model            => 'publishers',
     :max_items                => 20,
     :deliver_notifications    => 1,
     :deliver_payloads         => 1,

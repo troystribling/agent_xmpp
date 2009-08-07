@@ -1,6 +1,6 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing XMPP automated clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
+Agent XMPP is a simple DSL for writing automated XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
 Events. An application that responds to an Ad-Hoc command can be written with few lines of code.
 
     # myapp.rb
@@ -46,7 +46,7 @@ More examples can be found at http://gist.github.com/160338
 
 Agent XMPP will map scalars, arrays and hashes returned by <tt>execute</tt> blocks to jabber:x:data command 
 response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
-All scalars have <tt>to_s</tt> applied prior to building the command response payload.
+All scalars have <tt>to_s</tt> applied prior to building the payload.
 
     execute 'scalar' do
       'scalar' 
@@ -129,7 +129,6 @@ The following publish options are available with the indicated default values. T
 
     :title                    => 'event',
     :access_model             => 'presence',
-    :publish_model            => 'publishers',
     :max_items                => 20,
     :deliver_notifications    => 1,
     :deliver_payloads         => 1,
