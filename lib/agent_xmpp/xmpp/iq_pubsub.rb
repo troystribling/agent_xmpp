@@ -194,7 +194,7 @@ module AgentXmpp
       def items
         elements.to_a('items')
       end
-   end
+    end
 
     #####-------------------------------------------------------------------------------------------------------
     class EventItems < Items
@@ -224,12 +224,12 @@ module AgentXmpp
       xmpp_attribute :node, :subid
 
       #.........................................................................................................
-      def initialize(jid=nil, node=nil, subid=nil, subscription=nil) 
+      def initialize(jid=nil, node=nil, subid=nil, state=nil) 
         super()
         self.jid = jid if jid
         self.node = node if node
         self.subid = subid if subid
-        self.state = subscription if subscription
+        self.state = state if state
       end
 
       #.........................................................................................................

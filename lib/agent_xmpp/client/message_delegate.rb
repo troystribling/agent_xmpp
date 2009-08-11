@@ -147,7 +147,7 @@ module AgentXmpp
           response = []
           unless from_jid.to_s.eql?(AgentXmpp.jid.to_s)
             Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :available)             
-            response << Xmpp::IqVersion.request(pipe, from_jid) unless AgentXmpp.roster.has_version?(from_jid)
+            response << Xmpp::IqVersion.get(pipe, from_jid) unless AgentXmpp.roster.has_version?(from_jid)
             unless AgentXmpp.services.has_jid?(from_jid)
               response << Xmpp::IqDiscoInfo.get(pipe, from_jid)
               response << Xmpp::IqDiscoItems.get(pipe, from_jid, 'http://jabber.org/protocol/commands')
