@@ -1,6 +1,6 @@
 ##############################################################################################################
 module AgentXmpp  
-  module StandardLibrary
+  module CoreLibrary
     module FloatPatches
     
       ####----------------------------------------------------------------------------------------------------
@@ -16,10 +16,10 @@ module AgentXmpp
         
     #### ArrayPatches
     end
-  ##### StandardLibrary
+  ##### CoreLibrary
   end
 #### AgentXmpp
 end
 
 ##############################################################################################################
-Float.send(:include, AgentXmpp::StandardLibrary::FloatPatches::InstanceMethods)
+Float.send(:include, AgentXmpp::CoreLibrary::FloatPatches::InstanceMethods)

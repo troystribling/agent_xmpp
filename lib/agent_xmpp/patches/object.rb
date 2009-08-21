@@ -1,6 +1,6 @@
 ##############################################################################################################
 module AgentXmpp  
-  module StandardLibrary
+  module CoreLibrary
     module ObjectPatches
     
       ####----------------------------------------------------------------------------------------------------
@@ -21,10 +21,10 @@ module AgentXmpp
         
     #### ObjectPatches
     end
-  ##### StandardLibrary
+  ##### CoreLibrary
   end
 #### AgentXmpp
 end
 
 ##############################################################################################################
-Object.send(:include, AgentXmpp::StandardLibrary::ObjectPatches::InstanceMethods)
+Object.send(:include, AgentXmpp::CoreLibrary::ObjectPatches::InstanceMethods)

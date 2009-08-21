@@ -1,6 +1,6 @@
 ##############################################################################################################
 module AgentXmpp  
-  module StandardLibrary
+  module CoreLibrary
     module ArrayPatches
     
       ####----------------------------------------------------------------------------------------------------
@@ -38,10 +38,10 @@ module AgentXmpp
         
     #### ArrayPatches
     end
-  ##### StandardLibrary
+  ##### CoreLibrary
   end
 #### AgentXmpp
 end
 
 ##############################################################################################################
-Array.send(:include, AgentXmpp::StandardLibrary::ArrayPatches::InstanceMethods)
+Array.send(:include, AgentXmpp::CoreLibrary::ArrayPatches::InstanceMethods)

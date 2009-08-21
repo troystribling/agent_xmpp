@@ -1,6 +1,6 @@
 ##############################################################################################################
 module AgentXmpp  
-  module StandardLibrary
+  module CoreLibrary
     module HashPatches
     
       ####----------------------------------------------------------------------------------------------------
@@ -19,10 +19,10 @@ module AgentXmpp
         
     #### HashPatches
     end
-  ##### StandardLibrary
+  ##### CoreLibrary
   end
 #### AgentXmpp
 end
 
 ##############################################################################################################
-Hash.send(:include, AgentXmpp::StandardLibrary::HashPatches::InstanceMethods)
+Hash.send(:include, AgentXmpp::CoreLibrary::HashPatches::InstanceMethods)
