@@ -14,20 +14,23 @@ module AgentXmpp
         AgentXmpp.log_file = add_path(AgentXmpp.log_file) if AgentXmpp.log_file.kind_of?(String)
         AgentXmpp.config_file = add_path(AgentXmpp.config_file)
         AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
+        AgentXmpp.logger.level = Logger::WARN 
+
+
+        ####..............
+        call_if_implemented(:call_before_start)
 
         ####..............
         AgentXmpp.logger.info "STARTING AgentXmpp"
         AgentXmpp.logger.info "APPLICATION PATH: #{AgentXmpp.app_path}"
         AgentXmpp.logger.info "LOG FILE: #{AgentXmpp.log_file.kind_of?(String) ? AgentXmpp.log_file : "STDOUT"}"
         AgentXmpp.logger.info "CONFIGURATION FILE: #{AgentXmpp.config_file}"
-        AgentXmpp.logger.level = Logger::WARN 
 
         ####..............
         raise AgentXmppError, "Configuration file #{AgentXmpp.config_file} required." unless File.exist?(AgentXmpp.config_file) 
 
         ####..............
         AgentXmpp.config = File.open(AgentXmpp.config_file) {|yf| YAML::load(yf)}
-        call_if_implemented(:call_before_start)
         AgentXmpp::Client.new().connect
         
       end

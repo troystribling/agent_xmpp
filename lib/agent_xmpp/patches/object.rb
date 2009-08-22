@@ -1,30 +1,15 @@
 ##############################################################################################################
-module AgentXmpp  
-  module CoreLibrary
-    module ObjectPatches
-    
-      ####----------------------------------------------------------------------------------------------------
-      module InstanceMethods
+class Object  
 
-        #.......................................................................................................
-        def to_x_data(type='result')
-          Xmpp::XData.new(type).add_field_with_value(nil, to_s)
-        end
-  
-        #.......................................................................................................
-        def define_meta_class_method(name, &blk)
-          (class << self; self; end).instance_eval {define_method(name, &blk)}
-        end
-
-      #### InstanceMethods
-      end  
-        
-    #### ObjectPatches
-    end
-  ##### CoreLibrary
+  #.......................................................................................................
+  def to_x_data(type='result')
+    AgentXmpp::Xmpp::XData.new(type).add_field_with_value(nil, to_s)
   end
-#### AgentXmpp
-end
 
-##############################################################################################################
-Object.send(:include, AgentXmpp::CoreLibrary::ObjectPatches::InstanceMethods)
+  #.......................................................................................................
+  def define_meta_class_method(name, &blk)
+    (class << self; self; end).instance_eval {define_method(name, &blk)}
+  end
+
+#### Object
+end
