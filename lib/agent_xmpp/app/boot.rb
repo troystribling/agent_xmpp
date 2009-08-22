@@ -16,7 +16,6 @@ module AgentXmpp
         AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
         AgentXmpp.logger.level = Logger::WARN 
 
-
         ####..............
         call_if_implemented(:call_before_start)
 
