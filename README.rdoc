@@ -7,7 +7,7 @@ Events. An application that responds to an Ad-Hoc command can be written with fe
     require 'rubygems'
     require 'agent_xmpp'
 
-    execute 'hello' do
+    command 'hello' do
       'Hello World' 
     end
 
@@ -48,29 +48,29 @@ Agent XMPP will map scalars, arrays and hashes returned by <tt>execute</tt> bloc
 response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
 All scalars have <tt>to_s</tt> applied prior to building the payload.
 
-    execute 'scalar' do
+    command 'scalar' do
       'scalar' 
     end
 
-    execute 'hash' do
+    command 'hash' do
       {:a1 => 'v1', :a2 => 'v2'}
     end
 
-    execute 'scalar_array' do
+    command 'scalar_array' do
       ['v1', 'v2','v3', 'v4'] 
     end
 
-    execute 'hash_array' do
+    command 'hash_array' do
       {:a1 => ['v11', 'v11'], :a2 => 'v12'}
     end
 
-    execute 'array_hash' do
+    command 'array_hash' do
       [{:a1 => 'v11', :a2 => 'v12'}, 
        {:a1 => 'v21', :a2 => 'v22'}, 
        {:a1 => 'v31', :a2 => 'v32'}]
     end
 
-    execute 'array_hash_array' do
+    command 'array_hash_array' do
       [{:a1 => ['v11', 'v11'], :a2 => 'v12'}, 
        {:a1 => ['v21', 'v21'], :a2 => 'v22'}, 
        {:a1 => ['v31', 'v31'], :a2 => 'v32'}]
@@ -82,16 +82,16 @@ a <tt>params</tt> structure is available within the <tt>execute</tt> block conta
 
 Commands may be sent with or without a response callback,
 
-    command(:to=>'thatapp@a-place.com/ahost', :node=> 'hello') do |status, data|
+    send_command(:to=>'thatapp@a-place.com/ahost', :node=> 'hello') do |status, data|
       puts "COMMAND RESPONSE: #{status}, #{data.inspect}"
     end
 
-    command(:to=>'thatapp@a-place.com/ahost', :node=> 'bye')
+    send_command(:to=>'thatapp@a-place.com/ahost', :node=> 'bye')
 
-and within <tt>execute</tt> blocks.
+and within <tt>command</tt> blocks.
 
-    execute 'hash_hello' do
-      command(:to=>params[:from], :node=> 'hello') do |status, data|
+    command 'hash_hello' do
+      send_command(:to=>params[:from], :node=> 'hello') do |status, data|
         puts "COMMAND RESPONSE: #{status}, #{data.inspect}"
       end
       {:a1 => 'v1', :a2 => 'v2'}
@@ -171,7 +171,7 @@ If the <tt>chat</tt> block returns a <tt>String</tt> a response will be sent to 
 
 == Send Chat Messages
 
-    message(:to=>'thatapp@a-place.com/onahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
+    send_chat(:to=>'thatapp@a-place.com/onahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
     
 == Roster
 

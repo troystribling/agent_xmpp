@@ -62,7 +62,7 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      def title=(title)
+      def add_title(title)
         delete_elements('title')
         add_element(XDataTitle.new(title))
       end
@@ -73,8 +73,52 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      def instructions=(i)
+      def add_instructions(i)
         add(XDataInstructions.new(i))
+      end
+
+      #.....................................................................................................
+      def add_fixed(val)
+        add_field_with_value(nil, val, 'fixed')
+      end
+
+      #.....................................................................................................
+      def add_hidden(var, val)
+        add_field_with_value(var, val, 'hidden')
+      end
+
+      #.....................................................................................................
+      def add_text_single(var, label=nil)
+        add_field(var, label, 'text-single')
+      end
+
+      #.....................................................................................................
+      def add_text_multi(var, label=nil)
+        add_field(var, label, 'text-multi')
+      end
+
+      #.....................................................................................................
+      def add_text_private(var, label=nil)
+        add_field(var, label, 'text-private')
+      end
+
+      #.....................................................................................................
+      def add_jid_single(var, label=nil)
+        add_field(var, label, 'jid-single')
+      end
+
+      #.....................................................................................................
+      def add_boolean(var, label=nil)
+        add_field(var, label, 'boolean')
+      end
+
+      #.....................................................................................................
+      def add_list_single(var, opts, label=nil, default=nil)
+        field = XDataField.new(var, 'list-single')
+        field.label = label if label
+        field.options = opts
+        field.values = [default] if default
+        self << field
       end
 
       #.....................................................................................................
@@ -98,22 +142,37 @@ module AgentXmpp
         end
       end
 
-    private
+      #.....................................................................................................
+      def to_x_data
+        self
+      end
 
-    #.....................................................................................................
-    def to_scalar(vals)
-      vals.length.eql?(1) ? vals.first : vals
-    end
+      #.....................................................................................................
+      # private
+      #.....................................................................................................
+      def to_scalar(vals)
+        vals.length.eql?(1) ? vals.first : vals
+      end
       
-    #.....................................................................................................
-    def to_hash(flds)
-      flds.inject({}) {|h,f| h[f.var] = to_scalar(f.values); h}
-    end
+      #.....................................................................................................
+      def to_hash(flds)
+        flds.inject({}) {|h,f| h[f.var] = to_scalar(f.values); h}
+      end
 
-    #.....................................................................................................
-    def to_array_of_hashes(itms)
-      itms.map{|i| to_hash(i.fields)}
-    end
+      #.....................................................................................................
+      def to_array_of_hashes(itms)
+        itms.map{|i| to_hash(i.fields)}
+      end
+
+      #.....................................................................................................
+      def add_field(var, label, type=nil)
+        field = XDataField.new(var, type)
+        field.label = label if label
+        self << field
+      end
+      
+      #.....................................................................................................
+      private :to_scalar, :to_hash, :to_array_of_hashes, :add_field
       
     end
 

@@ -20,7 +20,7 @@ module AgentXmpp
         params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
           :from => stanza.from.to_s, :node => command.node, :id => stanza.id}
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-        Controller.new(pipe, params).invoke_execute
+        Controller.new(pipe, params).invoke_command
       end
 
       #.........................................................................................................
@@ -129,8 +129,8 @@ module AgentXmpp
       def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
         config_roster_item = AgentXmpp.roster.find_by_jid(AgentXmpp.jid)
-        add_command_method(pipe)
-        add_message_method(pipe)
+        add_send_command_method(pipe)
+        add_send_chat_method(pipe)
         [Send(Xmpp::Presence.new(nil, nil, AgentXmpp.priority)), Xmpp::IqRoster.get(pipe),  
          Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.domain), 
          Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.bare)]
@@ -631,8 +631,8 @@ module AgentXmpp
       end
           
       #.........................................................................................................
-      def add_command_method(pipe)
-        AgentXmpp.define_meta_class_method(:command) do |args, &blk| 
+      def add_send_command_method(pipe)
+        AgentXmpp.define_meta_class_method(:send_command) do |args, &blk| 
           raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
           iq = Xmpp::Iq.new(:set, args[:to])
           iq.command = Xmpp::IqCommand.new(args[:node])
@@ -643,19 +643,19 @@ module AgentXmpp
                            blk.call(r.type, (r.type.eql?(:result) and r.command and r.command.x) ? r.command.x.to_native : nil) if blk
                          end) 
         end    
-        Delegator.delegate(AgentXmpp, :command)
+        Delegator.delegate(AgentXmpp, :send_command)
         AgentXmpp.logger.info "ADDED COMMAND METHOD"
       end
 
       #.........................................................................................................
-      def add_message_method(pipe)
-        AgentXmpp.define_meta_class_method(:message) do |args| 
+      def add_send_chat_method(pipe)
+        AgentXmpp.define_meta_class_method(:send_chat) do |args| 
           raise ArgmentError ':to and :body are required' unless args[:to] and args[:body]
           message = Xmpp::Message.new(args[:to], args[:body])
           message.type = args[:type] || :chat
           pipe.send_resp(Send(message)) 
         end   
-        Delegator.delegate(AgentXmpp, :message)
+        Delegator.delegate(AgentXmpp, :send_chat)
         AgentXmpp.logger.info "ADDED MESSAGE METHOD"
       end
           

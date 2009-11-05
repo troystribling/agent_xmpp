@@ -14,8 +14,10 @@ module AgentXmpp
       attr_reader :routes
 
       #.........................................................................................................
-      def execute(node, opts = {}, &blk) 
-        route(:execute, {:node => node, :opts => opts, :blk => blk}) 
+      # interface
+      #.........................................................................................................
+      def command(node, opts = {}, &blk) 
+        route(:command, {:node => node, :opts => opts, :blk => blk}) 
       end
 
       #.........................................................................................................
@@ -30,13 +32,15 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      # managment
+      #.........................................................................................................
       def route(action, nroute)
         (routes[action] ||= []).push(nroute).last
       end
      
       #.........................................................................................................
       def command_nodes
-        (routes[:execute] ||= []).map{|r| r[:node]}
+        (routes[:command] ||= []).map{|r| r[:node]}
       end
 
       #.........................................................................................................
@@ -61,19 +65,41 @@ module AgentXmpp
       @pipe = pipe
     end
 
+    #.........................................................................................................
+    # process requests
     #.......................................................................................................
-     def invoke_execute
-       route = get_route(params[:action])
+     def invoke_command
+       route = get_route(:command)
        unless route.nil?
          define_meta_class_method(:request, &route[:blk])
          define_meta_class_method(:request_callback) do |*result|
-           result = result.first if result.length.eql?(1)  
+           result = command_result(result.length.eql?(1)  ? result.first : result )  
            add_payload_to_container(result.nil? ? nil : result.to_x_data)
          end
          handle_request
        else
          AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
          Xmpp::ErrorResponse.no_route(params)
+       end
+     end
+
+     #.......................................................................................................
+     def on(action, &blk)
+       define_meta_class_method(("on_"+action.to_s).to_sym, &blk)
+     end
+
+     #.........................................................................................................
+     def command_result(result)
+       result_method = ("on_"+params[:action].to_s).to_sym
+       if respond_to?(result_method)
+         if params[:action].eql?(:execute)
+           form = Xmpp::XData.new('form')
+           on_execute(form); form
+         else
+           send(result_method)
+         end
+       else
+         result
        end
      end
 
@@ -120,7 +146,7 @@ module AgentXmpp
     def result_message_chat(params, payload)
       Xmpp::Message.chat(params[:from], payload)
     end
-        
+
   private
     
     #.........................................................................................................

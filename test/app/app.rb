@@ -23,17 +23,11 @@ end
 discovered_pubsub_node do |service, node|
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
   if node.eql?(AgentXmpp.user_pubsub_root+'/time')
-    # AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
-    # EventMachine::PeriodicTimer.new(60) do
-    #   publish_time(Time.now.to_s)
-    #   AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
-    # end  
-  elsif node.eql?(AgentXmpp.user_pubsub_root+'/shot')
-    # AgentXmpp.logger.info "LAUNCHING SHOT PUBLISH TASK"
-    # EventMachine::Timer.new(30) do
-    #   publish_shot(Time.now.to_s)
-    #   AgentXmpp.logger.info "FIRING EVENT SHOT: #{Time.now.to_s}"
-    # end  
+    AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
+    EventMachine::PeriodicTimer.new(600) do
+      publish_time(Time.now.to_s)
+      AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
+    end  
   end
 end
 
@@ -42,7 +36,7 @@ discovered_command_nodes do |jid, nodes|
   AgentXmpp.logger.info "discovered_command_nodes"
   nodes.each do |n|
     AgentXmpp.logger.info "COMMAND NODE: #{jid}, #{n}"
-    command(:to=>jid, :node=> n) do |status, data|
+    send_command(:to=>jid, :node=> n) do |status, data|
       AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
     end
   end
@@ -54,33 +48,33 @@ received_presence do |from, status|
 end
 
 ##########################################################################################################
-# command processing
+# command processing: response payloads
 #.........................................................................................................
-execute 'scalar' do
+command 'scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 
 end
 
 #.........................................................................................................
-execute 'hash' do
+command 'hash' do
   AgentXmpp.logger.info "ACTION: hash"
-  {:attr1 => 'val1', :attr2 => 'val2'}
+  {:xyz => 'wuv', :attr1 => 'val1', :attr2 => 'val2', :test1 => 'ans1'}
 end
 
 #.........................................................................................................
-execute 'scalar_array' do
+command 'scalar_array' do
   AgentXmpp.logger.info "ACTION: array"
   ['val1', 'val2','val3', 'val4'] 
 end
 
 #.........................................................................................................
-execute 'hash_array' do
+command 'hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   {:attr1 => ['val11', 'val11'], :attr2 => 'val12'}
 end
 
 #.........................................................................................................
-execute 'array_hash' do
+command 'array_hash' do
   AgentXmpp.logger.info "ACTION: array_hash"
   [{:attr1 => 'val11', :attr2 => 'val12'}, 
    {:attr1 => 'val21', :attr2 => 'val22'}, 
@@ -88,21 +82,25 @@ execute 'array_hash' do
 end
 
 #.........................................................................................................
-execute 'array_hash_array' do
+command 'array_hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, 
    {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, 
    {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
 end
 
+##########################################################################################################
+# command processing: data forms
 #.........................................................................................................
-# respond with a result and another command resquest
-execute 'hash_hello' do
-  AgentXmpp.logger.info "ACTION: hash_hello"
-  command(:to=>params[:from], :node=> 'hello') do |status, data|
-    AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
+command 'text_single' do
+  AgentXmpp.logger.info "ACTION: text_single"
+  on(:execute) do |form|
+    form.add_title('Type some text')
+    form.add_instructions('Use the keyboard to enter text')
+    form.add_text_single('text', 'your text')
   end
-  {:attr1 => 'val1', :attr2 => 'val2'}
+  on(:submit) do
+  end
 end
 
 ##########################################################################################################
@@ -115,20 +113,13 @@ end
 ##########################################################################################################
 # pubsub events
 #.........................................................................................................
-# respond with a chat message
 event 'test@planbresearch.com', 'val' do
   AgentXmpp.logger.info "EVENT: test@planbresearch.com/val"
-  message(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
+  send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
 end
 
 #.........................................................................................................
 event 'test@planbresearch.com', 'waiting' do
   AgentXmpp.logger.info "EVENT: test@planbresearch.com/waiting"
-  p params
-end
-
-#.........................................................................................................
-event 'test@plan-b.ath.cx', 'val' do
-  AgentXmpp.logger.info "EVENT: test@plan-b.ath.cx/val"
   p params
 end
