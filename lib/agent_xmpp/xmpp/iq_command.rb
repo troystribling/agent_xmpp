@@ -22,7 +22,8 @@ module AgentXmpp
           iq = Iq.new(:result, args[:to])
           iq.id = args[:id] unless args[:id].nil?
           iq.command = new(args[:node])
-          iq.command.status = 'completed'
+          iq.command.status = args[:status].nil? ? 'completed' : args[:status]
+          iq.command.sessionid = args[:sessionid] unless args[:sessionid].nil?
           iq.command << args[:payload] unless args[:payload].nil?
           Send(iq)      
         end

@@ -92,7 +92,8 @@ module AgentXmpp
      def command_result(result)
        result_method = ("on_"+params[:action].to_s).to_sym
        if respond_to?(result_method)
-         if params[:action].eql?(:execute)
+         case params[:action]   
+         when :execute
            form = Xmpp::XData.new('form')
            on_execute(form); form
          else
@@ -139,16 +140,18 @@ module AgentXmpp
     # add payloads
     #.........................................................................................................
     def result_jabber_x_data(params, payload)
-      Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload)
+      status = payload.type.eql?('form') ? 'executing' : 'completed'
+      Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 
+                             :status => status, :sessionid => params[:sessionid])
     end
 
     #.........................................................................................................
     def result_message_chat(params, payload)
       Xmpp::Message.chat(params[:from], payload)
     end
-
-  private
     
+    #.........................................................................................................
+    # private
     #.........................................................................................................
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
@@ -171,6 +174,9 @@ module AgentXmpp
     def chat_route 
       (BaseController.routes[:chat] ||= []).first
     end
+
+    #.........................................................................................................
+    private :add_payload_to_container, :get_route, :chat_route
     
   #### BaseController
   end

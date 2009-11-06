@@ -18,7 +18,7 @@ module AgentXmpp
       def did_receive_command_set(pipe, stanza)
         command = stanza.command
         params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
-          :from => stanza.from.to_s, :node => command.node, :id => stanza.id}
+          :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :sessionid => command.sessionid}
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
         Controller.new(pipe, params).invoke_command
       end
