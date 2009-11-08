@@ -96,7 +96,7 @@ command 'text_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('Type some text')
-    form.add_instructions('Use the keyboard to enter text')
+    form.add_instructions('Use the keyboard to enter text in the box below. Any entered text is valid')
     form.add_text_single('text', 'your text')
   end
   on(:submit) do
