@@ -110,7 +110,7 @@ command 'multiple_text_single' do
   on(:execute) do |form|
     form.add_title('Car and City')
     form.add_instructions('Use the keyboard to enter a car model and a city in the two boxes below.')
-    form.add_text_single('car', 'enter carmodel')
+    form.add_text_single('car', 'enter car model')
     form.add_text_single('city', 'enter city')
   end
   on(:submit) do
