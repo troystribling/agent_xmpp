@@ -95,11 +95,39 @@ end
 command 'text_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
-    form.add_title('Type some text')
-    form.add_instructions('Use the keyboard to enter text in the box below. Any entered text is valid')
-    form.add_text_single('text', 'your text')
+    form.add_title('Your Name')
+    form.add_instructions('Use the keyboard to enter your name in the box below.')
+    form.add_text_single('name', 'enter your name')
   end
   on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'multiple_text_single' do
+  AgentXmpp.logger.info "ACTION: text_single"
+  on(:execute) do |form|
+    form.add_title('Car and City')
+    form.add_instructions('Use the keyboard to enter a car model and a city in the two boxes below.')
+    form.add_text_single('car', 'enter carmodel')
+    form.add_text_single('city', 'enter city')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'list_single' do
+  AgentXmpp.logger.info "ACTION: list_single"
+  on(:execute) do |form|
+    form.add_title('Fruits')
+    form.add_instructions('Select a fruit')
+    form.add_list_single('fruits',['apple', 'orange', 'lemon', 'lime'], 'chose a fruit')
+  end
+  on(:submit) do
+    params[:data]
   end
 end
 
