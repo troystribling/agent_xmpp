@@ -278,12 +278,13 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      def options=(hsh)
+      def options=(opts)
+        opts = opts.inject({}){|h,v| h.update(v => v.to_s.gsub(/_/,' '))} if opts.kind_of?(Array)
         delete_elements('option')
-        hsh.each do |value,label|
+        opts.each do |value,label|
           o = add(REXML::Element.new('option'))
           o.attributes['label'] = label
-          o.add(REXML::Element.new('value')).text = value
+          o.add(REXML::Element.new('value')).text = value.to_s
         end
       end
     end

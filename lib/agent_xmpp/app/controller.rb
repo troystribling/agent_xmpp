@@ -140,7 +140,7 @@ module AgentXmpp
     # add payloads
     #.........................................................................................................
     def result_jabber_x_data(params, payload)
-      status = payload.type.eql?('form') ? 'executing' : 'completed'
+      status = payload.type.eql?(:form) ? 'executing' : 'completed'
       Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 
                              :status => status, :sessionid => params[:sessionid])
     end

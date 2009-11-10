@@ -123,8 +123,8 @@ command 'list_single' do
   AgentXmpp.logger.info "ACTION: list_single"
   on(:execute) do |form|
     form.add_title('Fruits')
-    form.add_instructions('Select a fruit')
-    form.add_list_single('fruits',['apple', 'orange', 'lemon', 'lime'], 'chose a fruit')
+    form.add_instructions('Select a fruit from the list.')
+    form.add_list_single('fruits',[:apple, :orange, :lemon, :lime, :kiwi_fruit], 'available fruits')
   end
   on(:submit) do
     params[:data]
