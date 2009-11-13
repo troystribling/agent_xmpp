@@ -96,7 +96,7 @@ command 'text_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('Your Name')
-    form.add_instructions('Use the keyboard to enter your name in the box below.')
+    form.add_instructions('Use the keyboard to enter your name below.')
     form.add_text_single('name', 'enter your name')
   end
   on(:submit) do
@@ -109,9 +109,48 @@ command 'multiple_text_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('Car and City')
-    form.add_instructions('Use the keyboard to enter a car model and a city in the two boxes below.')
+    form.add_instructions('Use the keyboard to enter a car model and a city below.')
     form.add_text_single('car', 'enter car model')
     form.add_text_single('city', 'enter city')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'text_private' do
+  AgentXmpp.logger.info "ACTION: text_multi"
+  on(:execute) do |form|
+    form.add_title('Enter a Secret')
+    form.add_instructions('Use the keyboard to enter your secret below.')
+    form.add_text_private('secret', 'The Secret')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'jid_single' do
+  AgentXmpp.logger.info "ACTION: text_single"
+  on(:execute) do |form|
+    form.add_title('The JID')
+    form.add_instructions('Use the keyboard to enter a JID below.')
+    form.add_jid_single('jid', 'A JID')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'text_multi' do
+  AgentXmpp.logger.info "ACTION: text_multi"
+  on(:execute) do |form|
+    form.add_title('Tell a Story')
+    form.add_instructions('Use the keyboard to enter your story below.')
+    form.add_text_multi('story', 'Your Story')
   end
   on(:submit) do
     params[:data]
@@ -124,7 +163,20 @@ command 'list_single' do
   on(:execute) do |form|
     form.add_title('Fruits')
     form.add_instructions('Select a fruit from the list.')
-    form.add_list_single('fruits',[:apple, :orange, :lemon, :lime, :kiwi_fruit], 'available fruits')
+    form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'available fruits')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'boolean' do
+  AgentXmpp.logger.info "ACTION: list_single"
+  on(:execute) do |form|
+    form.add_title('On or Off')
+    form.add_instructions('Choose below')
+    form.add_boolean('answer', 'On or Off please')
   end
   on(:submit) do
     params[:data]
