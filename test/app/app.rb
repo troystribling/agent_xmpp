@@ -183,6 +183,35 @@ command 'boolean' do
   end
 end
 
+#.........................................................................................................
+command 'long_form' do
+  AgentXmpp.logger.info "ACTION: list_single"
+  on(:execute) do |form|
+    form.add_title('The Long Form')
+    form.add_instructions('Make the correct choices and provide the required information.')
+    form.add_fixed("Make the correct choices.")
+    form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'Select a Fruit')
+    form.add_list_single('nuts', [:peanut, :almond, :cashew, :pecan, :walnut], 'Select a Nut')
+    form.add_list_single('vegetables', [:broccoli, :carrot, :corn, :tomato, :onion], 'Select a Nut')
+    form.add_fixed("Your name is required.")
+    form.add_text_single('first_name', 'First Name')
+    form.add_text_single('last_name', 'Last Name')
+    form.add_fixed("Your address is required.")
+    form.add_text_single('street', 'Street')
+    form.add_text_single('city', 'City')
+    form.add_text_single('state', 'State')
+    form.add_text_single('zip', 'Zip Code')
+    form.add_fixed("Your password is required.")
+    form.add_text_private('password', 'Password')
+    form.add_text_private('renter_password', 'Renter Password')
+    form.add_fixed("A story is required.")
+    form.add_text_multi('story', 'Your Story')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
 ##########################################################################################################
 # chat messages
 chat do
