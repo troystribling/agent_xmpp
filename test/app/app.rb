@@ -174,9 +174,9 @@ end
 command 'boolean' do
   AgentXmpp.logger.info "ACTION: list_single"
   on(:execute) do |form|
-    form.add_title('On or Off')
+    form.add_title('Yes or No')
     form.add_instructions('Choose below')
-    form.add_boolean('answer', 'On or Off please')
+    form.add_boolean('answer', 'Yes or No please')
   end
   on(:submit) do
     params[:data]
@@ -189,10 +189,6 @@ command 'long_form' do
   on(:execute) do |form|
     form.add_title('The Long Form')
     form.add_instructions('Make the correct choices and provide the required information.')
-    form.add_fixed("Make the correct choices.")
-    form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'Select a Fruit')
-    form.add_list_single('nuts', [:peanut, :almond, :cashew, :pecan, :walnut], 'Select a Nut')
-    form.add_list_single('vegetables', [:broccoli, :carrot, :corn, :tomato, :onion], 'Select a Nut')
     form.add_fixed("Your name is required.")
     form.add_text_single('first_name', 'First Name')
     form.add_text_single('last_name', 'Last Name')
@@ -204,7 +200,14 @@ command 'long_form' do
     form.add_fixed("Your password is required.")
     form.add_text_private('password', 'Password')
     form.add_text_private('renter_password', 'Renter Password')
-    form.add_fixed("A story is required.")
+    form.add_fixed("Choose your food.")
+    form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'Select a Fruit')
+    form.add_list_single('nuts', [:peanut, :almond, :cashew, :pecan, :walnut], 'Select a Nut')
+    form.add_list_single('vegetables', [:broccoli, :carrot, :corn, :tomato, :onion], 'Select a Vegtable')
+    form.add_fixed("Answer the questions.")
+    form.add_boolean('yes_or_no', 'Yes or No please?')
+    form.add_boolean('flux_capcitors', 'Enable flux capacitors for superluminal transport')
+    form.add_fixed("A story of at least 250 characters is required.")
     form.add_text_multi('story', 'Your Story')
   end
   on(:submit) do
