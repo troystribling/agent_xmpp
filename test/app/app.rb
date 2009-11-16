@@ -98,20 +98,8 @@ command 'text_single' do
     form.add_title('Your Name')
     form.add_instructions('Use the keyboard to enter your name below.')
     form.add_text_single('name', 'enter your name')
-  end
-  on(:submit) do
-    params[:data]
-  end
-end
-
-#.........................................................................................................
-command 'multiple_text_single' do
-  AgentXmpp.logger.info "ACTION: text_single"
-  on(:execute) do |form|
-    form.add_title('Car and City')
-    form.add_instructions('Use the keyboard to enter a car model and a city below.')
-    form.add_text_single('car', 'enter car model')
-    form.add_text_single('city', 'enter city')
+    form.add_fixed('State of residence')
+    form.add_text_single('state')
   end
   on(:submit) do
     params[:data]
@@ -125,6 +113,8 @@ command 'text_private' do
     form.add_title('Enter a Secret')
     form.add_instructions('Use the keyboard to enter your secret below.')
     form.add_text_private('secret', 'The Secret')
+    form.add_fixed('Renter your secret')
+    form.add_jid_single('another_secret')
   end
   on(:submit) do
     params[:data]
@@ -138,6 +128,8 @@ command 'jid_single' do
     form.add_title('The JID')
     form.add_instructions('Use the keyboard to enter a JID below.')
     form.add_jid_single('jid', 'A JID')
+    form.add_fixed("Another JID")
+    form.add_jid_single('another_jid')
   end
   on(:submit) do
     params[:data]
@@ -151,6 +143,8 @@ command 'text_multi' do
     form.add_title('Tell a Story')
     form.add_instructions('Use the keyboard to enter your story below.')
     form.add_text_multi('story', 'Your Story')
+    form.add_fixed("A haiku is required")
+    form.add_text_multi('haiku')
   end
   on(:submit) do
     params[:data]
@@ -164,6 +158,8 @@ command 'list_single' do
     form.add_title('Fruits')
     form.add_instructions('Select a fruit from the list.')
     form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'available fruits')
+    form.add_fixed('Choose a car')
+    form.add_list_single('car', [:audi_s4, :bmw_m3, :subaru_wrx_ti, :mitsubishi_evo])
   end
   on(:submit) do
     params[:data]
@@ -174,9 +170,12 @@ end
 command 'boolean' do
   AgentXmpp.logger.info "ACTION: list_single"
   on(:execute) do |form|
-    form.add_title('Yes or No')
-    form.add_instructions('Choose below')
-    form.add_boolean('answer', 'Yes or No please')
+    form.add_title('Hyper Drive Configuration')
+    form.add_instructions('Choose the hyperdrive configuration which best suits your needs')
+    form.add_boolean('answer', 'On or Off please')
+    form.add_boolean('flux_capcitors', 'Enable flux capacitors for superluminal transport')
+    form.add_fixed('Enable SQUIDs for enhanced quantum decoherence')
+    form.add_boolean('squids')
   end
   on(:submit) do
     params[:data]
@@ -207,8 +206,60 @@ command 'long_form' do
     form.add_fixed("Answer the questions.")
     form.add_boolean('yes_or_no', 'Yes or No please?')
     form.add_boolean('flux_capcitors', 'Enable flux capacitors for superluminal transport')
+    form.add_fixed("A story of at least 250 characters is required")
+    form.add_text_multi('story', 'Your Story')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'another_long_form' do
+  AgentXmpp.logger.info "ACTION: list_single"
+  on(:execute) do |form|
+    form.add_title('The Other Long Form')
+    form.add_instructions('Make the correct choices and provide the required information')
+    form.add_fixed("Your nickname is required.")
+    form.add_text_single('nickname', 'Nickname')
+    form.add_fixed
+    form.add_text_single('street', 'Street')
+    form.add_text_single('city', 'City')
+    form.add_text_single('state', 'State')
+    form.add_text_single('zip', 'Zip Code')
+    form.add_fixed("Your password is required.")
+    form.add_text_private('password', 'Password')
+    form.add_text_private('renter_password', 'Renter Password')
+    form.add_fixed("A haiku is required")
+    form.add_text_multi('haiku')
+    form.add_fixed("A limerick is required")
+    form.add_text_multi('limericck')
     form.add_fixed("A story of at least 250 characters is required.")
     form.add_text_multi('story', 'Your Story')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'no_title' do
+  AgentXmpp.logger.info "ACTION: list_single"
+  on(:execute) do |form|
+    form.add_instructions('Choose On or Off')
+    form.add_boolean('answer', 'On or Off please')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'no_instructions' do
+  AgentXmpp.logger.info "ACTION: list_single"
+  on(:execute) do |form|
+    form.add_title('Yes or No')
+    form.add_boolean('answer', 'Yes or No please')
   end
   on(:submit) do
     params[:data]

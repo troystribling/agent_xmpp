@@ -78,7 +78,7 @@ module AgentXmpp
       end
 
       #.....................................................................................................
-      def add_fixed(val)
+      def add_fixed(val=nil)
         add_field_with_value(nil, val, 'fixed')
       end
 
