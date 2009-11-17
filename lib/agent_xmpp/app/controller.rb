@@ -96,9 +96,13 @@ module AgentXmpp
          when :execute
            form = Xmpp::XData.new('form')
            on_execute(form); form
+         when :cancel
+           on_cancel; nil
          else
            send(result_method)
          end
+       elsif params[:action].eql?(:cancel)
+         nil
        else
          result
        end
@@ -139,14 +143,19 @@ module AgentXmpp
     #.........................................................................................................
     # add payloads
     #.........................................................................................................
-    def result_jabber_x_data(params, payload)
-      status = payload.type.eql?(:form) ? 'executing' : 'completed'
-      Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 
-                             :status => status, :sessionid => params[:sessionid])
+    def result_jabber_x_data(payload)
+      if params[:action].eql?(:cancel)
+        Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], 
+                               :status => 'canceled', :sessionid => params[:sessionid])
+      else
+        status = payload.type.eql?(:form) ? 'executing' : 'completed'
+        Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 
+                               :status => status, :sessionid => params[:sessionid])
+      end
     end
 
     #.........................................................................................................
-    def result_message_chat(params, payload)
+    def result_message_chat(payload)
       Xmpp::Message.chat(params[:from], payload)
     end
     
@@ -156,7 +165,7 @@ module AgentXmpp
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
       if respond_to?(meth) 
-        pipe.send_resp(send(meth, params, payload))
+        pipe.send_resp(send(meth, payload))
       else
         AgentXmpp.logger.error "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
         Xmpp::ErrorResponse.unsupported_payload(params)
