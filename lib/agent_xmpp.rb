@@ -15,6 +15,7 @@ require 'evma_xmlpushparser'
 require 'sequel'
 
 require 'agent_xmpp/patches'
+require 'agent_xmpp/models'
 require 'agent_xmpp/client'
 require 'agent_xmpp/xmpp'
 require 'agent_xmpp/config'
