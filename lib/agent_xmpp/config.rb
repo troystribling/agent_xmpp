@@ -11,7 +11,11 @@ module AgentXmpp
               'jabber:iq:version',
               'jabber:x:data',
               'http://jabber.org/protocol/commands',
-              'http://jabber.org/protocol/muc']
+              'http://jabber.org/protocol/pubsub',
+              'http://jabber.org/protocol/pubsub#publish',
+              'http://jabber.org/protocol/pubsub#subscribe',
+              'http://jabber.org/protocol/pubsub#create-nodes',
+              'http://jabber.org/protocol/pubsub#delete-nodes']
   DEFAULT_PUBSUB_CONFIG = {
     :title                    => 'event',
     :access_model             => 'presence',

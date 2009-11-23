@@ -21,7 +21,7 @@ module AgentXmpp
           create.add_attribute('node', node) 
           iq.pubsub = IqPubSub.new << create
           configure = REXML::Element.new('configure')
-          user_config = AgentXmpp.published.find_by_node(node)
+          user_config = AgentXmpp.publication.find_by_node(node)
           if user_config
             form = Xmpp::XData.new(:submit)
             form.add_field_with_value('FORM_TYPE', 'http://jabber.org/protocol/pubsub#node_config', :hidden)

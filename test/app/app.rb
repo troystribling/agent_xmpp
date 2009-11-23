@@ -114,7 +114,7 @@ command 'text_private' do
     form.add_instructions('Use the keyboard to enter your secret below.')
     form.add_text_private('secret', 'The Secret')
     form.add_fixed('Renter your secret')
-    form.add_jid_single('another_secret')
+    form.add_text_private('another_secret')
   end
   on(:submit) do
     params[:data]
@@ -168,7 +168,7 @@ end
 
 #.........................................................................................................
 command 'boolean' do
-  AgentXmpp.logger.info "ACTION: list_single"
+  AgentXmpp.logger.info "ACTION: boolean"
   on(:execute) do |form|
     form.add_title('Hyper Drive Configuration')
     form.add_instructions('Choose the hyperdrive configuration which best suits your needs')
@@ -184,7 +184,7 @@ end
 
 #.........................................................................................................
 command 'long_form' do
-  AgentXmpp.logger.info "ACTION: list_single"
+  AgentXmpp.logger.info "ACTION: long_form"
   on(:execute) do |form|
     form.add_title('The Long Form')
     form.add_instructions('Make the correct choices and provide the required information.')
@@ -196,6 +196,9 @@ command 'long_form' do
     form.add_text_single('city', 'City')
     form.add_text_single('state', 'State')
     form.add_text_single('zip', 'Zip Code')
+    form.add_fixed("Enter two friends.")
+    form.add_jid_single('contact_1', 'contact JID')
+    form.add_jid_single('contact_2', 'contact JID')
     form.add_fixed("Your password is required.")
     form.add_text_private('password', 'Password')
     form.add_text_private('renter_password', 'Renter Password')
@@ -216,7 +219,7 @@ end
 
 #.........................................................................................................
 command 'another_long_form' do
-  AgentXmpp.logger.info "ACTION: list_single"
+  AgentXmpp.logger.info "ACTION: another_long_form"
   on(:execute) do |form|
     form.add_title('The Other Long Form')
     form.add_instructions('Make the correct choices and provide the required information')
@@ -244,7 +247,7 @@ end
 
 #.........................................................................................................
 command 'no_title' do
-  AgentXmpp.logger.info "ACTION: list_single"
+  AgentXmpp.logger.info "ACTION: no_title"
   on(:execute) do |form|
     form.add_instructions('Choose On or Off')
     form.add_boolean('answer', 'On or Off please')
@@ -256,10 +259,24 @@ end
 
 #.........................................................................................................
 command 'no_instructions' do
-  AgentXmpp.logger.info "ACTION: list_single"
+  AgentXmpp.logger.info "ACTION: no_instructions"
   on(:execute) do |form|
     form.add_title('Yes or No')
     form.add_boolean('answer', 'Yes or No please')
+  end
+  on(:submit) do
+    params[:data]
+  end
+end
+
+#.........................................................................................................
+command 'text_view_with_jids' do
+  AgentXmpp.logger.info "ACTION: text_view_with_jids"
+  on(:execute) do |form|
+    form.add_title('Account Information')
+    form.add_instructions('Enter and Account below and provide a description')
+    form.add_jid_single('jid', 'account JID')
+    form.add_text_multi('description', 'Description of Account')
   end
   on(:submit) do
     params[:data]

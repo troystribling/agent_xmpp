@@ -1,3 +1,5 @@
+require 'agent_xmpp/client/boot'
+require 'agent_xmpp/client/controller'
 require 'agent_xmpp/client/response'
 require 'agent_xmpp/client/message_pipe'
 require 'agent_xmpp/client/message_delegate'

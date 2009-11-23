@@ -614,7 +614,7 @@ module AgentXmpp
     
       #.........................................................................................................
       def add_publish_methods(pipe, pubsub)
-        AgentXmpp.published.find_all.each do |p|
+        AgentXmpp.publication.find_all.each do |p|
           if p.node
             meth = ("publish_" + p.node.gsub(/-/,'_')).to_sym
             unless AgentXmpp.respond_to?(meth)
@@ -675,7 +675,7 @@ module AgentXmpp
       #.........................................................................................................
       def update_publish_nodes(pipe, pubsub, items)
         disco_nodes = items.map{|i| i.node}
-        config_nodes = AgentXmpp.published.find_all.map{|p| "#{AgentXmpp.user_pubsub_root}/#{p.node}"}
+        config_nodes = AgentXmpp.publication.find_all.map{|p| "#{AgentXmpp.user_pubsub_root}/#{p.node}"}
         updates = disco_nodes.inject([]) do |u,n|
                     unless config_nodes.include?(n) 
                       AgentXmpp.logger.warn "DELETING PUBSUB NODE: #{pubsub.to_s}, #{n}"

@@ -24,10 +24,35 @@ module AgentXmpp
     attr_accessor :config
     
     #.........................................................................................................
+    def in_memory_db
+      @in_memory_db ||= Sequel.sqlite
+    end
+
+    #.........................................................................................................
+    def agent_xmpp_db
+      @agent_xmpp_db ||= Sequel.connect("sqlite://#{AgentXmpp.app_path}/agent_xmpp.db")
+    end
+
+    #.........................................................................................................
+    def contacts
+      @contacts ||= RosterModel.new(jid, config['roster'])
+    end
+
+    #.........................................................................................................
     def roster
       @roster ||= RosterModel.new(jid, config['roster'])
     end
 
+    #.........................................................................................................
+    def services
+      @services ||= ServicesModel.new
+    end
+    
+    #.........................................................................................................
+    def publication
+      @publication ||= PublishModel.new(config['publish'])
+    end
+        
     #.........................................................................................................
     def pubsub_root
       @pubsub_root ||= "/home/#{AgentXmpp.jid.domain}"  
@@ -38,16 +63,6 @@ module AgentXmpp
       @user_pubsub_root ||= "#{@pubsub_root}/#{AgentXmpp.jid.node}" 
     end
 
-    #.........................................................................................................
-    def services
-      @services ||= ServicesModel.new
-    end
-    
-    #.........................................................................................................
-    def published
-      @published ||= PublishModel.new(config['publish'])
-    end
-        
     #.........................................................................................................
     def jid
       @jid ||= Xmpp::Jid.new("#{config['jid']}/#{resource}")
