@@ -2,7 +2,7 @@
 module AgentXmpp
   
   #####-------------------------------------------------------------------------------------------------------
-  class ServicesModel
+  class ServiceModel
 
     #.........................................................................................................
     def initialize
@@ -90,7 +90,7 @@ module AgentXmpp
       end
     end
   
-  #### ServicesModel
+  #### ServiceModel
   end
 
 #### AgentXmpp

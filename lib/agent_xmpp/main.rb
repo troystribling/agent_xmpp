@@ -23,19 +23,22 @@ module AgentXmpp
     #.........................................................................................................
     attr_accessor :config
     
+    #####.....................................................................................................
+    # database
     #.........................................................................................................
     def in_memory_db
-      @in_memory_db ||= Sequel.sqlite
+      # @in_memory_db ||= Sequel.sqlite
+      @in_memory_db ||= Sequel.sqlite("#{AgentXmpp.app_path}/in_memory.db")
     end
 
     #.........................................................................................................
     def agent_xmpp_db
-      @agent_xmpp_db ||= Sequel.connect("sqlite://#{AgentXmpp.app_path}/agent_xmpp.db")
+      @agent_xmpp_db ||= Sequel.sqlite("#{AgentXmpp.app_path}/agent_xmpp.db")
     end
 
     #.........................................................................................................
-    def contacts
-      @contacts ||= RosterModel.new(jid, config['roster'])
+    def version
+      @version ||= agent_xmpp_db[:version]
     end
 
     #.........................................................................................................
@@ -45,7 +48,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def services
-      @services ||= ServicesModel.new
+      @services ||= ServiceModel.new
     end
     
     #.........................................................................................................
@@ -53,6 +56,8 @@ module AgentXmpp
       @publication ||= PublishModel.new(config['publish'])
     end
         
+    #####.....................................................................................................
+    # pubsub nodes
     #.........................................................................................................
     def pubsub_root
       @pubsub_root ||= "/home/#{AgentXmpp.jid.domain}"  
@@ -63,6 +68,8 @@ module AgentXmpp
       @user_pubsub_root ||= "#{@pubsub_root}/#{AgentXmpp.jid.node}" 
     end
 
+    #####.....................................................................................................
+    # client account configuration
     #.........................................................................................................
     def jid
       @jid ||= Xmpp::Jid.new("#{config['jid']}/#{resource}")
