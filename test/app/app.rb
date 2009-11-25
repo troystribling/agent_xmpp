@@ -5,7 +5,7 @@ require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 ##########################################################################################################
 # callbacks
 before_start do 
-  AgentXmpp.logger.level = Logger::WARN
+  AgentXmpp.logger.level = Logger::DEBUG
   File.delete("#{AgentXmpp.app_path}/in_memory.db") if File.exists?("#{AgentXmpp.app_path}/in_memory.db")
   AgentXmpp.logger.info "before_start"
 end

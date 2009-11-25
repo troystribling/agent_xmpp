@@ -8,9 +8,12 @@ module AgentXmpp
     def create_in_memory_db
       in_memory_db.create_table :roster do
       	primary_key :id
-      	foreign_key :contact_id, :contacts
+      	column :contact_id, :integer
+        column :jid, :text, :unique=>true
         column :status, :text
-        column :jid, :text
+        column :client_name, :text
+        column :client_version, :text
+        column :client_os, :text
       end
       in_memory_db.create_table :services do
       	primary_key :id
@@ -33,6 +36,7 @@ module AgentXmpp
     def create_agent_xmpp_db
       unless agent_xmpp_db.table_exists? :version
         agent_xmpp_db.create_table :version do
+        	primary_key :id
           integer :number
         end
       end
@@ -40,8 +44,10 @@ module AgentXmpp
       unless agent_xmpp_db.table_exists? :contacts
         agent_xmpp_db.create_table :contacts do
         	primary_key :id
-        	column :groups, :text
         	column :jid, :text, :unique=>true
+        	column :role, :text
+        	column :status, :text
+        	column :groups, :text
         end
       end
       unless agent_xmpp_db.table_exists? :messages

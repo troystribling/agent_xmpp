@@ -59,7 +59,7 @@ module AgentXmpp
               src_jid = "#{src[3]}@#{src[2]}"                
               params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :pubsub => from, 
                 :node => is.node, :data => data.to_native, :from => src_jid, :id => i.id,
-                :resources => AgentXmpp.roster.available_resources(Xmpp::Jid.new(src_jid))}
+                :resources => RosterModel.find_all_by_contact_jid_and_status(Xmpp::Jid.new(src_jid), :available)}
               Controller.new(pipe, params).invoke_event
             else
               did_receive_unsupported_message(pipe, event)
@@ -130,7 +130,6 @@ module AgentXmpp
       #.........................................................................................................
       def did_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
-        config_roster_item = AgentXmpp.roster.find_by_jid(AgentXmpp.jid)
         add_send_command_method(pipe)
         add_send_chat_method(pipe)
         [Send(Xmpp::Presence.new(nil, nil, AgentXmpp.priority)), Xmpp::IqRoster.get(pipe),  
@@ -142,9 +141,9 @@ module AgentXmpp
       # presence
       #.........................................................................................................
       def did_receive_presence(pipe, presence)
-        if AgentXmpp.roster.has_jid?(presence.from) 
-          from_jid = presence.from    
-          AgentXmpp.roster.update_resource(presence)
+        from_jid = presence.from    
+        if ContactModel.has_jid?(presence.from) 
+          AgentXmpp.roster.update(presence)
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s}"
           response = []
           unless from_jid.to_s.eql?(AgentXmpp.jid.to_s)
@@ -156,14 +155,14 @@ module AgentXmpp
             end
           end; response
         else
-          AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" 
+          AgentXmpp.logger.warn "RECEIVED PRESENCE FROM JID NOT IN ROSTER: #{from_jid}" unless from_jid.to_s.eql?(AgentXmpp.jid.to_s)
         end
       end
 
       #.........................................................................................................
       def did_receive_presence_subscribe(pipe, presence)
         from_jid = presence.from.to_s     
-        if AgentXmpp.roster.has_jid?(presence.from) 
+        if ContactModel.has_jid?(presence.from) 
           AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
           Xmpp::Presence.accept(from_jid)  
         else
@@ -180,8 +179,8 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_presence_unavailable(pipe, presence)
         from_jid = presence.from    
-        if AgentXmpp.roster.has_jid?(from_jid) 
-          AgentXmpp.roster.update_resource(presence)
+        if ContactModel.has_jid?(from_jid) 
+          AgentXmpp.roster.update(presence)
           Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :unavailable)             
           AgentXmpp.logger.info "RECEIVED UNAVAILABLE PRESENCE FROM: #{from_jid.to_s }"
         else
@@ -191,19 +190,20 @@ module AgentXmpp
       
       #.........................................................................................................
       def did_receive_presence_unsubscribed(pipe, presence)
-        from_jid = presence.from.to_s     
-        if AgentXmpp.roster.destroy_by_jid(presence.from)           
-          AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid}"
-          Xmpp::IqRoster.remove(pipe, presence.from)  
+        from_jid = presence.from     
+        if ContactModel.has_jid?(from_jid)
+          ContactModel.destroy_by_jid(from_jid)           
+          AgentXmpp.logger.info "RECEIVED UNSUBSCRIBED REQUEST: #{from_jid.to_s}"
+          Xmpp::IqRoster.remove(pipe, from_jid)  
         else
-          AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid}"   
+          AgentXmpp.logger.warn "RECEIVED UNSUBSCRIBED REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"   
         end
       end
 
       #.........................................................................................................
       def did_receive_presence_error(pipe, presence)
         AgentXmpp.logger.warn "RECEIVED PRESENCE ERROR FROM: #{presence.from.to_s}" 
-        if AgentXmpp.roster.has_jid?(presence.from)
+        if ContactModel.has_jid?(presence.from)
           AgentXmpp.logger.warn "REMOVING '#{presence.from.to_s}' FROM ROSTER" 
           Xmpp::IqRoster.remove(pipe, presence.from.to_s)
         end
@@ -225,25 +225,26 @@ module AgentXmpp
       def did_receive_roster_item(pipe, roster_item)
         roster_item_jid = roster_item.jid
         AgentXmpp.logger.info "RECEIVED ROSTER ITEM: #{roster_item_jid.to_s}"   
-        if AgentXmpp.roster.has_jid?(roster_item_jid) 
+        if ContactModel.has_jid?(roster_item_jid)
+          ContactModel.update_status(roster_item_jid, :active) 
           case roster_item.subscription   
           when :none
             if roster_item.ask.eql?(:subscribe)
               AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid.to_s}"   
-              AgentXmpp.roster.update_status(roster_item_jid, :ask) 
+              RosterModel.update_status(roster_item_jid, :ask) 
             else
               AgentXmpp.logger.info "CONTACT ADDED TO ROSTER: #{roster_item_jid.to_s}"   
-              AgentXmpp.roster.update_status(roster_item_jid, :added)
+              RosterModel.update_status(roster_item_jid, :added)
             end
           when :to
             AgentXmpp.logger.info "SUBSCRIBED TO CONTACT PRESENCE: #{roster_item_jid.to_s}"   
-            AgentXmpp.roster.update_status(roster_item_jid, :to) 
+            RosterModel.update_status(roster_item_jid, :to) 
           when :from
             AgentXmpp.logger.info "CONTACT SUBSCRIBED TO PRESENCE: #{roster_item_jid.to_s}"   
-            AgentXmpp.roster.update_status(roster_item_jid, :from) 
+            RosterModel.update_status(roster_item_jid, :from) 
           when :both    
             AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid.to_s}"   
-            AgentXmpp.roster.update_status(roster_item_jid, :both) 
+            RosterModel.update_status(roster_item_jid, :both) 
           end
           AgentXmpp.roster.update_roster_item(roster_item)
           check_roster_item_group(pipe, roster_item)
@@ -257,18 +258,18 @@ module AgentXmpp
       def did_remove_roster_item(pipe, roster_item)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM"   
         roster_item_jid = roster_item.jid
-        if AgentXmpp.roster.has_jid?(roster_item_jid) 
+        if ContactModel.has_jid?(roster_item_jid) 
           AgentXmpp.logger.info "REMOVED ROSTER ITEM: #{roster_item_jid.to_s}"   
-          AgentXmpp.roster.destroy_by_jid(roster_item_jid) 
+          ContactModel.destroy_by_jid(roster_item_jid) 
         end
       end
       
       #.........................................................................................................
       def did_receive_all_roster_items(pipe)
         AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
-        AgentXmpp.roster.find_all_by_status(:inactive).map do |r|
-          AgentXmpp.logger.info "ADDING CONTACT: #{r.jid}" 
-          [Xmpp::IqRoster.update(pipe, r.jid, r.groups), Xmpp::Presence.subscribe(r.jid)]  
+        ContactModel.find_all_by_status(:inactive).map do |r|
+          AgentXmpp.logger.info "ADDING CONTACT: #{r[:jid]}" 
+          [Xmpp::IqRoster.update(pipe, r[:jid], r[:groups].split(/,/)), Xmpp::Presence.subscribe(r[:jid])]  
         end
       end
       
@@ -280,7 +281,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_update_roster_item_error(pipe, roster_item_jid)
         AgentXmpp.logger.info "UPDATE ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
-        AgentXmpp.roster.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
+        ContactModel.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
       end
       
       #.........................................................................................................
@@ -291,7 +292,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_remove_roster_item_error(pipe, roster_item_jid)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
-        AgentXmpp.roster.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
+        ContactModel.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
       end
       
       #.........................................................................................................
@@ -299,18 +300,14 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_version_result(pipe, version)
         version_jid = version.from
-        if AgentXmpp.roster.has_jid?(version_jid)
-          query = version.query
-          AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{version_jid.to_s}, #{query.iname}, #{query.version}"
-          AgentXmpp.roster.update_resource_version(version)
-        else
-          AgentXmpp.logger.warn "RECEIVED VERSION RESULT FROM JID NOT IN ROSTER: #{from.to_s}"
-        end        
+        query = version.query
+        AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{version_jid.to_s}, #{query.iname}, #{query.version}"
+        AgentXmpp.roster.update_client_version(version)
       end
       
       #.........................................................................................................
       def did_receive_version_get(pipe, request)
-        if AgentXmpp.roster.has_jid?(request.from)
+        if ContactModel.has_jid?(request.from)
           AgentXmpp.logger.info "RECEIVED VERSION REQUEST: #{request.from.to_s}"
           Xmpp::IqVersion.result(pipe, request)
         else
@@ -327,15 +324,16 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_discoinfo_get(pipe, request)   
         from_jid = request.from
-        if AgentXmpp.roster.has_jid?(from_jid)
+        if ContactModel.has_jid?(from_jid)
           if request.query.node.nil?
             AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST FROM: #{from_jid.to_s}"
             Xmpp::IqDiscoInfo.result(pipe, request)
           else
             AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST FOR UNSUPPORTED NODE FROM: #{from_jid.to_s}"
-            Xmpp::ErrorResponse.service_unavailable(request)
+            Xmpp::ErrorResponse.item_not_found(request)
           end
         else
+          Xmpp::ErrorResponse.service_unavailable(request)
           AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end
       end
@@ -345,36 +343,32 @@ module AgentXmpp
         from_jid = discoinfo.from
         do_discoitems = true
         request = []
-        if AgentXmpp.roster.has_jid?(from_jid) or AgentXmpp.services.has_jid?(from_jid)
-          q = discoinfo.query
-          AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
-          AgentXmpp.services.update_with_discoinfo(discoinfo)
-          q.identities.each do |i|
-            AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
-            request << case i.category
-                         when 'server'        then Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
-                         when 'pubsub'        then process_pubsub_discoinfo(i.type, pipe, from_jid, q.node)
-                         when 'conference'
-                         when 'proxy'
-                         when 'directory'
-                         when 'client'
-                         when 'automation'
-                         when 'auth'
-                         when 'collaboration'
-                         when 'componenet'
-                         when 'gateway'
-                         when 'hierarchy'
-                         when 'headline'
-                         when 'store'
-                       end
+        q = discoinfo.query
+        AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
+        AgentXmpp.services.update_with_discoinfo(discoinfo)
+        q.identities.each do |i|
+          AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
+          request << case i.category
+                       when 'server'        then Xmpp::IqDiscoItems.get(pipe, from_jid.to_s, q.node) 
+                       when 'pubsub'        then process_pubsub_discoinfo(i.type, pipe, from_jid, q.node)
+                       when 'conference'
+                       when 'proxy'
+                       when 'directory'
+                       when 'client'
+                       when 'automation'
+                       when 'auth'
+                       when 'collaboration'
+                       when 'componenet'
+                       when 'gateway'
+                       when 'hierarchy'
+                       when 'headline'
+                       when 'store'
                      end
-          q.features.each do |f|
-            AgentXmpp.logger.info " FEATURE: #{f}"
-          end
-          request.smash
-        else
-          AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT A ROSTER ITEM OR SERVICE: #{from_jid.to_s}"
-        end        
+                   end
+        q.features.each do |f|
+          AgentXmpp.logger.info " FEATURE: #{f}"
+        end
+        request.smash
       end
       
       #.........................................................................................................
@@ -386,7 +380,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_discoitems_get(pipe, request)   
         from_jid = request.from
-        if AgentXmpp.roster.has_jid?(from_jid)
+        if ContactModel.has_jid?(from_jid)
           if request.query.node.eql?('http://jabber.org/protocol/commands')
             AgentXmpp.logger.info "RECEIVED COMMAND NODE DISCO ITEMS REQUEST FROM: #{from_jid.to_s}"
             Xmpp::IqDiscoItems.result_command_nodes(pipe, request)
@@ -398,6 +392,7 @@ module AgentXmpp
             Xmpp::ErrorResponse.item_not_found(request)
           end
         else
+          Xmpp::ErrorResponse.service_unavailable(request)
           AgentXmpp.logger.warn "RECEIVED DISCO ITEMS REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
         end
       end
@@ -405,29 +400,25 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_discoitems_result(pipe, discoitems)
         from_jid = discoitems.from
-        if AgentXmpp.roster.has_jid?(from_jid) or AgentXmpp.services.has_jid?(from_jid)
-          q = discoitems.query
-          AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
-          AgentXmpp.services.update_with_discoitems(discoitems)
-          case q.node
-            when 'http://jabber.org/protocol/commands' 
-              Boot.call_if_implemented(:call_discovered_command_nodes, from_jid.to_s, q.items.map{|i| i.node}) unless q.items.empty?
-          else
-            msgs = if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(AgentXmpp.pubsub_root)
-                     create_user_pubsub_root(pipe, from_jid, q.items)
-                   else ; []; end
-            if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(AgentXmpp.user_pubsub_root)
-              msgs += update_publish_nodes(pipe, from_jid, q.items)
-            end
-            q.items.inject(msgs) do |r,i|
-              AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
-              AgentXmpp.services.create(i.jid)
-              r << Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node)         
-            end
-          end
+        q = discoitems.query
+        AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
+        AgentXmpp.services.update_with_discoitems(discoitems)
+        case q.node
+          when 'http://jabber.org/protocol/commands' 
+            Boot.call_if_implemented(:call_discovered_command_nodes, from_jid.to_s, q.items.map{|i| i.node}) unless q.items.empty?
         else
-          AgentXmpp.logger.warn "RECEIVED DISCO INFO RESULT FROM JID NOT A ROSTER ITEM OR SERVICE: #{from_jid.to_s}"
-        end        
+          msgs = if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(AgentXmpp.pubsub_root)
+                   create_user_pubsub_root(pipe, from_jid, q.items)
+                 else ; []; end
+          if from_jid.to_s.eql?(pubsub_service.to_s) and q.node.eql?(AgentXmpp.user_pubsub_root)
+            msgs += update_publish_nodes(pipe, from_jid, q.items)
+          end
+          q.items.inject(msgs) do |r,i|
+            AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
+            AgentXmpp.services.create(i.jid)
+            r << Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node)         
+          end
+        end
       end
       
       #.........................................................................................................
@@ -588,10 +579,10 @@ module AgentXmpp
       #.........................................................................................................
       def check_roster_item_group(pipe, roster_item)
         roster_item_jid = roster_item.jid
-        config_roster_item = AgentXmpp.roster.find_by_jid(roster_item_jid)
-        unless roster_item.groups.sort.eql?(config_roster_item.groups.sort)
-          AgentXmpp.logger.info "CHANGE IN ROSTER ITEM GROUP FOUND UPDATING: #{roster_item_jid.to_s} to '#{config_roster_item.groups.join(', ')}'"
-          Xmpp::IqRoster.update(pipe, roster_item_jid.to_s, config_roster_item.groups)
+        roster_item_groups = ContactModel.find_by_jid(roster_item_jid)[:groups].split(/,/).sort
+        unless roster_item.groups.sort.eql?(roster_item_groups)
+          AgentXmpp.logger.info "CHANGE IN ROSTER ITEM GROUP FOUND UPDATING: #{roster_item_jid.to_s} to '#{roster_item_groups.join(', ')}'"
+          Xmpp::IqRoster.update(pipe, roster_item_jid.to_s, roster_item_groups)
         end
       end
 

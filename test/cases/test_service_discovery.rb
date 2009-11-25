@@ -124,10 +124,10 @@ class TestServiceDiscovery < Test::Unit::TestCase
   
   #.........................................................................................................
   should "not respond if get disco#info is received from a jid not in the configuration roster" do
-    AgentXmpp.roster.has_jid?(@noone).should be(false)
+    ContactModel.has_jid?(@noone).should be(false)
     @delegate.did_receive_discoinfo_get_method.should_not be_called
     @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoinfo(@client, @noone.to_s)).should not_respond
-    AgentXmpp.roster.has_jid?(@noone).should be(false)
+    ContactModel.has_jid?(@noone).should be(false)
     @delegate.did_receive_discoinfo_get_method.should be_called
   end
   
@@ -157,10 +157,10 @@ class TestServiceDiscovery < Test::Unit::TestCase
   
   #.........................................................................................................
   should "not respond if get disco#items is received from a jid not in the configuration roster" do
-    AgentXmpp.roster.has_jid?(@noone).should be(false)
+    ContactModel.has_jid?(@noone).should be(false)
     @delegate.did_receive_discoitems_get_method.should_not be_called
     @client.receiving(ServiceDiscoveryMessages.recv_iq_get_query_discoitems(@client, @noone.to_s)).should not_respond
-    AgentXmpp.roster.has_jid?(@noone).should be(false)
+    ContactModel.has_jid?(@noone).should be(false)
     @delegate.did_receive_discoitems_get_method.should be_called
   end
     

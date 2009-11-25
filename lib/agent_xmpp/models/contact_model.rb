@@ -13,18 +13,65 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def messages
+        @messages ||= AgentXmpp.agent_xmpp_db[:messages]
+      end
+
+      #.........................................................................................................
+      def roster
+        RosterModel.roster
+      end
+
+      #.........................................................................................................
       def load_config
         if AgentXmpp.config['roster'].kind_of?(Array)
           AgentXmpp.config['roster'].each do |c|
             groups = c["groups"].kind_of?(Array) ? c["groups"].join(",") : []
+            role = c["role"].nil? ? "user" : c["role"]
             begin
-              contacts << {:jid => c["jid"], :groups => groups}
+              contacts << {:jid => c["jid"], :groups => groups, :role => role, :status => "inactive"}
             rescue 
-              contacts.filter(:jid => c["jid"]).update(:groups => groups)
+              contacts.filter(:jid => c["jid"]).update(:groups => groups, :role => role)
             end
           end
         end
       end
+
+      #.........................................................................................................
+      def update_status(jid, status)
+        if contact = contacts.filter(:jid => jid.bare.to_s)
+          contact.update(:status => status.to_s)
+        end
+      end
+
+      #.........................................................................................................
+      def find_by_jid(jid)
+        contacts[:jid => jid.bare.to_s]
+      end
+
+      #.........................................................................................................
+      def find_by_jid(jid)
+        contacts[:jid => jid.bare.to_s]
+      end
+
+      #.........................................................................................................
+      def find_all_by_status(status)
+        contacts.filter(:status => status.to_s).all
+      end
+
+      #.........................................................................................................
+      def has_jid?(jid)
+        contacts.filter(:jid => jid.bare.to_s).count > 0
+      end
+
+      #.........................................................................................................
+      def destroy_by_jid(jid)
+        contact = contacts.filter(:jid => jid.bare.to_s)
+        contact_id = contact.first[:contact_id]
+        RosterModel.destroy_by_contact_id(contact_id)
+        MessageModel.destroy_by_contact_id(contact_id)
+        contact.delete
+      end 
 
       #.........................................................................................................
       def method_missing(meth, *args, &blk)
