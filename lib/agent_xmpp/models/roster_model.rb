@@ -16,7 +16,7 @@ module AgentXmpp
       def update(presence)
         from_jid = presence.from.to_s    
         contact = ContactModel.find_by_jid(presence.from)
-        status = presence.type.nil? ? 'available' : presence.type 
+        status = presence.type.nil? ? 'available' : presence.type.to_s 
         if (contact)
           begin
             roster << {:jid => from_jid, :status => status, :contact_id => contact[:id]}
