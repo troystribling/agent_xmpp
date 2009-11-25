@@ -149,7 +149,7 @@ module AgentXmpp
       def ask
         case attributes['ask']
           when 'subscribe' then :subscribe
-          else nil
+          else :none
         end
       end
 

@@ -41,7 +41,7 @@ class TestRosterManagement < Test::Unit::TestCase
     
     #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
-      AgentXmpp.roster.find_all{|r| r[:status].should be(:inactive)}  
+      RosterModel.find_all{|r| r[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_result_query_roster(client, [@dev.bare.to_s])).should \
         respond_with(RosterMessages.send_iq_set_query_roster(client, @troy.bare.to_s))
       ContactModel.find_by_jid(@dev)[:status].should be(:both)      
@@ -101,7 +101,7 @@ class TestRosterManagement < Test::Unit::TestCase
     
     #### receive roster request and verify that appropriate roster item is activated and remove roster message is sent for 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
-      AgentXmpp.roster.find_all{|r| r[:status].should be(:inactive)}  
+      RosterModel.find_all{|r| r[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_result_query_roster(client, [@dev.bare.to_s, @troy.bare.to_s])).should \
         respond_with(RosterMessages.send_iq_set_query_roster_remove(client, @troy.bare.to_s))
       ContactModel.find_by_jid(@dev)[:status].should be(:both)      
@@ -132,7 +132,7 @@ class TestRosterManagement < Test::Unit::TestCase
   
     #### receive roster request and verify that appropriate roster item is not configured and send remove roster message to 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
-      AgentXmpp.roster.find_all{|r| r[:status].should be(:inactive)}  
+      RosterModel.find_all{|r| r[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_set_query_roster_none_subscribe(client, [@troy.bare.to_s])).should \
         respond_with(RosterMessages.send_iq_set_query_roster_remove(client, @troy.bare.to_s))
       ContactModel.has_jid?(@troy).should be(false) 
@@ -169,7 +169,7 @@ class TestRosterManagement < Test::Unit::TestCase
   
     #### receive roster request and verify that appropriate roster item is not configured and send remove roster message to 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
-      AgentXmpp.roster.find_all{|r| r[:status].should be(:inactive)}  
+      RosterModel.find_all{|r| r[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_set_query_roster_none_subscribe(client, [@troy.bare.to_s])).should \
         respond_with(RosterMessages.send_iq_set_query_roster_remove(client, @troy.bare.to_s))
       ContactModel.has_jid?(@troy).should be(false) 
@@ -195,7 +195,7 @@ class TestRosterManagement < Test::Unit::TestCase
     
     #### receive roster request and verify that appropriate roster item is activated and add roster message is sent for 'troy@nowhere.com'
     test_receive_roster_item(client) do |client|
-      AgentXmpp.roster.find_all{|r| r[:status].should be(:inactive)}  
+      RosterModel.find_all{|r| r[:status].should be(:inactive)}  
       client.receiving(RosterMessages.recv_iq_result_query_roster(client, [@dev.bare.to_s])).should \
         respond_with(RosterMessages.send_iq_set_query_roster(client, @troy.bare.to_s))
       ContactModel.find_by_jid(@dev)[:status].should be(:both)      

@@ -143,12 +143,12 @@ module AgentXmpp
       def did_receive_presence(pipe, presence)
         from_jid = presence.from    
         if ContactModel.has_jid?(presence.from) 
-          AgentXmpp.roster.update(presence)
+          RosterModel.update(presence)
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s}"
           response = []
           unless from_jid.to_s.eql?(AgentXmpp.jid.to_s)
-            Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :available)             
-            response << Xmpp::IqVersion.get(pipe, from_jid) unless AgentXmpp.roster.has_version?(from_jid)
+            Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :available)   
+            response << Xmpp::IqVersion.get(pipe, from_jid) unless RosterModel.has_version?(from_jid)
             unless AgentXmpp.services.has_jid?(from_jid)
               response << Xmpp::IqDiscoInfo.get(pipe, from_jid)
               response << Xmpp::IqDiscoItems.get(pipe, from_jid, 'http://jabber.org/protocol/commands')
@@ -180,7 +180,7 @@ module AgentXmpp
       def did_receive_presence_unavailable(pipe, presence)
         from_jid = presence.from    
         if ContactModel.has_jid?(from_jid) 
-          AgentXmpp.roster.update(presence)
+          RosterModel.update(presence)
           Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :unavailable)             
           AgentXmpp.logger.info "RECEIVED UNAVAILABLE PRESENCE FROM: #{from_jid.to_s }"
         else
@@ -230,23 +230,20 @@ module AgentXmpp
           case roster_item.subscription   
           when :none
             if roster_item.ask.eql?(:subscribe)
-              AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid.to_s}"   
-              RosterModel.update_status(roster_item_jid, :ask) 
+              AgentXmpp.logger.info "CONTACT SUBSCRIPTION PENDING: #{roster_item_jid.to_s}" 
+              roster_item.subscription = :ask  
             else
               AgentXmpp.logger.info "CONTACT ADDED TO ROSTER: #{roster_item_jid.to_s}"   
-              RosterModel.update_status(roster_item_jid, :added)
+              roster_item.subscription = :added  
             end
           when :to
             AgentXmpp.logger.info "SUBSCRIBED TO CONTACT PRESENCE: #{roster_item_jid.to_s}"   
-            RosterModel.update_status(roster_item_jid, :to) 
           when :from
             AgentXmpp.logger.info "CONTACT SUBSCRIBED TO PRESENCE: #{roster_item_jid.to_s}"   
-            RosterModel.update_status(roster_item_jid, :from) 
           when :both    
             AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid.to_s}"   
-            RosterModel.update_status(roster_item_jid, :both) 
           end
-          AgentXmpp.roster.update_roster_item(roster_item)
+          ContactModel.update(roster_item)
           check_roster_item_group(pipe, roster_item)
         else
           AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid.to_s}"   
@@ -299,10 +296,9 @@ module AgentXmpp
       # service discovery management
       #.........................................................................................................
       def did_receive_version_result(pipe, version)
-        version_jid = version.from
-        query = version.query
-        AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{version_jid.to_s}, #{query.iname}, #{query.version}"
-        AgentXmpp.roster.update_client_version(version)
+        from_jid, query = version.from, version.query
+        AgentXmpp.logger.info "RECEIVED VERSION RESULT: #{from_jid.to_s}, #{query.iname}, #{query.version}"
+        RosterModel.update(query, from_jid)
       end
       
       #.........................................................................................................

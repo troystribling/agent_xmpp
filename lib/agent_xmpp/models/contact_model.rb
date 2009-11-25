@@ -13,16 +13,6 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def messages
-        @messages ||= AgentXmpp.agent_xmpp_db[:messages]
-      end
-
-      #.........................................................................................................
-      def roster
-        RosterModel.roster
-      end
-
-      #.........................................................................................................
       def load_config
         if AgentXmpp.config['roster'].kind_of?(Array)
           AgentXmpp.config['roster'].each do |c|
@@ -35,6 +25,12 @@ module AgentXmpp
             end
           end
         end
+      end
+
+      #.........................................................................................................
+      def update(roster_item)
+        from_jid, subscription, ask = roster_item.jid.to_s, roster_item.subscription.to_s, roster_item.ask.to_s
+        contacts.filter(:jid => from_jid).update(:subscription => subscription, :ask => ask)
       end
 
       #.........................................................................................................
