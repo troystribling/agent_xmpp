@@ -25,15 +25,15 @@ module AgentXmpp
       end
       in_memory_db.create_table :service_items do
       	primary_key :id
-        column :parentNode, :text
+        column :parent_node, :text
         column :service, :text
         column :node, :text
         column :jid, :text
-        column :itemName, :text
+        column :name, :text
       end
       in_memory_db.create_table :service_features do
       	primary_key :id
-        column :parentNode, :text
+        column :parent_node, :text
         column :service, :text
         column :var, :text
       end
@@ -51,7 +51,7 @@ module AgentXmpp
         column :deliver_payloads, :integer
         column :persist_items, :integer
         column :subscribe, :integer
-        column :presence_based_delivery
+        column :presence_based_delivery, :integer
         column :notify_config, :integer
         column :notify_delete, :integer
         column :notify_retract, :integer

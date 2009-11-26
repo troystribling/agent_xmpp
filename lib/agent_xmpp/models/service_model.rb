@@ -9,7 +9,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def services
-        @roster ||= AgentXmpp.in_memory_db[:services]
+        @services ||= AgentXmpp.in_memory_db[:services]
       end
 
       #.........................................................................................................
@@ -22,9 +22,45 @@ module AgentXmpp
         @service_features ||= AgentXmpp.in_memory_db[:service_features]
       end
 
+      #.........................................................................................................
+      def update(disco_iq)
+        disco = disco_iq.query
+p disco.class
+        case disco
+          when AgentXmpp::Xmpp::IqDiscoInfo then update_with_disco_info(disco_iq)
+          # when AgentXmpp::Xmpp::IqDiscoItems then update_with_disco_items(disco_iq)
+        end
+      end
+
+      #.........................................................................................................
+      # private
+      #.........................................................................................................
+      def update_with_disco_info(disco_iq)
+        disco, service = disco_iq.query, disco_iq.from.to_s
+        parent = disco.node
+        disco.identities.each do |i|
+          services << {:node => parent, :jid => service, :category => i.category, :type => i.type, :name => i.iname}
+        end
+        disco.features.each do |f|
+          service_features << {:parent_node => parent, :service => service, :var => f.var}
+        end
+      end
+
+      #.........................................................................................................
+      def update_with_disco_items(disco_iq)
+p disco_iq
+        disco, service = disco_iq.query, disco_iq.from.to_s
+        parent = disco.node
+        disco.items.each do |i|
+          services << {:node => parent, :jid => service, :category => i.category, :type => i.type, :name => i.iname}
+        end
+      end
+
+      #.........................................................................................................
+      private :update_with_disco_info, :update_with_disco_items
+
     #### self
     end
-
 
     #.........................................................................................................
     def initialize
@@ -82,11 +118,6 @@ module AgentXmpp
       else; []; end
     end 
         
-    #.........................................................................................................
-    def update_with_discoinfo(disco)
-      save_item_disco(:discoinfo, disco)
-    end
- 
     #.........................................................................................................
     def update_with_discoitems(disco)      
       save_item_disco(:discoitems, disco)

@@ -341,7 +341,7 @@ module AgentXmpp
         request = []
         q = discoinfo.query
         AgentXmpp.logger.info "RECEIVED DISCO INFO RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
-        AgentXmpp.services.update_with_discoinfo(discoinfo)
+        ServiceModel.update(discoinfo)
         q.identities.each do |i|
           AgentXmpp.logger.info " IDENTITY: NAME:#{i.iname}, CATEGORY:#{i.category}, TYPE:#{i.type}"
           request << case i.category
@@ -398,7 +398,7 @@ module AgentXmpp
         from_jid = discoitems.from
         q = discoitems.query
         AgentXmpp.logger.info "RECEIVED DISCO ITEMS RESULT FROM: #{from_jid.to_s}" + (q.node.nil? ? '' : ", NODE: #{q.node}")
-        AgentXmpp.services.update_with_discoitems(discoitems)
+        ServiceModel.update(discoitems)
         case q.node
           when 'http://jabber.org/protocol/commands' 
             Boot.call_if_implemented(:call_discovered_command_nodes, from_jid.to_s, q.items.map{|i| i.node}) unless q.items.empty?
