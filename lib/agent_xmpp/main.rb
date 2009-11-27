@@ -42,11 +42,6 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def services
-      @services ||= ServiceModel.new
-    end
-    
-    #.........................................................................................................
     def publication
       @publication ||= PublishModel.new(config['publish'])
     end

@@ -22,6 +22,7 @@ module AgentXmpp
         column :category, :text
         column :type, :text
         column :node, :text
+        unique [:node, :jid]
       end
       in_memory_db.create_table :service_items do
       	primary_key :id
@@ -30,40 +31,37 @@ module AgentXmpp
         column :node, :text
         column :jid, :text
         column :name, :text
+        unique [:node, :service]
       end
       in_memory_db.create_table :service_features do
       	primary_key :id
-        column :parent_node, :text
+        column :node, :text
         column :service, :text
         column :var, :text
+        unique [:node, :service, :var]
       end
       in_memory_db.create_table :publications do
       	primary_key :id
-        column :node, :text
+        column :node, :text, :unique=>true
+        column :message_count, :integer, :default=>0
         column :status, :text
         column :title, :text
         column :access_model, :text
-        column :publish_model, :text
-        column :send_last_published_item, :integer
         column :max_items, :integer
-        column :max_payload_size, :integer
         column :deliver_notifications, :integer
         column :deliver_payloads, :integer
         column :persist_items, :integer
         column :subscribe, :integer
-        column :presence_based_delivery, :integer
         column :notify_config, :integer
         column :notify_delete, :integer
         column :notify_retract, :integer
-        column :notify_sub, :integer
       end
       in_memory_db.create_table :subscriptions do
       	primary_key :id
-      	column :subId, :text
-        column :node, :text
+        column :node, :text, :unique=>true
+        column :message_count, :integer, :default=>0
         column :service, :text
         column :subscription, :text
-        column :jid, :text
       end
     end
 

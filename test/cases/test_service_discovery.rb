@@ -20,11 +20,11 @@ class TestServiceDiscovery < Test::Unit::TestCase
     #.........................................................................................................
     setup do
       @delegate.did_receive_discoinfo_result_method.should_not be_called
-      AgentXmpp.roster.has_discoinfo?(@server).should be(false)
+      ServiceModel.has_disco_info?(@server).should be(false)
       @client.receiving(ServiceDiscoveryMessages.recv_iq_result_query_discoinfo(@client, @server.to_s)).should \
         respond_with(ServiceDiscoveryMessages.send_iq_get_query_discoitems(@client, @server.to_s))
       @delegate.did_receive_discoinfo_result_method.should be_called
-      AgentXmpp.roster.has_discoinfo?(@server).should be(true)
+      ServiceModel.has_disco_info?(@server).should be(true)
     end
       
     #.........................................................................................................
@@ -34,21 +34,21 @@ class TestServiceDiscovery < Test::Unit::TestCase
     #.........................................................................................................
     should "update the server roster entry with result of server disco#items request if the result is not an error" do
       @delegate.did_receive_discoitems_result_method.should_not be_called
-      AgentXmpp.roster.has_discoitems?(@server).should be(false)
+      ServiceModel.has_disco_items?(@server).should be(false)
       @client.receiving(ServiceDiscoveryMessages.recv_iq_result_query_discoitems(@client, @server.to_s)).should not_respond
       @delegate.did_receive_discoitems_result_method.should be_called
-      AgentXmpp.roster.has_discoitems?(@server).should be(true)
+      ServiceModel.has_disco_items?(@server).should be(true)
     end
     
     #.........................................................................................................
     should "not update the server roster entry with the disco#items result if the result is an error" do
       @delegate.did_receive_discoitems_result_method.should_not be_called
       @delegate.did_receive_discoitems_error_method.should_not be_called
-      AgentXmpp.roster.has_discoitems?(@server).should be(false)
+      ServiceModel.has_disco_items?(@server).should be(false)
       @client.receiving(ServiceDiscoveryMessages.recv_iq_error_query_discoitems(@client, @server.to_s)).should not_respond
       @delegate.did_receive_discoitems_result_method.should_not be_called
       @delegate.did_receive_discoitems_error_method.should be_called
-      AgentXmpp.roster.has_discoitems?(@server).should be(false)
+      ServiceModel.has_disco_items?(@server).should be(false)
     end
   
   end  
@@ -61,12 +61,12 @@ class TestServiceDiscovery < Test::Unit::TestCase
       AgentXmpp::Xmpp::IdGenerator.set_gen_id([1,2])
       @client.receiving(PresenceMessages.recv_presence_available(@client, @test.to_s))
       @delegate.did_receive_discoinfo_result_method.should_not be_called
-      AgentXmpp.roster.has_discoinfo?(@test).should be(false)
+      ServiceModel.has_disco_info?(@test).should be(false)
       AgentXmpp::Xmpp::IdGenerator.set_gen_id
       @client.receiving(ServiceDiscoveryMessages.recv_iq_result_query_discoinfo(@client, @test.to_s)).should \
         respond_with(ServiceDiscoveryMessages.send_iq_get_query_discoitems(@client, @test.to_s))
       @delegate.did_receive_discoinfo_result_method.should be_called
-      AgentXmpp.roster.has_discoinfo?(@test).should be(true)
+      ServiceModel.has_disco_info?(@test).should be(true)
     end
           
     #.........................................................................................................
@@ -76,21 +76,21 @@ class TestServiceDiscovery < Test::Unit::TestCase
     #.........................................................................................................
     should "update the contact roster entry with result of contact disco#items request if the result is not an error" do
         @delegate.did_receive_discoitems_result_method.should_not be_called
-        AgentXmpp.roster.has_discoitems?(@test).should be(false)
+        ServiceModel.has_disco_items?(@test).should be(false)
         @client.receiving(ServiceDiscoveryMessages.recv_iq_result_query_discoitems(@client, @test.to_s)).should not_respond
         @delegate.did_receive_discoitems_result_method.should be_called
-        AgentXmpp.roster.has_discoitems?(@test).should be(true)
+        ServiceModel.has_disco_items?(@test).should be(true)
     end
       
     #.........................................................................................................
     should "not update the contact roster entry with the disco#info result or geneate a disco#items request if the result is an error" do
         @delegate.did_receive_discoitems_result_method.should_not be_called
         @delegate.did_receive_discoitems_error_method.should_not be_called
-        AgentXmpp.roster.has_discoitems?(@test).should be(false)
+        ServiceModel.has_disco_items?(@test).should be(false)
         @client.receiving(ServiceDiscoveryMessages.recv_iq_error_query_discoitems(@client, @test.to_s)).should not_respond
         @delegate.did_receive_discoitems_result_method.should_not be_called
         @delegate.did_receive_discoitems_error_method.should be_called
-        AgentXmpp.roster.has_discoitems?(@test).should be(false)
+        ServiceModel.has_disco_items?(@test).should be(false)
     end
       
   end
@@ -99,9 +99,9 @@ class TestServiceDiscovery < Test::Unit::TestCase
   should "not update the roster entry with the disco#info result or geneate a disco#items request if an error is received as a result of a disco#info request" do
     @delegate.did_receive_discoinfo_result_method.should_not be_called
     @delegate.did_receive_discoinfo_error_method.should_not be_called    
-    AgentXmpp.roster.has_discoinfo?(@server).should be(false)
+    ServiceModel.has_disco_info?(@server).should be(false)
     @client.receiving(ServiceDiscoveryMessages.recv_iq_error_query_discoinfo(@client, @server.to_s)).should not_respond
-    AgentXmpp.roster.has_discoinfo?(@server).should be(false)
+    ServiceModel.has_disco_info?(@server).should be(false)
     @delegate.did_receive_discoinfo_result_method.should_not be_called
     @delegate.did_receive_discoinfo_error_method.should be_called    
   end

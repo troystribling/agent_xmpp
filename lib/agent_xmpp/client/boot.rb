@@ -32,6 +32,7 @@ module AgentXmpp
         AgentXmpp.create_in_memory_db        
         AgentXmpp.upgrade_agent_xmpp_db
         ContactModel.load_config 
+        PublicationModel.load_config 
                 
         AgentXmpp::Client.new().connect
         

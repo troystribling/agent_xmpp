@@ -8,14 +8,23 @@ module AgentXmpp
     class << self
 
       #.........................................................................................................
-      def subscription
-        @subscription ||= AgentXmpp.in_memory_db[:subscription]
+      def subscriptions
+        @subscriptions ||= AgentXmpp.in_memory_db[:subscriptions]
       end
 
       #.........................................................................................................
-      def destroy_by_contact_id(jid)
-        messages.filter(:contact_id => contact_id).delete
-      end 
+      def update(msg, service)
+        begin
+          subscriptions << {:node => msg.node, :subscription => msg.subscription, :service => service}
+        rescue 
+        end
+      end
+ 
+      #.........................................................................................................
+      def update_message_count(nodes)
+        subs = subscriptions.filter(:node => node)
+        subs.update(:message_count => pubs.first[:message_count]+1)
+      end
 
     #### self
     end

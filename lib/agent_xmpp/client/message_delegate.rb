@@ -54,6 +54,7 @@ module AgentXmpp
         AgentXmpp.logger.info "RECEIVED EVENT FROM: #{from.to_s}"
         event.items.each do |is|
           is.item.each do |i|
+            SubscriptionModel.update_message_count(is.node)
             if data = i.x and data.type.eql?(:result)    
               src = is.node.split('/')  
               src_jid = "#{src[3]}@#{src[2]}"                
@@ -149,7 +150,7 @@ module AgentXmpp
           unless from_jid.to_s.eql?(AgentXmpp.jid.to_s)
             Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :available)   
             response << Xmpp::IqVersion.get(pipe, from_jid) unless RosterModel.has_version?(from_jid)
-            unless AgentXmpp.services.has_jid?(from_jid)
+            unless ServiceModel.has_jid?(from_jid)
               response << Xmpp::IqDiscoInfo.get(pipe, from_jid)
               response << Xmpp::IqDiscoItems.get(pipe, from_jid, 'http://jabber.org/protocol/commands')
             end
@@ -411,7 +412,6 @@ module AgentXmpp
           end
           q.items.inject(msgs) do |r,i|
             AgentXmpp.logger.info " ITEM JID: #{i.jid}" + (i.node.nil? ? '' : ", NODE: #{i.node}")
-            AgentXmpp.services.create(i.jid)
             r << Xmpp::IqDiscoInfo.get(pipe, i.jid, i.node)         
           end
         end
@@ -474,7 +474,7 @@ module AgentXmpp
         app_subs = BaseController.subscriptions(result.from.domain)
         srvr_subs = result.pubsub.subscriptions.map do |s| 
           AgentXmpp.logger.info "SUBSCRIBED TO NODE: #{from_jid}, #{s.node}"
-          s.node
+          SubscriptionModel.update(s, from_jid); s.node
         end
         reqs = app_subs.inject([]) do |r,s|
                  unless srvr_subs.include?(s)
@@ -511,6 +511,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_pubsub_create_node_result(pipe, result, node) 
         from_jid = result.from
+        PublicationModel.update_status(node, :active)
         AgentXmpp.logger.info "RECEIVED CREATE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
         if node.eql?(AgentXmpp.user_pubsub_root)
           [did_discover_user_pubsub_root(pipe, from_jid, node), Xmpp::IqDiscoInfo.get(pipe, from_jid.to_s, node)]   
@@ -520,6 +521,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_pubsub_create_node_error(pipe, result, node)   
         from_jid = result.from
+        PublicationModel.update_status(node, :error)
         AgentXmpp.logger.info "RECEIVED CREATE NODE ERROR FROM: #{from_jid.to_s}, #{node}"
       end 
 
@@ -539,6 +541,7 @@ module AgentXmpp
       def did_receive_pubsub_subscribe_result(pipe, result, node) 
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE RESULT FROM: #{from_jid.to_s}, #{node}"
+        Xmpp::IqPubSub.subscriptions(pipe, from_jid)
       end
 
       #.........................................................................................................
@@ -601,17 +604,18 @@ module AgentXmpp
     
       #.........................................................................................................
       def add_publish_methods(pipe, pubsub)
-        AgentXmpp.publication.find_all.each do |p|
-          if p.node
-            meth = ("publish_" + p.node.gsub(/-/,'_')).to_sym
+        PublicationModel.find_all.each do |pub|
+          if pub[:node]
+            meth = ("publish_" + pub[:node].gsub(/-/,'_')).to_sym
             unless AgentXmpp.respond_to?(meth)
               AgentXmpp.define_meta_class_method(meth) do |payload| 
-                pipe.send_resp(Xmpp::IqPublish.set(pipe, :node => p.node, :to => pubsub, :payload => payload.to_x_data))
+                PublicationModel.update_message_count(pub[:node])
+                pipe.send_resp(Xmpp::IqPublish.set(pipe, :node => pub[:node], :to => pubsub, :payload => payload.to_x_data))
               end
-              AgentXmpp.logger.info "ADDED PUBLISH METHOD FOR NODE: #{p.node}, #{pubsub}"
+              AgentXmpp.logger.info "ADDED PUBLISH METHOD FOR NODE: #{pub[:node]}, #{pubsub}"
               Delegator.delegate(AgentXmpp, meth)
             else
-              AgentXmpp.logger.warn "PUBLISH METHOD FOR NODE EXISTS: #{p.node}, #{pubsub}"
+              AgentXmpp.logger.warn "PUBLISH METHOD FOR NODE EXISTS: #{pub[:node]}, #{pubsub}"
             end
           else
             AgentXmpp.logger.warn "NODE NOT SPECIFIED FOR PUBSUB PUBLISH CONFIGURATION"
@@ -662,7 +666,7 @@ module AgentXmpp
       #.........................................................................................................
       def update_publish_nodes(pipe, pubsub, items)
         disco_nodes = items.map{|i| i.node}
-        config_nodes = AgentXmpp.publication.find_all.map{|p| "#{AgentXmpp.user_pubsub_root}/#{p.node}"}
+        config_nodes = PublicationModel.find_all.map{|pub| "#{AgentXmpp.user_pubsub_root}/#{pub[:node]}"}
         updates = disco_nodes.inject([]) do |u,n|
                     unless config_nodes.include?(n) 
                       AgentXmpp.logger.warn "DELETING PUBSUB NODE: #{pubsub.to_s}, #{n}"
@@ -680,7 +684,6 @@ module AgentXmpp
       #.........................................................................................................
       def init_remote_services(pipe)
         (BaseController.event_domains-[AgentXmpp.jid.domain]).map do |d| 
-          AgentXmpp.services.create(d)
           Xmpp::IqDiscoInfo.get(pipe, d)
         end
       end
