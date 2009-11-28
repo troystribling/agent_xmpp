@@ -54,6 +54,7 @@ module AgentXmpp
         @id_callbacks[data.id] = blk
       end
       AgentXmpp.logger.info "SEND: #{data.to_s}"
+      MessageModel.update(data)
       @connection.send_data(data.to_s)
     end
 
@@ -143,6 +144,7 @@ module AgentXmpp
                                 /.*::(.*)/.match(stanza.class.to_s).to_a.last
                               end.downcase
       meth += '_' + stanza.type.to_s if stanza.type
+      MessageModel.update(stanza)
       if delegates_respond_to?(meth.to_sym) 
         broadcast_to_delegates(meth.to_sym, self, stanza)
       else

@@ -14,6 +14,21 @@ module AgentXmpp
 
       #.........................................................................................................
       def update(msg, service)
+        case msg
+          when AgentXmpp::Xmpp::Subscription then update_with_subscription(msg, service)
+          when AgentXmpp::Xmpp::Iq then update_with_subscription(msg.pubsub.subscription, service)
+        end                 
+      end
+ 
+      #.........................................................................................................
+      def destroy_by_node(node)
+        subscriptions.filter(:node => node).delete
+      end 
+
+      #.........................................................................................................
+      # private
+      #.........................................................................................................
+      def update_with_subscription(msg, service)
         begin
           subscriptions << {:node => msg.node, :subscription => msg.subscription, :service => service}
         rescue 
@@ -21,10 +36,7 @@ module AgentXmpp
       end
  
       #.........................................................................................................
-      def update_message_count(nodes)
-        subs = subscriptions.filter(:node => node)
-        subs.update(:message_count => pubs.first[:message_count]+1)
-      end
+      private :update_with_subscription
 
     #### self
     end

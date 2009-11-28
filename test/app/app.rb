@@ -304,3 +304,9 @@ event 'test@planbresearch.com', 'waiting' do
   AgentXmpp.logger.info "EVENT: test@planbresearch.com/waiting"
   p params
 end
+
+#.........................................................................................................
+event 'troy@plan-b.ath.cx', 'stupid' do
+  AgentXmpp.logger.info "EVENT: troy@plan-b.ath.cx/stupid"
+  p params
+end

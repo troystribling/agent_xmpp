@@ -65,7 +65,6 @@ module AgentXmpp
         contact = contacts.filter(:jid => jid.bare.to_s)
         contact_id = contact.first[:contact_id]
         RosterModel.destroy_by_contact_id(contact_id)
-        MessageModel.destroy_by_contact_id(contact_id)
         contact.delete
       end 
 

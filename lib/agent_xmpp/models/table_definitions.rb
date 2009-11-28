@@ -43,7 +43,6 @@ module AgentXmpp
       in_memory_db.create_table :publications do
       	primary_key :id
         column :node, :text, :unique=>true
-        column :message_count, :integer, :default=>0
         column :status, :text
         column :title, :text
         column :access_model, :text
@@ -59,7 +58,6 @@ module AgentXmpp
       in_memory_db.create_table :subscriptions do
       	primary_key :id
         column :node, :text, :unique=>true
-        column :message_count, :integer, :default=>0
         column :service, :text
         column :subscription, :text
       end
@@ -88,14 +86,14 @@ module AgentXmpp
       unless agent_xmpp_db.table_exists? :messages
         agent_xmpp_db.create_table :messages do
         	primary_key :id
-        	foreign_key :contact_id, :contacts
         	column :message_text, :text
-        	column :text_type, :text
+        	column :content_type, :text
+        	column :message_type, :text
         	column :to_jid, :text
         	column :from_jid, :text
         	column :node, :text
         	column :item_id, :text
-          DateTime :created_at;
+          Time :created_at
         end
       end
     end

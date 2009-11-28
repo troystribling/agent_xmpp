@@ -10,6 +10,7 @@ module AgentXmpp
 
       #.......................................................................................................
       name_xmlns 'pubsub', 'http://jabber.org/protocol/pubsub'
+      xmpp_child :subscription, :publish
       
       #####-------------------------------------------------------------------------------------------------------
       class << self
@@ -143,6 +144,7 @@ module AgentXmpp
       #.........................................................................................................
       name_xmlns 'publish', 'http://jabber.org/protocol/pubsub'
       xmpp_attribute :node
+      xmpp_child :item
 
       #####-------------------------------------------------------------------------------------------------------
       class << self
@@ -182,6 +184,7 @@ module AgentXmpp
     class Item < Element
       name_xmlns 'item', 'http://jabber.org/protocol/pubsub'
       xmpp_attribute :id
+      xmpp_child :x, :entry
       def initialize(id=nil)
         super()
         self.id = id if id
@@ -208,7 +211,6 @@ module AgentXmpp
     #####-------------------------------------------------------------------------------------------------------
     class EventItem < Item
       name_xmlns 'item', 'http://jabber.org/protocol/pubsub' + "#event"
-      xmpp_child :x
     end
 
     #####-------------------------------------------------------------------------------------------------------
@@ -221,7 +223,7 @@ module AgentXmpp
 
       #.........................................................................................................
       name_xmlns 'subscription', 'http://jabber.org/protocol/pubsub'
-      xmpp_attribute :node, :subid
+      xmpp_attribute :node, :subid, :subscription
 
       #.........................................................................................................
       def initialize(jid=nil, node=nil, subid=nil, state=nil) 

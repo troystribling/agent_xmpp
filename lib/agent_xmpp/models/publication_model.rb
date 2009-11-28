@@ -38,12 +38,6 @@ module AgentXmpp
         publications.filter(:node => node).update(:status => status.to_s)
       end
 
-      #.........................................................................................................
-      def update_message_count(node)
-        pubs = publications.filter(:node => node)
-        pubs.update(:message_count => pubs.first[:message_count]+1)
-      end
-
     #### self
     end
 

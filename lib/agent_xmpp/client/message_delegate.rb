@@ -53,15 +53,21 @@ module AgentXmpp
       def did_receive_pubsub_event(pipe, event, to, from)
         AgentXmpp.logger.info "RECEIVED EVENT FROM: #{from.to_s}"
         event.items.each do |is|
+          src = is.node.split('/')  
+          src_jid = "#{src[3]}@#{src[2]}"                
           is.item.each do |i|
-            SubscriptionModel.update_message_count(is.node)
-            if data = i.x and data.type.eql?(:result)    
-              src = is.node.split('/')  
-              src_jid = "#{src[3]}@#{src[2]}"                
-              params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :pubsub => from, 
-                :node => is.node, :data => data.to_native, :from => src_jid, :id => i.id,
-                :resources => RosterModel.find_all_by_contact_jid_and_status(Xmpp::Jid.new(src_jid), :available)}
-              Controller.new(pipe, params).invoke_event
+            if i.respond_to?(:x) and i.respond_to?(:entry) and not MessageModel.find_by_item_id(i.id)
+              params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :pubsub => from, :node => is.node, :from => src_jid, 
+                :id => i.id, :resources => RosterModel.find_all_by_contact_jid_and_status(Xmpp::Jid.new(src_jid), :available)}
+              if data = i.x and data.type.eql?(:result)    
+                params.update(:data => data.to_native)
+                Controller.new(pipe, params).invoke_event
+              elsif entry = i.entry
+                params.update(:entry => entry.title)
+                Controller.new(pipe, params).invoke_event
+              else
+                did_receive_unsupported_message(pipe, event)
+              end
             else
               did_receive_unsupported_message(pipe, event)
             end
@@ -539,9 +545,9 @@ module AgentXmpp
 
       #.........................................................................................................
       def did_receive_pubsub_subscribe_result(pipe, result, node) 
-        from_jid = result.from
-        AgentXmpp.logger.info "RECEIVED SUBSCRIBE RESULT FROM: #{from_jid.to_s}, #{node}"
-        Xmpp::IqPubSub.subscriptions(pipe, from_jid)
+        from_jid = result.from.to_s
+        SubscriptionModel.update(result, from_jid)
+        AgentXmpp.logger.info "RECEIVED SUBSCRIBE RESULT FROM: #{from_jid}, #{node}"
       end
 
       #.........................................................................................................
@@ -564,6 +570,7 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_pubsub_unsubscribe_result(pipe, result, node) 
         from_jid = result.from
+        SubscriptionModel.destroy_by_node(node)
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBE RESULT FROM: #{from_jid.to_s}, #{node}"
       end
 
@@ -609,7 +616,6 @@ module AgentXmpp
             meth = ("publish_" + pub[:node].gsub(/-/,'_')).to_sym
             unless AgentXmpp.respond_to?(meth)
               AgentXmpp.define_meta_class_method(meth) do |payload| 
-                PublicationModel.update_message_count(pub[:node])
                 pipe.send_resp(Xmpp::IqPublish.set(pipe, :node => pub[:node], :to => pubsub, :payload => payload.to_x_data))
               end
               AgentXmpp.logger.info "ADDED PUBLISH METHOD FOR NODE: #{pub[:node]}, #{pubsub}"
