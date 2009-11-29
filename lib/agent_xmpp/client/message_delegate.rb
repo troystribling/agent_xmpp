@@ -56,9 +56,11 @@ module AgentXmpp
           src = is.node.split('/')  
           src_jid = "#{src[3]}@#{src[2]}"                
           is.item.each do |i|
-            if i.respond_to?(:x) and i.respond_to?(:entry) and not MessageModel.find_by_item_id(i.id)
-              params = {:xmlns => 'http://jabber.org/protocol/pubsub#event', :to => to, :pubsub => from, :node => is.node, :from => src_jid, 
-                :id => i.id, :resources => RosterModel.find_all_by_contact_jid_and_status(Xmpp::Jid.new(src_jid), :available)}
+            if MessageModel.update_received_event_item(i, from, is.node)
+              params = {
+                :xmlns => 'http://jabber.org/protocol/pubsub#event', 
+                :to => to, :pubsub => from, :node => is.node, :from => src_jid, :id => i.id, 
+                :resources => RosterModel.find_all_by_contact_jid_and_status(Xmpp::Jid.new(src_jid), :available)}
               if data = i.x and data.type.eql?(:result)    
                 params.update(:data => data.to_native)
                 Controller.new(pipe, params).invoke_event
@@ -518,6 +520,7 @@ module AgentXmpp
       def did_receive_pubsub_create_node_result(pipe, result, node) 
         from_jid = result.from
         PublicationModel.update_status(node, :active)
+        Boot.call_if_implemented(:call_discovered_pubsub_node, from_jid, node)
         AgentXmpp.logger.info "RECEIVED CREATE NODE RESULT FROM: #{from_jid.to_s}, #{node}"
         if node.eql?(AgentXmpp.user_pubsub_root)
           [did_discover_user_pubsub_root(pipe, from_jid, node), Xmpp::IqDiscoInfo.get(pipe, from_jid.to_s, node)]   

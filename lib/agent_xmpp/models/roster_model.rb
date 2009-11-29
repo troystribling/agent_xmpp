@@ -50,7 +50,7 @@ module AgentXmpp
       #.........................................................................................................
       def find_all_by_contact_jid_and_status(jid, status)
         if contact = ContactModel.find_by_jid(jid)
-          roster.filter(:jid => jid.to_s, :contact_id => contact[:contact_id]).all
+          roster.filter(:contact_id => contact[:id]).all
         else; []; end
       end 
       

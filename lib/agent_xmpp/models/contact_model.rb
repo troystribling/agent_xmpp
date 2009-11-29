@@ -46,11 +46,6 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def find_by_jid(jid)
-        contacts[:jid => jid.bare.to_s]
-      end
-
-      #.........................................................................................................
       def find_all_by_status(status)
         contacts.filter(:status => status.to_s).all
       end

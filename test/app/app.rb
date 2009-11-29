@@ -22,6 +22,7 @@ end
 
 #.........................................................................................................
 discovered_pubsub_node do |service, node|
+puts "service:#{service}, node:#{node}"  
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
   if node.eql?(AgentXmpp.user_pubsub_root+'/time')
     AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
@@ -294,19 +295,19 @@ end
 ##########################################################################################################
 # pubsub events
 #.........................................................................................................
-event 'test@planbresearch.com', 'val' do
-  AgentXmpp.logger.info "EVENT: test@planbresearch.com/val"
-  send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
-end
-
-#.........................................................................................................
-event 'test@planbresearch.com', 'waiting' do
-  AgentXmpp.logger.info "EVENT: test@planbresearch.com/waiting"
-  p params
-end
+# event 'nowhere@noone.com', 'val' do
+#   AgentXmpp.logger.info "EVENT: nowhere@noone.com/val"
+#   send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
+# end
 
 #.........................................................................................................
 event 'troy@plan-b.ath.cx', 'stupid' do
   AgentXmpp.logger.info "EVENT: troy@plan-b.ath.cx/stupid"
+  p params
+end
+
+#.........................................................................................................
+event 'peer@agentxmpp.org', 'time' do
+  AgentXmpp.logger.info "EVENT: peer@agentxmpp.org/time"
   p params
 end

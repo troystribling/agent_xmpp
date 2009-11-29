@@ -18,13 +18,6 @@ module AgentXmpp
           when AgentXmpp::Xmpp::Message 
             if stanza.type.eql?(:chat)
               update_with_chat_message(stanza)
-            elsif event = stanza.event and items = event.items
-              items.each do |is|
-                is.each do |i|
-                  (event_item =  i.entry || i.x) if i.respond_to?(:entry) and i.respond_to?(:x)
-                  update_with_event(stanza, event_item, is.node, i.id) unless event_item.nil? 
-                end
-              end
             end
           when AgentXmpp::Xmpp::Iq
             if cmd = stanza.command
@@ -33,17 +26,23 @@ module AgentXmpp
               else
                 update_with_command_request(stanza, cmd.node)
               end
-            elsif pubsub = stanza.pubsub and pub = pubsub.publish and item = pub.item 
+            elsif (pubsub = stanza.pubsub).kind_of?(AgentXmpp::Xmpp::IqPubSub) and pub = pubsub.publish and item = pub.item 
               if data = item.x
-                  update_with_published_data(stanza, data, pub.node)
+                update_with_published_data(stanza, data, pub.node)
               end
             end
         end                 
       end
 
       #.........................................................................................................
+      def update_received_event_item(item, from, node)
+        (event_item =  item.entry || item.x) if item.respond_to?(:entry) and item.respond_to?(:x)
+        event_item.nil? ? false : update_with_event_item(event_item, from, node, item.id) 
+      end
+
+      #.........................................................................................................
       def find_by_item_id(item_id)
-        messages[:item_id => item_id]        
+        item_id.nil? ? nil : messages[:item_id => item_id]        
       end
 
       #.........................................................................................................
@@ -91,28 +90,26 @@ module AgentXmpp
         messages << {
           :message_text  => data.to_s,
           :content_type  => 'x',
-          :message_type  => data.type,
+          :message_type  => data.type.to_s,
           :to_jid        => stanza.to.to_s,
           :from_jid      => from_jid.to_s,
           :node          => node,
-          :created_at   => Time.now}
+          :created_at    => Time.now}
       end
 
       #.........................................................................................................
-      def update_with_event(stanza, event, node, item_id)
-        content_type = event.name
+      def update_with_event_item(event_item, from, node, item_id)
         unless find_by_item_id(item_id)
-          from_jid = stanza.from || AgentXmpp.jid 
           messages << {
-            :message_text  => event.to_s,
-            :content_type  => content_type,
+            :message_text  => event_item.to_s,
+            :content_type  => event_item.name,
             :message_type  => 'normal',
-            :to_jid        => stanza.to.to_s,
-            :from_jid      => from_jid.to_s,
+            :to_jid        => AgentXmpp.jid.to_s,
+            :from_jid      => from.to_s,
             :node          => node,
             :item_id       => item_id,
-            :created_at    => Time.now}
-        end    
+            :created_at    => Time.now}; true
+        else; false; end    
       end
        
       #.........................................................................................................

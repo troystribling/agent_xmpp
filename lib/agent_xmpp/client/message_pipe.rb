@@ -127,28 +127,30 @@ module AgentXmpp
   
     #.........................................................................................................
     def demux_stanza(stanza)
-      meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
-                                iqclass = if stanza.query
-                                            stanza.query.class
-                                          elsif stanza.command
-                                            stanza.command.class
-                                          else
-                                            nil
-                                          end
-                                if iqclass
-                                  /.*::Iq(.*)/.match(iqclass.to_s).to_a.last 
+      unless MessageModel.find_by_item_id(stanza.id)
+        MessageModel.update(stanza)
+        meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
+                                  iqclass = if stanza.query
+                                              stanza.query.class
+                                            elsif stanza.command
+                                              stanza.command.class
+                                            else
+                                              nil
+                                            end
+                                  if iqclass
+                                    /.*::Iq(.*)/.match(iqclass.to_s).to_a.last 
+                                  else
+                                    'fail'
+                                  end
                                 else
-                                  'fail'
-                                end
-                              else
-                                /.*::(.*)/.match(stanza.class.to_s).to_a.last
-                              end.downcase
-      meth += '_' + stanza.type.to_s if stanza.type
-      MessageModel.update(stanza)
-      if delegates_respond_to?(meth.to_sym) 
-        broadcast_to_delegates(meth.to_sym, self, stanza)
-      else
-        broadcast_to_delegates(:did_receive_unsupported_message, self, stanza)
+                                  /.*::(.*)/.match(stanza.class.to_s).to_a.last
+                                end.downcase
+        meth += '_' + stanza.type.to_s if stanza.type
+        if delegates_respond_to?(meth.to_sym) 
+          broadcast_to_delegates(meth.to_sym, self, stanza)
+        else
+          broadcast_to_delegates(:did_receive_unsupported_message, self, stanza)
+        end
       end
     end
   

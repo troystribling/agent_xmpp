@@ -9,28 +9,13 @@ before_start do
 end
 
 #.........................................................................................................
-discovered_command_nodes do |jid, nodes|
-  AgentXmpp.logger.info "discovered_command_nodes"
-  nodes.each do |n|
-    AgentXmpp.logger.info "COMMAND NODE: #{jid}, #{n}"
-  end
-end
-
-##########################################################################################################
-execute 'hello' do
-  AgentXmpp.logger.info "EXECUTE: hello"
-  'hello'
-end
-  
-##########################################################################################################
-# send commands to all available resources of publisher
-event 'dev@plan-b.ath.cx', 'shot' do
-  AgentXmpp.logger.info "EVENT: dev@plan-b.ath.cx/shot, #{params[:id]}"
-  AgentXmpp.logger.info "ONLINE RESOURCES: #{params[:resources].inspect}"
-  params[:resources].map do |r| 
-    AgentXmpp.logger.info "COMMAND REQUEST: #{r}, hash_hello"
-    command(:to=>r, :node=> 'hash_hello') do |status, data|
-      AgentXmpp.logger.info "COMMAND RESPONSE: #{status}, #{data.inspect}"
-    end
+discovered_pubsub_node do |service, node|
+  AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
+  if node.eql?(AgentXmpp.user_pubsub_root+'/time')
+    AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
+    EventMachine::PeriodicTimer.new(30) do
+      publish_time({:time => Time.now.to_s, :greeting => 'Rockin'})
+      AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
+    end  
   end
 end
