@@ -6,12 +6,13 @@ module AgentXmpp
 
     #---------------------------------------------------------------------------------------------------------
     @routes = {}
+    @before_filters = {}
     
     #---------------------------------------------------------------------------------------------------------
     class << self
       
       #.........................................................................................................
-      attr_reader :routes
+      attr_reader :routes, :before_filters
 
       #.........................................................................................................
       # interface
@@ -32,12 +33,23 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def before(args=nil, &blk)
+        args = {:command => :all, :event => :all, :chat => :all} if args.nil? or args.eql?(:all)
+        args.each {|(msg_type, nodes)| add_before_filter(msg_type, {:nodes => nodes, :blk => blk})}
+      end
+
+      #.........................................................................................................
       # managment
       #.........................................................................................................
-      def route(action, nroute)
-        (routes[action] ||= []).push(nroute).last
+      def route(msg_type, nroute)
+        (routes[msg_type] ||= []).push(nroute).last
       end
      
+      #.........................................................................................................
+      def add_before_filter(msg_type, nodes)
+        (before_filters[msg_type] ||= []).push(nodes).last
+      end
+
       #.........................................................................................................
       def command_nodes
         (routes[:command] ||= []).map{|r| r[:node]}
@@ -52,7 +64,7 @@ module AgentXmpp
       def event_domains
         (routes[:event] ||= []).map{|r| r[:domain]}.uniq
       end
-      
+
     #### self
     end
 
@@ -71,12 +83,14 @@ module AgentXmpp
      def invoke_command
        route = get_route(:command)
        unless route.nil?
-         define_meta_class_method(:request, &route[:blk])
-         define_meta_class_method(:request_callback) do |*result|
-           result = command_result(result.length.eql?(1)  ? result.first : result )  
-           add_payload_to_container(result.nil? ? nil : result.to_x_data)
+         if apply_before_filters(:command)
+           define_meta_class_method(:request, &route[:blk])
+           define_meta_class_method(:request_callback) do |*result|
+             result = command_result(result.length.eql?(1)  ? result.first : result )  
+             add_payload_to_container(result.nil? ? nil : result.to_x_data)
+           end
+           handle_request
          end
-         handle_request
        else
          AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
          Xmpp::ErrorResponse.no_route(params)
@@ -93,11 +107,11 @@ module AgentXmpp
        result_method = ("on_"+params[:action].to_s).to_sym
        if respond_to?(result_method)
          case params[:action]   
-         when :execute
-           form = Xmpp::XData.new('form')
-           on_execute(form); form
-         when :cancel
-           on_cancel; nil
+           when :execute
+             form = Xmpp::XData.new('form')
+             on_execute(form); form
+           when :cancel
+             on_cancel; nil
          else
            send(result_method)
          end
@@ -175,8 +189,8 @@ module AgentXmpp
     #.........................................................................................................
     # routes
     #.........................................................................................................
-    def get_route(action) 
-      (BaseController.routes[action] || []).select{|r| r[:node].eql?(params[:node].to_s)}.first
+    def get_route(msg_type) 
+      (BaseController.routes[msg_type] || []).select{|r| r[:node].eql?(params[:node].to_s)}.first
     end
 
     #.........................................................................................................
@@ -184,6 +198,19 @@ module AgentXmpp
       (BaseController.routes[:chat] ||= []).first
     end
 
+    #.........................................................................................................
+    # filters
+    #.........................................................................................................
+    def apply_before_filters(msg_type, node=nil)
+      (BaseController.before_filters[msg_type] || []).inject([]) do |fs, f|
+        nodes = [f[:nodes]].flatten
+        fs << f if nodes.include?(node) or nodes.include?(:all)
+      end.inject(true) do |r,f|
+        define_meta_class_method(:filter, &f[:blk])
+        r and filter
+      end
+    end
+    
     #.........................................................................................................
     private :add_payload_to_container, :get_route, :chat_route
     

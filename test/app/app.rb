@@ -5,7 +5,7 @@ require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 ##########################################################################################################
 # callbacks
 before_start do 
-  AgentXmpp.logger.level = Logger::WARN
+  AgentXmpp.logger.level = Logger::DEBUG
   File.delete("#{AgentXmpp.app_path}/in_memory.db") if File.exists?("#{AgentXmpp.app_path}/in_memory.db")
   AgentXmpp.logger.info "before_start"
 end
@@ -22,7 +22,6 @@ end
 
 #.........................................................................................................
 discovered_pubsub_node do |service, node|
-puts "service:#{service}, node:#{node}"  
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
   if node.eql?(AgentXmpp.user_pubsub_root+'/time')
     AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
@@ -299,15 +298,3 @@ end
 #   AgentXmpp.logger.info "EVENT: nowhere@noone.com/val"
 #   send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
 # end
-
-#.........................................................................................................
-event 'troy@plan-b.ath.cx', 'stupid' do
-  AgentXmpp.logger.info "EVENT: troy@plan-b.ath.cx/stupid"
-  p params
-end
-
-#.........................................................................................................
-event 'peer@agentxmpp.org', 'time' do
-  AgentXmpp.logger.info "EVENT: peer@agentxmpp.org/time"
-  p params
-end
