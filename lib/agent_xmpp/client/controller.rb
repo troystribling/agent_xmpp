@@ -105,9 +105,7 @@ module AgentXmpp
      #.........................................................................................................
      def command_result(result)
        result_method = ("on_"+(params[:x_data_type] || params[:action]).to_s).to_sym
-p result_method       
        if respond_to?(result_method)
-p params         
          if params[:action].eql?(:execute) and params[:x_data_type].nil?
              form = Xmpp::XData.new('form')
              on_execute(form); form
