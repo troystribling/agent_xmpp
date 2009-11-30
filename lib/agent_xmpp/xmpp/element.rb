@@ -58,7 +58,8 @@ module AgentXmpp
           args.each do |a|
             class_eval <<-DEF
               def #{a.to_s}
-                attributes['#{a.to_s}']#{sym}
+                attr = attributes['#{a.to_s}']
+                attr.nil? ? nil : attr#{sym}
               end
               def #{a.to_s}=(v)
                 attributes['#{a.to_s}'] = v.to_s

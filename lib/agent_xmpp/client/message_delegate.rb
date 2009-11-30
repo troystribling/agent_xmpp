@@ -17,10 +17,11 @@ module AgentXmpp
       #.........................................................................................................
       def did_receive_command_set(pipe, stanza)
         command = stanza.command
-        data = command.x
         params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
-          :from => stanza.from.to_s, :node => command.node, :id => stanza.id, :sessionid => command.sessionid}
-        params.update(:data=>data.to_params) unless data.nil?
+                  :from => stanza.from.to_s, :node => command.node, :id => stanza.id, 
+                  :sessionid => command.sessionid}
+        data = command.x
+        params.update(:data=>data.to_params, :x_data_type => data.type) unless data.nil?
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
         Controller.new(pipe, params).invoke_command
       end
@@ -29,8 +30,8 @@ module AgentXmpp
       # process chat messages
       #.........................................................................................................
       def did_receive_message_chat(pipe, stanza)
-        params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, :id => stanza.id, 
-          :body => stanza.body}
+        params = {:xmlns => 'message:chat', :to => stanza.from.to_s, :from => stanza.from.to_s, 
+                  :id => stanza.id, :body => stanza.body}
         AgentXmpp.logger.info "RECEIVED CHAT MESSAGE FROM: #{stanza.from.to_s}"
         Controller.new(pipe, params).invoke_chat
       end

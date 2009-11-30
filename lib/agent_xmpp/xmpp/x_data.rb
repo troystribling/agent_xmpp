@@ -161,7 +161,11 @@ module AgentXmpp
       
       #.....................................................................................................
       def to_hash(flds)
-        flds.inject({}) {|h,f| h[f.var] = to_scalar(f.values); h}
+        flds.inject({}) do |h,f| 
+          if handle_field_type?(f)
+            h[f.var] = to_scalar(get_field_values(f))
+          end; h
+        end
       end
 
       #.....................................................................................................
@@ -177,7 +181,27 @@ module AgentXmpp
       end
       
       #.....................................................................................................
-      private :to_scalar, :to_hash, :to_array_of_hashes, :add_field
+      def get_field_values(field)
+        vals = field.values
+        case field.type
+          when :boolean then vals.length.eql?(0) ? ['0'] : vals
+          when :"text-multi" then [vals.compact.join("/n")]
+        else vals
+        end
+      end
+
+      #.....................................................................................................
+      def handle_field_type?(field)
+        case field.type
+          when :fixed then false
+        else field
+        end
+          
+      end
+      
+      #.....................................................................................................
+      private :to_scalar, :to_hash, :to_array_of_hashes, :add_field, :get_field_values, 
+              :handle_field_type?
       
     end
 
@@ -272,8 +296,7 @@ module AgentXmpp
         elements.inject('option',{}) do |r, e|
           value = nil
           value = (ve = first_element('value')).nil? ? nil : ve.text
-          r[value] = e.attributes['label'] if value
-          r 
+          r[value] = e.attributes['label'] if value; r 
         end
       end
 
