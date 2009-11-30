@@ -83,13 +83,16 @@ module AgentXmpp
      def invoke_command
        route = get_route(:command)
        unless route.nil?
-         if apply_before_filters(:command)
+         if apply_before_filters(:command, params[:node])
            define_meta_class_method(:request, &route[:blk])
            define_meta_class_method(:request_callback) do |*result|
              result = command_result(result.length.eql?(1)  ? result.first : result )  
              add_payload_to_container(result.nil? ? nil : result.to_x_data)
            end
            handle_request
+         else
+           AgentXmpp.logger.error "ACCESS ERROR: before_filter prevented '#{params[:from]}' access {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
+           Xmpp::ErrorResponse.forbidden(params)
          end
        else
          AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
@@ -203,7 +206,7 @@ module AgentXmpp
     def apply_before_filters(msg_type, node=nil)
       (BaseController.before_filters[msg_type] || []).inject([]) do |fs, f|
         nodes = [f[:nodes]].flatten
-        fs << f if nodes.include?(node) or nodes.include?(:all)
+        (nodes.include?(node) or nodes.include?(:all)) ? fs << f : fs
       end.inject(true) do |r,f|
         define_meta_class_method(:filter, &f[:blk])
         r and filter

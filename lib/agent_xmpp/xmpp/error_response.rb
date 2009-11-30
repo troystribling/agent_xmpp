@@ -33,6 +33,11 @@ module AgentXmpp
         end
 
         #.........................................................................................................
+        def forbidden(params)
+          command_error(params, 'forbidden', 'the requesting JID is not allowed to execute the command')
+        end
+
+        #.........................................................................................................
         def feature_not_implemented(request)
           iq_error(request, 'feature-not-implemented', 'feature not implemented')
         end
