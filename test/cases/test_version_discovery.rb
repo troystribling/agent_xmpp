@@ -22,23 +22,23 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
       AgentXmpp::Xmpp::IdGenerator.set_gen_id([1,2])
       @delegate.did_receive_version_get_method.should_not be_called
       @delegate.did_receive_version_result_method.should_not be_called
-      RosterModel.find_by_jid(@troy).should be_nil
+      AgentXmpp::Roster.find_by_jid(@troy).should be_nil
       @client.receiving(PresenceMessages.recv_presence_available(@client, @troy.to_s)).should \
         respond_with(VersionDiscoveryMessages.send_iq_get_query_version(@client, @troy.to_s))
-      RosterModel.find_by_jid(@troy).should_not be_nil
+      AgentXmpp::Roster.find_by_jid(@troy).should_not be_nil
     end  
   
     #.........................................................................................................
     should "send a client version request to that jid and do nothing if the result is an error" do
       @client.receiving(VersionDiscoveryMessages.recv_iq_result_query_version(@client, @troy.to_s)).should not_respond
-      RosterModel.has_version?(@troy).should be(true)
+      AgentXmpp::Roster.has_version?(@troy).should be(true)
       @delegate.did_receive_version_result_method.should be_called
     end
         
     #.........................................................................................................
     should "respond to client version requests from that jid" do
       @client.receiving(VersionDiscoveryMessages.recv_iq_result_query_version(@client, @troy.to_s)).should not_respond
-      RosterModel.has_version?(@troy).should be(true)
+      AgentXmpp::Roster.has_version?(@troy).should be(true)
       @delegate.did_receive_version_result_method.should be_called
       @client.receiving(VersionDiscoveryMessages.recv_iq_get_query_version(@client, @troy.to_s)).should \
         respond_with(VersionDiscoveryMessages.send_iq_result_query_version(@client, @troy.to_s))
@@ -49,7 +49,7 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
     should "send a client version request to that jid and update roster with result version information" do
       @delegate.did_receive_version_error_method.should_not be_called
       @client.receiving(VersionDiscoveryMessages.recv_iq_error_query_version(@client, @troy.to_s)).should not_respond
-      RosterModel.has_version?(@troy).should be(false)
+      AgentXmpp::Roster.has_version?(@troy).should be(false)
       @delegate.did_receive_version_error_method.should be_called
     end
       
@@ -58,7 +58,7 @@ class TestClientVersionDiscovery < Test::Unit::TestCase
   #.........................................................................................................
   should "not respond to client version requests from jids not in configured roster" do
     @delegate.did_receive_version_get_method.should_not be_called
-    ContactModel.has_jid?(@noone).should be(false)
+    AgentXmpp::Contact.has_jid?(@noone).should be(false)
     @client.receiving(VersionDiscoveryMessages.recv_iq_get_query_version(@client, @noone.to_s)).should not_respond
     @delegate.did_receive_version_get_method.should be_called
   end

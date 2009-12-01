@@ -54,7 +54,7 @@ module AgentXmpp
         @id_callbacks[data.id] = blk
       end
       AgentXmpp.logger.info "SEND: #{data.to_s}"
-      MessageModel.update(data)
+      Message.update(data)
       @connection.send_data(data.to_s)
     end
 
@@ -127,8 +127,8 @@ module AgentXmpp
   
     #.........................................................................................................
     def demux_stanza(stanza)
-      unless MessageModel.find_by_item_id(stanza.id)
-        MessageModel.update(stanza)
+      unless Message.find_by_item_id(stanza.id)
+        Message.update(stanza)
         meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
                                   iqclass = if stanza.query
                                               stanza.query.class

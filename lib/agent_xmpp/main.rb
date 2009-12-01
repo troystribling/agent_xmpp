@@ -84,7 +84,7 @@ module AgentXmpp
     def password
       config['password']
     end
-            
+
     #.........................................................................................................
     def priority
       @priority ||= if config['priority']
@@ -135,4 +135,6 @@ end
 include AgentXmpp::Delegator
 
 ##############################################################################################################
-at_exit {AgentXmpp::Boot.boot}
+at_exit do
+  AgentXmpp::Boot.boot
+end

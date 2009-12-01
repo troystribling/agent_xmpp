@@ -36,9 +36,9 @@ class Test::Unit::TestCase
   
     #### receive roster request and verify that roster items are activated
     delegate.did_receive_all_roster_items_method.should_not be_called     
-    RosterModel.find_all{|r| r[:status].should be(:inactive)}  
+    AgentXmpp::Roster.find_all{|r| r[:status].should be(:inactive)}  
     client.receiving(RosterMessages.recv_iq_result_query_roster(client, AgentXmpp.config['roster'])).should not_respond
-    RosterModel.find_all{|r| r[:status].should be(:both)}  
+    AgentXmpp::Roster.find_all{|r| r[:status].should be(:both)}  
     delegate.did_receive_all_roster_items_method.should be_called     
   end
   

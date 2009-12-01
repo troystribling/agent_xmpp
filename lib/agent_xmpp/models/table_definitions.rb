@@ -76,10 +76,8 @@ module AgentXmpp
         agent_xmpp_db.create_table :contacts do
         	primary_key :id
         	column :jid, :text, :unique=>true
-        	column :role, :text
           column :ask, :text
           column :subscription, :text
-          column :status, :text
         	column :groups, :text
         end
       end
