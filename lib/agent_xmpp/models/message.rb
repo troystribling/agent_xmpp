@@ -8,7 +8,7 @@ module AgentXmpp
     class << self
 
       #.........................................................................................................
-      def messages
+      def messages(renew=false)
         @messages ||= AgentXmpp.agent_xmpp_db[:messages]
       end
 

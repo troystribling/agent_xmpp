@@ -7,7 +7,6 @@ require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 #.........................................................................................................
 # only online contacts can send command messages
 before :command => :all do
-p params  
   AgentXmpp::Roster.find_by_jid(params[:from])
 end
 
@@ -61,31 +60,31 @@ end
 ##########################################################################################################
 # command processing: response payloads
 #.........................................................................................................
-command 'scalar' do
+command 'demo/scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 
 end
 
 #.........................................................................................................
-command 'hash' do
+command 'demo/hash' do
   AgentXmpp.logger.info "ACTION: hash"
   {:xyz => 'wuv', :attr1 => 'val1', :attr2 => 'val2', :test1 => 'ans1'}
 end
 
 #.........................................................................................................
-command 'scalar_array' do
+command 'demo/scalar_array' do
   AgentXmpp.logger.info "ACTION: array"
   ['val1', 'val2','val3', 'val4'] 
 end
 
 #.........................................................................................................
-command 'hash_array' do
+command 'demo/hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   {:attr1 => ['val11', 'val11'], :attr2 => 'val12'}
 end
 
 #.........................................................................................................
-command 'array_hash' do
+command 'demo/array_hash' do
   AgentXmpp.logger.info "ACTION: array_hash"
   [{:attr1 => 'val11', :attr2 => 'val12'}, 
    {:attr1 => 'val21', :attr2 => 'val22'}, 
@@ -93,7 +92,7 @@ command 'array_hash' do
 end
 
 #.........................................................................................................
-command 'array_hash_array' do
+command 'demo/array_hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, 
    {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, 
@@ -103,7 +102,7 @@ end
 ##########################################################################################################
 # command processing: data forms
 #.........................................................................................................
-command 'text_single' do
+command 'demo/text_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('Your Name')
@@ -118,7 +117,7 @@ command 'text_single' do
 end
 
 #.........................................................................................................
-command 'text_private' do
+command 'demo/text_private' do
   AgentXmpp.logger.info "ACTION: text_multi"
   on(:execute) do |form|
     form.add_title('Enter a Secret')
@@ -133,7 +132,7 @@ command 'text_private' do
 end
 
 #.........................................................................................................
-command 'jid_single' do
+command 'demo/jid_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('The JID')
@@ -148,7 +147,7 @@ command 'jid_single' do
 end
 
 #.........................................................................................................
-command 'text_multi' do
+command 'demo/text_multi' do
   AgentXmpp.logger.info "ACTION: text_multi"
   on(:execute) do |form|
     form.add_title('Tell a Story')
@@ -163,7 +162,7 @@ command 'text_multi' do
 end
 
 #.........................................................................................................
-command 'list_single' do
+command 'demo/list_single' do
   AgentXmpp.logger.info "ACTION: list_single"
   on(:execute) do |form|
     form.add_title('Fruits')
@@ -178,7 +177,7 @@ command 'list_single' do
 end
 
 #.........................................................................................................
-command 'boolean' do
+command 'demo/boolean', :defer => true do
   AgentXmpp.logger.info "ACTION: boolean"
   on(:execute) do |form|
     form.add_title('Hyper Drive Configuration')
@@ -194,7 +193,7 @@ command 'boolean' do
 end
 
 #.........................................................................................................
-command 'long_form' do
+command 'demo/long_form' do
   AgentXmpp.logger.info "ACTION: long_form"
   on(:execute) do |form|
     form.add_title('The Long Form')
@@ -229,7 +228,7 @@ command 'long_form' do
 end
 
 #.........................................................................................................
-command 'another_long_form' do
+command 'demo/another_long_form' do
   AgentXmpp.logger.info "ACTION: another_long_form"
   on(:execute) do |form|
     form.add_title('The Other Long Form')
@@ -257,7 +256,7 @@ command 'another_long_form' do
 end
 
 #.........................................................................................................
-command 'no_title' do
+command 'demo/no_title' do
   AgentXmpp.logger.info "ACTION: no_title"
   on(:execute) do |form|
     form.add_instructions('Choose On or Off')
@@ -269,7 +268,7 @@ command 'no_title' do
 end
 
 #.........................................................................................................
-command 'no_instructions' do
+command 'demo/no_instructions' do
   AgentXmpp.logger.info "ACTION: no_instructions"
   on(:execute) do |form|
     form.add_title('Yes or No')
@@ -281,7 +280,7 @@ command 'no_instructions' do
 end
 
 #.........................................................................................................
-command 'text_view_with_jids' do
+command 'demo/text_view_with_jids' do
   AgentXmpp.logger.info "ACTION: text_view_with_jids"
   on(:execute) do |form|
     form.add_title('Account Information')
@@ -309,3 +308,9 @@ end
 #   AgentXmpp.logger.info "EVENT: nowhere@noone.com/val"
 #   send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
 # end
+
+#.........................................................................................................
+event 'troy@plan-b.ath.cx', 'stupid' do
+  AgentXmpp.logger.info "EVENT: troy@plan-b.ath.cx/stupid"
+  send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
+end

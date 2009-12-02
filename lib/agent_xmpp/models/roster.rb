@@ -8,7 +8,7 @@ module AgentXmpp
     class << self
 
       #.........................................................................................................
-      def roster
+      def roster(renew=false)
         @roster ||= AgentXmpp.in_memory_db[:roster]
       end
 

@@ -88,11 +88,14 @@ module AgentXmpp
        unless route.nil?
          if apply_before_filters(:command, params[:node])
            define_meta_class_method(:request, &route[:blk])
+           define_meta_class_method(:request_handler) do
+             command_result(request)  
+           end
            define_meta_class_method(:request_callback) do |*result|
-             result = command_result(result.length.eql?(1)  ? result.first : result )  
+             result = result.length.eql?(1)  ? result.first : result  
              add_payload_to_container(result.nil? ? nil : result.to_x_data)
            end
-           handle_request
+           process_request(route)
          else
            AgentXmpp.logger.error "ACCESS ERROR: before_filter prevented '#{params[:from]}' access {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
            Xmpp::ErrorResponse.forbidden(params)
@@ -131,8 +134,8 @@ module AgentXmpp
       def invoke_event
         route = get_route(:event)
         unless route.nil?
-          define_meta_class_method(:request, &route[:blk])
-          handle_request
+          define_meta_class_method(:request_handler, &route[:blk])
+          process_request(route)
         else
           AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}'}."
         end
@@ -142,21 +145,25 @@ module AgentXmpp
      def invoke_chat
        route = chat_route
        unless route.nil?
-         define_meta_class_method(:request, &route[:blk])
+         define_meta_class_method(:request_handler, &route[:blk])
        else
-         define_meta_class_method(:request) do
+         define_meta_class_method(:request_handler) do
            "#{AgentXmpp::AGENT_XMPP_NAME} #{AgentXmpp::VERSION}, #{AgentXmpp::OS_VERSION}"
          end
        end
        define_meta_class_method(:request_callback) do |result|
          add_payload_to_container(result) if result.kind_of?(String)
        end
-       handle_request
+       process_request(route)
      end
 
     #.........................................................................................................
-    def handle_request
-      EventMachine.defer(method(:request).to_proc, respond_to?(:request_callback) ? method(:request_callback).to_proc : nil)
+    def process_request(route)
+      if route[:opts][:defer]
+        EventMachine.defer(method(:request_handler).to_proc, respond_to?(:request_callback) ? method(:request_callback).to_proc : nil)
+      else
+        respond_to?(:request_callback) ? request_callback(request_handler) : request_handler
+      end
     end
 
     #.........................................................................................................
