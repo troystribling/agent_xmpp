@@ -88,14 +88,14 @@ module AgentXmpp
     #.........................................................................................................
     def priority
       @priority ||= if config['priority']
-                    if config['priority'] < -127
-                      -127
-                    elsif config['priority'] > 128
-                      128
-                    else
-                      config['priority']
-                    end
-                  else; 1; end
+                      if config['priority'] < -127
+                        -127
+                      elsif config['priority'] > 128
+                        128
+                      else
+                        config['priority']
+                      end
+                    else; 1; end
     end
             
   #### self

@@ -15,19 +15,22 @@ module AgentXmpp
       #.........................................................................................................
       def load_config
         if AgentXmpp.config['roster'].kind_of?(Array)
-          AgentXmpp.config['roster'].each do |c|
-            groups = c['groups'].kind_of?(Array) ? c['groups'].join(",") : c['groups']
-            begin
-              contacts << {:jid => c['jid'], :groups => groups, :subscription => 'new', :ask => 'new'}
-            rescue 
-              contacts.filter(:jid => c['jid']).update(:groups => groups)
-            end
-          end
+          AgentXmpp.config['roster'].each {|c| update(c)}
         end
       end
 
       #.........................................................................................................
-      def update(roster_item)
+      def update(contact)
+        groups = contact['groups'].kind_of?(Array) ? contact['groups'].join(",") : contact['groups']
+        begin
+          contacts << {:jid => contact['jid'], :groups => groups, :subscription => 'new', :ask => 'new'}
+        rescue 
+          contacts.filter(:jid => contact['jid']).update(:groups => groups)
+        end
+      end
+
+      #.........................................................................................................
+      def update_with_roster_item(roster_item)
         from_jid, subscription, ask = roster_item.jid.to_s, roster_item.subscription.to_s, roster_item.ask.to_s
         contacts.filter(:jid => from_jid).update(:subscription => subscription, :ask => ask)
       end

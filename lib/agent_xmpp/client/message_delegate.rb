@@ -252,7 +252,7 @@ module AgentXmpp
           when :both    
             AgentXmpp.logger.info "CONTACT SUBSCRIPTION BIDIRECTIONAL: #{roster_item_jid.to_s}"   
           end
-          Contact.update(roster_item)
+          Contact.update_with_roster_item(roster_item)
           check_roster_item_group(pipe, roster_item)
         else
           AgentXmpp.logger.info "REMOVING ROSTER ITEM: #{roster_item_jid.to_s}"   
@@ -272,7 +272,7 @@ module AgentXmpp
       
       #.........................................................................................................
       def did_receive_all_roster_items(pipe)
-        AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS"   
+        AgentXmpp.logger.info "RECEIVED ALL ROSTER ITEMS" 
         Contact.find_all_by_subscription(:new).map do |r|
           AgentXmpp.logger.info "ADDING CONTACT: #{r[:jid]}" 
           [Xmpp::IqRoster.update(pipe, r[:jid], r[:groups].split(/,/)), Xmpp::Presence.subscribe(r[:jid])]  

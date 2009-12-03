@@ -23,6 +23,11 @@ module AgentXmpp
       class << self
         
         #.........................................................................................................
+        def bad_request(params, msg)
+          command_error(params, 'bad-request', msg)
+        end
+
+        #.........................................................................................................
         def unsupported_payload(params)
           command_error(params, 'bad-request', 'unsupported payload')
         end
