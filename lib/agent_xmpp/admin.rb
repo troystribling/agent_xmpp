@@ -4,7 +4,7 @@
 before :command => :all do
   if access = route[:opts][:access]
     groups = AgentXmpp::Contact.find_by_jid(params[:from])[:groups] 
-    [access].flatten.select{|a| groups.include?(a)}.length > 0
+    [access].flatten.any?{|a| groups.include?(a)}
   else; true; end
 end
 
@@ -37,7 +37,9 @@ command 'admin/add_contact', :access => 'admin' do
     contact = params[:data]
     if contact[:jid]
       AgentXmpp::Contact.update(contact)
-      pipe.send_resp([Xmpp::IqRoster.update(pipe, r[:jid], r[:groups].split(/,/)), Xmpp::Presence.subscribe(r[:jid])]) 
+      pipe.send_resp([Xmpp::IqRoster.update(pipe, r[:jid], r[:groups].split(/,/)), 
+                      Xmpp::Presence.subscribe(r[:jid])]) 
+      'completed'                
     else
       command_bad_request('jid not specified')
     end
@@ -56,6 +58,7 @@ command 'admin/delete_contact', :access => 'admin' do
     contact = params[:data]
     if contact[:jid]
       pipe.send_resp(Xmpp::IqRoster.remove(pipe, roster_item_jid))  
+      'completed'                
     else
       command_bad_request('jid not specified')
     end

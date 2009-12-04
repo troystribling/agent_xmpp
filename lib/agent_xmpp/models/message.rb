@@ -51,7 +51,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def count_by_content_type(content_type)
-        messages[:content_type => content_type].count
+        messages.filter(:content_type => content_type).count
       end
 
       #.........................................................................................................

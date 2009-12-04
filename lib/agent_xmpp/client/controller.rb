@@ -54,7 +54,7 @@ module AgentXmpp
       def command_nodes(jid)
         (routes[:command] ||= []).inject([]) do |n,r| 
           groups, access = Contact.find_by_jid(jid)[:groups], [r[:opts][:access] || []].flatten
-          (access.empty? or access.select{|a| groups.include?(a)}.length > 0) ? n << r[:node] : n
+          (access.empty? or access.any?{|a| groups.include?(a)}) ? n << r[:node] : n
         end
       end
 
@@ -88,12 +88,12 @@ module AgentXmpp
       unless route.nil?
         if apply_before_filters(:command, params[:node])
           define_meta_class_method(:request, &route[:blk])
-          define_meta_class_method(:request_handler) do
+          define_meta_class_method(:request_handler) do           
             command_result(request)  
           end
-          define_meta_class_method(:request_callback) do |*result|
-            result = result.length.eql?(1)  ? result.first : result  
-            add_payload_to_container(result.nil? ? nil : result.to_x_data)
+          define_meta_class_method(:request_callback) do |*payload|
+            payload = payload.length.eql?(1)  ? payload.first : payload  
+            add_payload_to_container((payload.nil? or payload.kind_of?(AgentXmpp::Error)) ? payload : payload.to_x_data)
           end
           process_request
         else
@@ -177,11 +177,12 @@ module AgentXmpp
     # add payloads
     #.........................................................................................................
     def result_jabber_x_data(payload)
+p payload      
       if params[:action].eql?(:cancel)
         Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], 
                                :status => 'canceled', :sessionid => params[:sessionid])
       elsif payload.kind_of?(AgentXmpp::Error)
-        Xmpp::ErrorResponse.bad_request(payload.to_s)        
+        Xmpp::ErrorResponse.bad_request(params, payload.to_s)
       else
         status = payload.type.eql?(:form) ? 'executing' : 'completed'
         Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 
