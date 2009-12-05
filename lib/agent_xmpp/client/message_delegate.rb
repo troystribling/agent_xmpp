@@ -143,8 +143,8 @@ module AgentXmpp
         add_send_command_method(pipe)
         add_send_chat_method(pipe)
         [Send(Xmpp::Presence.new(nil, nil, AgentXmpp.priority)), Xmpp::IqRoster.get(pipe),  
-         Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.domain), 
-         Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.bare)]
+              Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.domain), 
+              Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.bare)]
       end
 
       #.........................................................................................................

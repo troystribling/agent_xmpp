@@ -36,18 +36,19 @@ module AgentXmpp
   class Error
 
     #.........................................................................................................
-    attr_reader :message
+    attr_reader :error, :args
 
     #.........................................................................................................
-    def initialize(msg)
-      @message = msg
+    def initialize(error, *args)
+      @error = error.to_sym
+      @args = args
     end
 
     #.........................................................................................................
-    def to_s
-      message
+    def send
+      Xmpp::ErrorResponse.send(error, *args)
     end
-    
+
     #.........................................................................................................
     def method_missing(meth, *args, &blk)
       message.send(meth, *args, &blk)
@@ -55,6 +56,42 @@ module AgentXmpp
 
   #### Error
   end
+
+  #####-------------------------------------------------------------------------------------------------------
+  class Defer
+
+    #.........................................................................................................
+    attr_reader :methods
+
+    #.........................................................................................................
+    def initialize
+      @methods = {}
+    end
+    
+    #.........................................................................................................
+    def add_defered_method(method, &blk)
+      @methods[method.to_sym] = blk
+    end
+
+    #.........................................................................................................
+    def delegate(pipe, delegate)
+      methods.each do |m,b|
+        delegate.define_meta_class_method(m) do
+          pipe.send_resp(b.call)
+          pipe.remove_delegate(delegate)
+        end
+      end
+      pipe.add_delegate(delegate)
+    end
+
+    #.........................................................................................................
+    def method_missing(meth, *args, &blk)
+      method.send(meth, *args, &blk)
+    end
+
+  #### Error
+  end
+
 
 #### AgentXmpp
 end

@@ -17,8 +17,8 @@ command 'admin/contacts', :access => 'admin' do
 end
 
 #.........................................................................................................
-command 'admin/resources', :access => 'admin' do
-  AgentXmpp.logger.info "ACTION: admin/resources"
+command 'admin/on_line_users', :access => 'admin' do
+  AgentXmpp.logger.info "ACTION: admin/on_line_users"
   AgentXmpp::Roster.find_all_by_status(:available).map do |r| 
     jid = AgentXmpp::Xmpp::Jid.new(r[:jid]) 
     {:jid => jid.bare, :resource => jid.resource}
@@ -35,13 +35,16 @@ command 'admin/add_contact', :access => 'admin' do
   end
   on(:submit) do
     contact = params[:data]
-    if contact[:jid]
+    if contact["jid"]
       AgentXmpp::Contact.update(contact)
-      pipe.send_resp([Xmpp::IqRoster.update(pipe, r[:jid], r[:groups].split(/,/)), 
-                      Xmpp::Presence.subscribe(r[:jid])]) 
-      'completed'                
+      pipe.send_resp([AgentXmpp::Xmpp::IqRoster.update(pipe, contact["jid"], contact["groups"].split(/,/)), 
+                      AgentXmpp::Xmpp::Presence.subscribe(contact["jid"])]) 
+      defer() do
+      end 
+      defer() do
+      end               
     else
-      command_bad_request('jid not specified')
+      error(:bad_request, 'jid not specified')
     end
   end
 end
@@ -56,11 +59,14 @@ command 'admin/delete_contact', :access => 'admin' do
   end
   on(:submit) do
     contact = params[:data]
-    if contact[:jid]
-      pipe.send_resp(Xmpp::IqRoster.remove(pipe, roster_item_jid))  
-      'completed'                
+    if contact["jid"]
+      pipe.send_resp(AgentXmpp::Xmpp::IqRoster.remove(pipe, contact["jid"]))  
+      defer() do
+      end 
+      defer() do
+      end               
     else
-      command_bad_request('jid not specified')
+      error(:bad_request, 'jid not specified')
     end
   end
 end

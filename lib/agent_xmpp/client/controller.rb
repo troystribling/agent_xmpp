@@ -91,9 +91,16 @@ module AgentXmpp
           define_meta_class_method(:request_handler) do           
             command_result(request)  
           end
-          define_meta_class_method(:request_callback) do |*payload|
-            payload = payload.length.eql?(1)  ? payload.first : payload  
-            add_payload_to_container((payload.nil? or payload.kind_of?(AgentXmpp::Error)) ? payload : payload.to_x_data)
+          define_meta_class_method(:request_callback) do |*resp|
+            resp = resp.length.eql?(1)  ? resp.first : resp  
+            payload = case resp
+                        when nil then resp
+                        when AgentXmpp::Error then resp
+                        when AgentXmpp::Defer then resp
+                      else
+                        resp.to_x_data   
+                      end
+            add_payload_to_container(payload)
           end
           process_request
         else
@@ -139,8 +146,22 @@ module AgentXmpp
     end
 
     #.......................................................................................................
-    def command_bad_request(msg)
-      AgentXmpp::Error.new(msg)
+    def error(err, *args)
+      AgentXmpp::Error.new(err, *args)
+    end
+
+    #.......................................................................................................
+    def defered_methods
+      @defered_methods ||= AgentXmpp::Defer.new
+    end
+    #.......................................................................................................
+    def defer(method, &blk)
+      defered_methods.add_defered_method(method, &blk)
+    end
+
+    #.........................................................................................................
+    def send_command(args, &blk)
+      AgentXmpp.send_command(args, &blk)
     end
 
     #.........................................................................................................
@@ -177,12 +198,13 @@ module AgentXmpp
     # add payloads
     #.........................................................................................................
     def result_jabber_x_data(payload)
-p payload      
       if params[:action].eql?(:cancel)
         Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], 
                                :status => 'canceled', :sessionid => params[:sessionid])
       elsif payload.kind_of?(AgentXmpp::Error)
-        Xmpp::ErrorResponse.bad_request(params, payload.to_s)
+        payload.send
+      elsif payload.kind_of?(AgentXmpp::Defer) 
+        defered_methods.delegate(pipe, self)       
       else
         status = payload.type.eql?(:form) ? 'executing' : 'completed'
         Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 

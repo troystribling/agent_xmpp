@@ -55,10 +55,8 @@ module AgentXmpp
       end 
       
       #.........................................................................................................
-      def destroy_by_contact_id(jid)
-        if contact = Contact.find_by_jid(jid)
-          roster.filter(:contact_id => contact[:contact_id]).delete
-        end
+      def destroy_by_contact_id(contact_id)
+        roster.filter(:contact_id => contact_id).delete
       end 
 
       #.........................................................................................................
