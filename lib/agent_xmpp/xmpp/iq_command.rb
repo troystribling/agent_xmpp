@@ -18,14 +18,20 @@ module AgentXmpp
       class << self
         
         #.........................................................................................................
-        def result(args)
-          iq = Iq.new(:result, args[:to])
+        def send_command(args, &blk)
+          iq = Xmpp::Iq.new(args[:iq_type] || :set, args[:to])
           iq.id = args[:id] unless args[:id].nil?
           iq.command = new(args[:node])
-          iq.command.status = args[:status].nil? ? 'completed' : args[:status]
+          iq.command.action = args[:action] unless args[:action].nil? 
+          iq.command.status = args[:status] unless args[:status].nil? 
           iq.command.sessionid = args[:sessionid] unless args[:sessionid].nil?
           iq.command << args[:payload] unless args[:payload].nil?
-          Send(iq)      
+          if blk
+            Send(iq) do |r|  
+              AgentXmpp.logger.info "RECEIVED RESPONSE: #{r.type} from #{r.from}"
+              blk.call(r.type, (r.type.eql?(:result) and r.command and r.command.x) ? r.command.x.to_native : nil)
+            end
+          else; Send(iq); end               
         end
         
       #### self

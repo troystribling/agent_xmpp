@@ -18,12 +18,12 @@ class Test::Unit::TestCase
     bind_resource(client)
   
     #### session starts and roster is requested
-    delegate.did_start_session_method.should_not be_called
+    delegate.on_start_session_method.should_not be_called
     AgentXmpp::Xmpp::IdGenerator.set_gen_id([1,2])
     client.receiving(SessionMessages.recv_iq_result_session(client)).should \
       respond_with(SessionMessages.send_presence_init(client), RosterMessages.send_iq_get_query_roster(client), \
                    ServiceDiscoveryMessages.send_iq_get_query_discoinfo(client, client.jid.domain)) 
-    delegate.did_start_session_method.should be_called
+    delegate.on_start_session_method.should be_called
     AgentXmpp::Xmpp::IdGenerator.set_gen_id
   end
   
@@ -35,11 +35,11 @@ class Test::Unit::TestCase
     delegate = client.new_delegate
   
     #### receive roster request and verify that roster items are activated
-    delegate.did_receive_all_roster_items_method.should_not be_called     
+    delegate.on_all_roster_items_method.should_not be_called     
     AgentXmpp::Roster.find_all{|r| r[:status].should be(:inactive)}  
     client.receiving(RosterMessages.recv_iq_result_query_roster(client, AgentXmpp.config['roster'])).should not_respond
     AgentXmpp::Roster.find_all{|r| r[:status].should be(:both)}  
-    delegate.did_receive_all_roster_items_method.should be_called     
+    delegate.on_all_roster_items_method.should be_called     
   end
   
 end

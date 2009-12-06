@@ -37,14 +37,11 @@ command 'admin/add_contact', :access => 'admin' do
     contact = params[:data]
     if contact["jid"]
       AgentXmpp::Contact.update(contact)
-      pipe.send_resp([AgentXmpp::Xmpp::IqRoster.update(pipe, contact["jid"], contact["groups"].split(/,/)), 
-                      AgentXmpp::Xmpp::Presence.subscribe(contact["jid"])]) 
-      defer() do
-      end 
-      defer() do
-      end               
+      send_msg(AgentXmpp::Xmpp::IqRoster.update(pipe, contact["jid"], contact["groups"].split(/,/))) 
+      send_msg(AgentXmpp::Xmpp::Presence.subscribe(contact["jid"]))
+      command_completed
     else
-      error(:bad_request, 'jid not specified')
+      error(:bad_request, params, 'jid not specified')
     end
   end
 end
@@ -60,13 +57,10 @@ command 'admin/delete_contact', :access => 'admin' do
   on(:submit) do
     contact = params[:data]
     if contact["jid"]
-      pipe.send_resp(AgentXmpp::Xmpp::IqRoster.remove(pipe, contact["jid"]))  
-      defer() do
-      end 
-      defer() do
-      end               
+      send_msg(AgentXmpp::Xmpp::IqRoster.remove(pipe, contact["jid"]))  
+      command_completed
     else
-      error(:bad_request, 'jid not specified')
+      error(:bad_request, params, 'jid not specified')
     end
   end
 end

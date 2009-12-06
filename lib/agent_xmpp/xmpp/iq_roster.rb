@@ -18,7 +18,7 @@ module AgentXmpp
         def get(pipe)
           Send(new_rosterget) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_roster_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_roster_result, pipe, r)
             elsif r.type.eql?(:error)
               raise AgentXmppError, "roster request failed"
             end
@@ -33,9 +33,9 @@ module AgentXmpp
           request.query.add(item)
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_update_roster_item_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_update_roster_item_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_update_roster_item_error, pipe, roster_item_jid)
+              pipe.broadcast_to_delegates(:on_update_roster_item_error, pipe, roster_item_jid)
             end
           end
         end
@@ -46,9 +46,9 @@ module AgentXmpp
           request.query.add(Xmpp::RosterItem.new(roster_item_jid, nil, :remove))
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_remove_roster_item_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_remove_roster_item_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_remove_roster_item_error, pipe, roster_item_jid)
+              pipe.broadcast_to_delegates(:on_remove_roster_item_error, pipe, roster_item_jid)
             end
           end
         end

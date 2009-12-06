@@ -13,11 +13,11 @@ class TestRosterManagement < Test::Unit::TestCase
   #.........................................................................................................
   def test_receive_roster_item(client)
     delegate = client.new_delegate
-    delegate.did_receive_roster_item_method.should_not be_called
-    delegate.did_receive_all_roster_items_method.should_not be_called
+    delegate.on_roster_item_method.should_not be_called
+    delegate.on_all_roster_items_method.should_not be_called
     yield client
-    delegate.did_receive_roster_item_method.should be_called
-    delegate.did_receive_all_roster_items_method.should be_called     
+    delegate.on_roster_item_method.should be_called
+    delegate.on_all_roster_items_method.should be_called     
   end
   
   ####------------------------------------------------------------------------------------------------------
@@ -50,10 +50,10 @@ class TestRosterManagement < Test::Unit::TestCase
   
     ### receive roster add ackgnowledgement and send subscription request
     delegate = client.new_delegate
-    delegate.did_acknowledge_add_roster_item_method.should_not be_called
+    delegate.on_acknowledge_add_roster_item_method.should_not be_called
     client.receiving(RosterMessages.recv_iq_result_query_roster_ack(client)).should \
       respond_with(PresenceMessages.send_presence_subscribe(client, @troy.bare.to_s))
-    delegate.did_acknowledge_add_roster_item_method.should be_called
+    delegate.on_acknowledge_add_roster_item_method.should be_called
   
     #### receive roster update with subscribe=none for newly added contact
     test_receive_roster_item(client) do |client|
@@ -76,10 +76,10 @@ class TestRosterManagement < Test::Unit::TestCase
     
     #### receive subscribe request from contact and accept
     delegate = client.new_delegate
-    delegate.did_receive_presence_subscribe_method.should_not be_called
+    delegate.on_presence_subscribe_method.should_not be_called
     client.receiving(PresenceMessages.recv_presence_subscribe(client, @troy.bare.to_s)).should \
       respond_with(PresenceMessages.send_presence_subscribed(client, @troy.bare.to_s))
-    delegate.did_receive_presence_subscribe_method.should be_called
+    delegate.on_presence_subscribe_method.should be_called
     
     #### receive roster update with subscription=both indicating that the contact's presence updates will be received and contact 
     #### will treceive presence updates and activate contact roster item
@@ -109,17 +109,17 @@ class TestRosterManagement < Test::Unit::TestCase
   
     #### receive roster remove ackgnowledgement
     delegate = client.new_delegate
-    delegate.did_acknowledge_remove_roster_item_method.should_not be_called
+    delegate.on_acknowledge_remove_roster_item_method.should_not be_called
     client.receiving(RosterMessages.recv_iq_result_query_roster_ack(client)).should not_respond
-    delegate.did_acknowledge_remove_roster_item_method.should be_called
+    delegate.on_acknowledge_remove_roster_item_method.should be_called
   
     #### recieve roster item remove
-    delegate.did_remove_roster_item_method.should_not be_called
-    delegate.did_receive_all_roster_items_method.should_not be_called
+    delegate.on_remove_roster_item_method.should_not be_called
+    delegate.on_all_roster_items_method.should_not be_called
     client.receiving(RosterMessages.recv_iq_set_query_roster_remove(client, @troy.bare.to_s)).should not_respond
     AgentXmpp::Contact.has_jid?(@troy).should be(false) 
-    delegate.did_remove_roster_item_method.should be_called
-    delegate.did_receive_all_roster_items_method.should be_called
+    delegate.on_remove_roster_item_method.should be_called
+    delegate.on_all_roster_items_method.should be_called
   
   end
     
@@ -140,9 +140,9 @@ class TestRosterManagement < Test::Unit::TestCase
   
     #### receive roster remove ackgnowledgement
     delegate = client.new_delegate
-    delegate.did_acknowledge_remove_roster_item_method.should_not be_called
+    delegate.on_acknowledge_remove_roster_item_method.should_not be_called
     client.receiving(RosterMessages.recv_iq_result_query_roster_ack(client)).should not_respond
-    delegate.did_acknowledge_remove_roster_item_method.should be_called
+    delegate.on_acknowledge_remove_roster_item_method.should be_called
   
   end
     
@@ -177,10 +177,10 @@ class TestRosterManagement < Test::Unit::TestCase
   
     #### receive roster remove ackgnowledgement
     delegate = client.new_delegate
-    delegate.did_receive_remove_roster_item_error_method.should_not be_called
+    delegate.on_remove_roster_item_error_method.should_not be_called
     client.receiving(RosterMessages.recv_error_query_roster_remove(client)).should not_respond
     AgentXmpp::Contact.has_jid?(@troy).should be(false) 
-    delegate.did_receive_remove_roster_item_error_method.should be_called
+    delegate.on_remove_roster_item_error_method.should be_called
     
   end
   
@@ -204,9 +204,9 @@ class TestRosterManagement < Test::Unit::TestCase
   
     ### receive roster add ackgnowledgement and send subscription request
     delegate = client.new_delegate
-    delegate.did_receive_add_roster_item_error_method.should_not be_called
+    delegate.on_add_roster_item_error_method.should_not be_called
     client.receiving(RosterMessages.recv_error_query_roster_remove(client)).should not_respond
-    delegate.did_receive_add_roster_item_error_method.should be_called
+    delegate.on_add_roster_item_error_method.should be_called
     AgentXmpp::Contact.has_jid?(@troy).should be(false) 
     
   end

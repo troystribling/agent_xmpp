@@ -22,9 +22,9 @@ module AgentXmpp
           iq.query.node = node if node
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoItems)
-              pipe.broadcast_to_delegates(:did_receive_discoitems_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_discoitems_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_discoitems_error, pipe, r)
+              pipe.broadcast_to_delegates(:on_discoitems_error, pipe, r)
             end
           end
         end
@@ -81,9 +81,9 @@ module AgentXmpp
           iq.query.node = node if node
           Send(iq) do |r|
             if (r.type == :result) && r.query.kind_of?(Xmpp::IqDiscoInfo)
-              pipe.broadcast_to_delegates(:did_receive_discoinfo_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_discoinfo_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_discoinfo_error, pipe, r)
+              pipe.broadcast_to_delegates(:on_discoinfo_error, pipe, r)
             end
           end
         end

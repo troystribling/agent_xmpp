@@ -14,10 +14,10 @@ class TestErrors < Test::Unit::TestCase
   
   #.........................................................................................................
   should "respond with feature-not-implemented when unsupported messages are received" do
-    @delegate.did_receive_unsupported_message_method.should_not be_called
+    @delegate.on_unsupported_message_method.should_not be_called
     @client.receiving(ErrorMessages.recv_iq_error(@client, @test.to_s)).should \
       respond_with(ErrorMessages.send_iq_error(@client, @test.to_s))
-    @delegate.did_receive_unsupported_message_method.should be_called
+    @delegate.on_unsupported_message_method.should be_called
   end
   
 end

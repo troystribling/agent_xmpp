@@ -85,14 +85,14 @@ module AgentXmpp
     #.........................................................................................................
     def connection_completed
       Boot.call_if_implemented(:call_after_connected, self)     
-      broadcast_to_delegates(:did_connect, self)
+      broadcast_to_delegates(:on_connect, self)
       init_connection.collect{|m| send(m)}
     end
 
     #.........................................................................................................
     def unbind
       @connection_status = :off_line
-      broadcast_to_delegates(:did_disconnect, self)
+      broadcast_to_delegates(:on_disconnect, self)
     end
     
   private
@@ -103,22 +103,22 @@ module AgentXmpp
       when 'features'
         set_stream_features_and_mechanisms(stanza)
         if connection_status.eql?(:offline)
-          broadcast_to_delegates(:did_receive_preauthenticate_features, self)
+          broadcast_to_delegates(:on_preauthenticate_features, self)
         elsif connection_status.eql?(:authenticated)
-          broadcast_to_delegates(:did_receive_postauthenticate_features, self)
+          broadcast_to_delegates(:on_postauthenticate_features, self)
         end
       when 'stream'
       when 'success'
         if connection_status.eql?(:offline)
           @connection.reset_parser
           @connection_status = :authenticated
-          broadcast_to_delegates(:did_authenticate, self)
+          broadcast_to_delegates(:on_authenticate, self)
           init_connection(false)
         end
       when 'failure'
         if connection_status.eql?(:offline)
           @connection.reset_parser
-          broadcast_to_delegates(:did_not_authenticate, self)
+          broadcast_to_delegates(:on_did_not_authenticate, self)
         end
       else
         demux_stanza(stanza)
@@ -129,27 +129,27 @@ module AgentXmpp
     def demux_stanza(stanza)
       unless Message.find_by_item_id(stanza.id)
         Message.update(stanza)
-        meth = 'did_receive_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
-                                  iqclass = if stanza.query
-                                              stanza.query.class
-                                            elsif stanza.command
-                                              stanza.command.class
-                                            else
-                                              nil
-                                            end
-                                  if iqclass
-                                    /.*::Iq(.*)/.match(iqclass.to_s).to_a.last 
-                                  else
-                                    'fail'
-                                  end
-                                else
-                                  /.*::(.*)/.match(stanza.class.to_s).to_a.last
-                                end.downcase
+        meth = 'on_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
+                         iqclass = if stanza.query
+                                     stanza.query.class
+                                   elsif stanza.command
+                                     stanza.command.class
+                                   else
+                                     nil
+                                   end
+                           if iqclass
+                                /.*::Iq(.*)/.match(iqclass.to_s).to_a.last 
+                           else
+                                'fail'
+                           end
+                       else
+                         /.*::(.*)/.match(stanza.class.to_s).to_a.last
+                       end.downcase
         meth += '_' + stanza.type.to_s if stanza.type
         if delegates_respond_to?(meth.to_sym) 
           broadcast_to_delegates(meth.to_sym, self, stanza)
         else
-          broadcast_to_delegates(:did_receive_unsupported_message, self, stanza)
+          broadcast_to_delegates(:on_unsupported_message, self, stanza)
         end
       end
     end

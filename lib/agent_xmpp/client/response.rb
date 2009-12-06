@@ -45,7 +45,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def send
+    def responce
       Xmpp::ErrorResponse.send(error, *args)
     end
 
@@ -65,23 +65,24 @@ module AgentXmpp
 
     #.........................................................................................................
     def initialize
-      @methods = {}
+      @methods = []
     end
     
     #.........................................................................................................
-    def add_defered_method(method, &blk)
-      @methods[method.to_sym] = blk
+    def add_defered_methods(methods)
+      @methods << [methods].flatten
     end
 
     #.........................................................................................................
     def delegate(pipe, delegate)
-      methods.each do |m,b|
-        delegate.define_meta_class_method(m) do
-          pipe.send_resp(b.call)
-          pipe.remove_delegate(delegate)
+      methods.each do |m|
+        delegate.define_meta_class_method(m[:method]) do
+          @count ||= methods.length
+          pipe.send_resp(m[:blk].call)
+          @scount -= 1; pipe.remove_delegate(delegate) if count.eql?(0)
         end
+        pipe.add_delegate(delegate)
       end
-      pipe.add_delegate(delegate)
     end
 
     #.........................................................................................................

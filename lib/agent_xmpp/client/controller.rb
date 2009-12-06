@@ -89,7 +89,7 @@ module AgentXmpp
         if apply_before_filters(:command, params[:node])
           define_meta_class_method(:request, &route[:blk])
           define_meta_class_method(:request_handler) do           
-            command_result(request)  
+            run_command(request)  
           end
           define_meta_class_method(:request_callback) do |*resp|
             resp = resp.length.eql?(1)  ? resp.first : resp  
@@ -97,6 +97,7 @@ module AgentXmpp
                         when nil then resp
                         when AgentXmpp::Error then resp
                         when AgentXmpp::Defer then resp
+                        when AgentXmpp::Response then resp
                       else
                         resp.to_x_data   
                       end
@@ -122,7 +123,10 @@ module AgentXmpp
     def invoke_event
       @route = get_route(:event)
       unless route.nil?
-        define_meta_class_method(:request_handler, &route[:blk])
+        define_meta_class_method(:request, &route[:blk])
+        define_meta_class_method(:request_handler) do
+          request; defered_methods.delegate(pipe, self); flush_messages
+        end
         process_request
       else
         AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}'}."
@@ -154,34 +158,67 @@ module AgentXmpp
     def defered_methods
       @defered_methods ||= AgentXmpp::Defer.new
     end
+
     #.......................................................................................................
-    def defer(method, &blk)
-      defered_methods.add_defered_method(method, &blk)
+    def messages
+      @messages ||= []
+    end
+
+    #.......................................................................................................
+    def flush_messages
+      pipe.send_resp(messages); messages.clear
+    end
+
+    #.......................................................................................................
+    def send_msg(msg)
+      messages << msg
+    end
+
+    #.......................................................................................................
+    def defer(methods)
+      defered_methods.add_defered_method(methods); defered_methods
     end
 
     #.........................................................................................................
-    def send_command(args, &blk)
-      AgentXmpp.send_command(args, &blk)
+    def command_completed
+      Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :iq_type=>:result, :status=>:completed, 
+                                   :id => params[:id], :sessionid => params[:sessionid])
     end
 
+    #.........................................................................................................
+    def command_canceled
+      Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>:canceled, :id => params[:id], 
+                                   :sessionid => params[:sessionid], :iq_type=>:result)
+    end
+
+    #.........................................................................................................
+    def command_result(payload)
+      Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>payload.type.eql?(:form) ? :executing : :completed, 
+                                   :id => params[:id], :sessionid => params[:sessionid], :payload => payload, :iq_type=>:result)
+    end
+
+    #.........................................................................................................
+    def command_request(args, &blk)
+      raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
+      Xmpp::IqCommand.send_command(:to=>args[:to], :node=>args[:node], :iq_type=>:set, :action=>:execute, :payload=>args[:payload], &blk)
+    end
+          
     #.........................................................................................................
     # private
     #.........................................................................................................
-    def command_result(result)
-      result_method = ("on_"+(params[:x_data_type] || params[:action]).to_s).to_sym
-      if respond_to?(result_method)
+    def run_command(request)
+      request_method = ("on_"+(params[:x_data_type] || params[:action]).to_s).to_sym
+      if respond_to?(request_method)
         if params[:action].eql?(:execute) and params[:x_data_type].nil?
             form = Xmpp::XData.new('form')
             on_execute(form); form
         elsif params[:action].eql?(:cancel)
-            on_cancel; nil
+            on_cancel
         else
-          send(result_method)
+          send(request_method)
         end
-      elsif params[:action].eql?(:cancel)
-        nil
       else
-        result
+        request
       end
     end
 
@@ -198,17 +235,18 @@ module AgentXmpp
     # add payloads
     #.........................................................................................................
     def result_jabber_x_data(payload)
+      defered_methods.delegate(pipe, self)  
+      flush_messages
       if params[:action].eql?(:cancel)
-        Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], 
-                               :status => 'canceled', :sessionid => params[:sessionid])
+        command_canceled
       elsif payload.kind_of?(AgentXmpp::Error)
-        payload.send
+        payload.responce
       elsif payload.kind_of?(AgentXmpp::Defer) 
-        defered_methods.delegate(pipe, self)       
+        nil
+      elsif payload.kind_of?(AgentXmpp::Response)
+        payload
       else
-        status = payload.type.eql?(:form) ? 'executing' : 'completed'
-        Xmpp::IqCommand.result(:to => params[:from], :id => params[:id], :node => params[:node], :payload => payload, 
-                               :status => status, :sessionid => params[:sessionid])
+        command_result(payload)
       end
     end
 
@@ -221,7 +259,9 @@ module AgentXmpp
     def add_payload_to_container(payload)
       meth = "result_#{params[:xmlns].gsub(/:/, "_")}".to_sym
       if respond_to?(meth, true) 
-        pipe.send_resp(send(meth, payload))
+        if res = send(meth, payload)
+          pipe.send_resp(res)
+        end
       else
         AgentXmpp.logger.error "PAYLOAD ERROR: unsupported payload {:xmlns => '#{params[:xmlns]}', :node => '#{params[:node]}', :action => '#{params[:action]}'}."
         Xmpp::ErrorResponse.unsupported_payload(params)

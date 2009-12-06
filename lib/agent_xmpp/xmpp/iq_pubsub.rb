@@ -33,9 +33,9 @@ module AgentXmpp
           iq.pubsub << configure 
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_create_node_result, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_create_node_result, pipe, r, node)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_create_node_error, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_create_node_error, pipe, r, node)
             end
           end     
         end
@@ -46,9 +46,9 @@ module AgentXmpp
           iq.pubsub = IqPubSub.new << REXML::Element.new('subscriptions')
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_subscriptions_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_pubsub_subscriptions_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_subscriptions_error, pipe, r)
+              pipe.broadcast_to_delegates(:on_pubsub_subscriptions_error, pipe, r)
             end
           end     
         end
@@ -62,9 +62,9 @@ module AgentXmpp
           iq.pubsub = IqPubSub.new << subscribe
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_subscribe_result, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_subscribe_result, pipe, r, node)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_subscribe_error, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_subscribe_error, pipe, r, node)
             end
           end     
         end
@@ -78,9 +78,9 @@ module AgentXmpp
           iq.pubsub = IqPubSub.new << unsubscribe
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_unsubscribe_result, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_unsubscribe_result, pipe, r, node)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_unsubscribe_error, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_unsubscribe_error, pipe, r, node)
             end
           end     
         end
@@ -91,9 +91,9 @@ module AgentXmpp
           iq.pubsub = IqPubSub.new << REXML::Element.new('affiliations')
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_affiliations_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_pubsub_affiliations_result, pipe, r)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_affiliations_error, pipe, r)
+              pipe.broadcast_to_delegates(:on_pubsub_affiliations_error, pipe, r)
             end
           end     
         end
@@ -126,9 +126,9 @@ module AgentXmpp
           iq.pubsub = IqPubSubOwner.new << delete
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_delete_node_result, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_delete_node_result, pipe, r, node)
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_pubsub_delete_node_error, pipe, r, node)
+              pipe.broadcast_to_delegates(:on_pubsub_delete_node_error, pipe, r, node)
             end
           end     
         end
@@ -157,9 +157,9 @@ module AgentXmpp
           iq.pubsub = IqPubSub.new << pub
           Send(iq) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:did_receive_publish_result, pipe, r, args[:node])
+              pipe.broadcast_to_delegates(:on_publish_result, pipe, r, args[:node])
             elsif r.type.eql?(:error)
-              pipe.broadcast_to_delegates(:did_receive_publish_error, pipe, r, args[:node])
+              pipe.broadcast_to_delegates(:on_publish_error, pipe, r, args[:node])
             end
           end     
         end

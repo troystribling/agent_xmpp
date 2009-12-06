@@ -268,135 +268,135 @@ callbacks a delegate object must be provided that implements the callbacks of in
 
 === Connection
 
-    did_connect(connection)
+    on_connect(connection)
 
-    did_disconnect(connection)
+    on_disconnect(connection)
 
-    did_not_connect(connection)
+    on_did_not_connect(connection)
 
 === Authentication
 
-    did_bind(connection)
+    on_bind(connection)
 
-    did_receive_preauthenticate_features(connection)
+    on_preauthenticate_features(connection)
 
-    did_authenticate(connection)
+    on_authenticate(connection)
 
-    did_not_authenticate(connection)
+    on_did_not_authenticate(connection)
 
-    did_receive_postauthenticate_features(connection)
+    on_postauthenticate_features(connection)
 
-    did_start_session(connection)
+    on_start_session(connection)
 
 === Presence
 
-    did_receive_presence(connection, presence)
+    on_presence(connection, presence)
 
-    did_receive_presence_subscribe(connection, presence)
+    on_presence_subscribe(connection, presence)
 
-    did_receive_presence_subscribed(connection, presence)
+    on_presence_subscribed(connection, presence)
 
-    did_receive_presence_unavailable(connection, presence)
+    on_presence_unavailable(connection, presence)
 
-    did_receive_presence_unsubscribed(connection, presence)
+    on_presence_unsubscribed(connection, presence)
     
-    did_receive_presence_error(pipe, presence)
+    on_presence_error(pipe, presence)
 
 === Roster
 
-    did_receive_roster_result(connection, stanza)
+    on_roster_result(connection, stanza)
 
-    did_receive_roster_set(connection, stanza)
+    on_roster_set(connection, stanza)
 
-    did_receive_roster_item(connection, roster_item)
+    on_roster_item(connection, roster_item)
 
-    did_remove_roster_item(connection, roster_item)
+    on_remove_roster_item(connection, roster_item)
 
-    did_receive_all_roster_items(connection)
+    on_all_roster_items(connection)
 
-    did_receive_update_roster_item_result(connection, response)
+    on_update_roster_item_result(connection, response)
 
-    did_receive_update_roster_item_error(connection, response)
+    on_update_roster_item_error(connection, response)
 
-    did_receive_remove_roster_item(connection, response)
+    on_remove_roster_item(connection, response)
 
-    did_receive_remove_roster_item_error(connection, response)
+    on_remove_roster_item_error(connection, response)
 
 === Service Discovery
 
-    did_receive_version_result(connection, version)
+    on_version_result(connection, version)
 
-    did_receive_version_get(connection, request)
+    on_version_get(connection, request)
 
-    did_receive_version_error(connection, error)
+    on_version_error(connection, error)
     
-    did_receive_discoinfo_get(connection, request) 
+    on_discoinfo_get(connection, request) 
 
-    did_receive_discoinfo_result(connection, discoinfo)
+    on_discoinfo_result(connection, discoinfo)
     
-    did_receive_discoinfo_error(connection, error)
+    on_discoinfo_error(connection, error)
     
-    did_receive_discoitems_result(connection, discoitems)
+    on_discoitems_result(connection, discoitems)
     
-    did_receive_discoitems_get(connection, request)
+    on_discoitems_get(connection, request)
 
-    did_receive_discoitems_error(connection, result)
+    on_discoitems_error(connection, result)
             
 === Applications
 
-    did_receive_command_set(connection, stanza)
+    on_command_set(connection, stanza)
 
-    did_receive_message_chat(connection, stanza)
+    on_message_chat(connection, stanza)
 
-    did_receive_message_normal(connection, stanza)
+    on_message_normal(connection, stanza)
 
-    did_receive_pubsub_event(connection, event, to, from)
+    on_pubsub_event(connection, event, to, from)
 
 === PubSub
 
-    did_receive_publish_result(connection, result, node)
+    on_publish_result(connection, result, node)
 
-    did_receive_publish_error(connection, result, node)
+    on_publish_error(connection, result, node)
 
-    did_discover_pubsub_service(connection, jid, ident)
+    on_discovery_of_pubsub_service(connection, jid, ident)
     
-    did_discover_pubsub_collection(connection, jid, node)
+    on_discovery_of_pubsub_collection(connection, jid, node)
       
-    did_discover_pubsub_leaf(connection, jid, node)
+    on_discovery_of_pubsub_leaf(connection, jid, node)
 
-    did_discover_user_pubsub_root(pipe, pubsub, node)
+    on_discovery_of_user_pubsub_root(pipe, pubsub, node)
 
-    did_receive_pubsub_subscriptions_result(connection, result)
+    on_pubsub_subscriptions_result(connection, result)
     
-    did_receive_pubsub_subscriptions_error(connection, result)
+    on_pubsub_subscriptions_error(connection, result)
 
-    did_receive_pubsub_affiliations_result(connection, result)
+    on_pubsub_affiliations_result(connection, result)
     
-    did_receive_pubsub_affiliations_error(connection, result)
+    on_pubsub_affiliations_error(connection, result)
 
-    did_discover_user_pubsub_root(connection, result)
+    on_discovery_of_user_pubsub_root(connection, result)
     
-    did_receive_create_node_result(connection, node, result)    
+    on_create_node_result(connection, node, result)    
 
-    did_receive_create_node_error(connection, node, result)    
+    on_create_node_error(connection, node, result)    
 
-    did_receive_delete_node_result(connection, node, result)    
+    on_delete_node_result(connection, node, result)    
 
-    did_receive_delete_node_error(connection, node, result)    
+    on_delete_node_error(connection, node, result)    
 
-    did_receive_pubsub_subscribe_result(connection, result, node) 
+    on_pubsub_subscribe_result(connection, result, node) 
 
-    did_receive_pubsub_subscribe_error(connection, result, node) 
+    on_pubsub_subscribe_error(connection, result, node) 
 
-    did_receive_pubsub_subscribe_error_item_not_found(connection, result, node) 
+    on_pubsub_subscribe_error_item_not_found(connection, result, node) 
 
-    did_receive_pubsub_unsubscribe_result(connection, result, node) 
+    on_pubsub_unsubscribe_result(connection, result, node) 
 
-    did_receive_pubsub_unsubscribe_error(connection, result, node) 
+    on_pubsub_unsubscribe_error(connection, result, node) 
     
 === ERRORS
 
-    did_receive_unsupported_message(connection, stanza)
+    on_unsupported_message(connection, stanza)
 
 == Copyright
 
