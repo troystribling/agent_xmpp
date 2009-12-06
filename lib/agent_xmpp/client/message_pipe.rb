@@ -95,8 +95,8 @@ module AgentXmpp
       broadcast_to_delegates(:on_disconnect, self)
     end
     
-  private
-
+    #.........................................................................................................
+    # private
     #.........................................................................................................
     def process_stanza(stanza)
       case stanza.name
@@ -172,6 +172,9 @@ module AgentXmpp
       msg.push(Send("<?xml version='1.0' ?>")) if starting
       msg.push(Send("<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' version='1.0' to='#{AgentXmpp.jid.domain}'>"))
     end
+     
+    #.........................................................................................................
+     private :process_stanza, :demux_stanza, :set_stream_features_and_mechanisms, :init_connection
          
   #### MessagePipe
   end

@@ -140,7 +140,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_start_session(pipe)
         AgentXmpp.logger.info "SESSION STARTED"
-        add_send_command_method(pipe)
+        add_send_command_request_method(pipe)
         add_send_chat_method(pipe)
         [Send(Xmpp::Presence.new(nil, nil, AgentXmpp.priority)), Xmpp::IqRoster.get(pipe),  
               Xmpp::IqDiscoInfo.get(pipe, AgentXmpp.jid.domain), 
@@ -280,8 +280,8 @@ module AgentXmpp
       end
       
       #.........................................................................................................
-      def on_update_roster_item_result(pipe, result)
-        AgentXmpp.logger.info "UPDATE ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"                  
+      def on_update_roster_item_result(pipe, roster_item_jid)
+        AgentXmpp.logger.info "UPDATE ROSTER ITEM ACKNOWLEDEGED FROM: #{roster_item_jid}"                  
       end
 
       #.........................................................................................................
@@ -290,14 +290,13 @@ module AgentXmpp
       end
       
       #.........................................................................................................
-      def on_remove_roster_item_result(pipe, result)
-        AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDEGED FROM: #{result.from.to_s}"   
+      def on_remove_roster_item_result(pipe, roster_item_jid)
+        AgentXmpp.logger.info "REMOVE ROSTER ITEM ACKNOWLEDEGED FROM: #{roster_item_jid}"   
       end
       
       #.........................................................................................................
       def on_remove_roster_item_error(pipe, roster_item_jid)
         AgentXmpp.logger.info "REMOVE ROSTER ITEM RECEIVED ERROR REMOVING: #{roster_item_jid}"
-        Contact.destroy_by_jid(Xmpp::Jid.new(roster_item_jid))
       end
       
       #.........................................................................................................
@@ -581,9 +580,9 @@ module AgentXmpp
         from_jid = result.from
         AgentXmpp.logger.info "RECEIVED UNSUBSCRIBE ERROR FROM: #{from_jid.to_s}, #{node}"
       end
-      
-    private
-    
+          
+      #.........................................................................................................
+      # private
       #.........................................................................................................
       def check_roster_item_group(pipe, roster_item)
         roster_item_jid = roster_item.jid
@@ -632,12 +631,13 @@ module AgentXmpp
       end
           
       #.........................................................................................................
-      def add_send_command_method(pipe)
+      def add_send_command_request_method(pipe)
         AgentXmpp.define_meta_class_method(:send_command_request) do |args, &blk| 
-          pipe.send_resp(Xmpp::IqCommand.send_command(:to=>args[:to], :node=>args[:node], :iq_type=>:set, :action=>:execute, :payload=>args[:payload], &blk))
+          pipe.send_resp(Xmpp::IqCommand.send_command(:to=>args[:to], :node=>args[:node], :iq_type=>:set, 
+            :action=>:execute, :payload=>args[:payload], &blk))
         end    
         Delegator.delegate(AgentXmpp, :send_command_request)
-        AgentXmpp.logger.info "ADDED COMMAND METHOD"
+        AgentXmpp.logger.info "ADDED SEND_COMMAND_REQUEST METHOD"
       end
 
       #.........................................................................................................
@@ -687,6 +687,11 @@ module AgentXmpp
           Xmpp::IqDiscoInfo.get(pipe, d)
         end
       end
+
+      #.........................................................................................................
+      private :init_remote_services, :update_publish_nodes, :create_user_pubsub_root, :add_send_chat_method, 
+              :add_send_command_request_method, :add_publish_methods, :process_roster_items, :process_pubsub_discoinfo,
+              :check_roster_item_group
           
     #### self
     end

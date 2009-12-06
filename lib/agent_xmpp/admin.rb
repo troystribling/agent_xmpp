@@ -37,9 +37,17 @@ command 'admin/add_contact', :access => 'admin' do
     contact = params[:data]
     if contact["jid"]
       AgentXmpp::Contact.update(contact)
-      send_msg(AgentXmpp::Xmpp::IqRoster.update(pipe, contact["jid"], contact["groups"].split(/,/))) 
-      send_msg(AgentXmpp::Xmpp::Presence.subscribe(contact["jid"]))
-      command_completed
+      xmpp_msg(AgentXmpp::Xmpp::IqRoster.update(pipe, contact["jid"], contact["groups"].split(/,/))) 
+      xmpp_msg(AgentXmpp::Xmpp::Presence.subscribe(contact["jid"]))
+      result_handlers = {
+        :on_update_roster_item_result => lambda do |pipe, item_jid|     
+          command_completed if item_jid.eql?(contact["jid"])
+        end,
+        :on_update_roster_item_error  => lambda do |pipe, item_jid|
+          error(:bad_request, params, 'roster updated failed') if item_jid.eql?(contact["jid"])
+        end
+      }
+      delegate_to(result_handlers)
     else
       error(:bad_request, params, 'jid not specified')
     end
@@ -57,8 +65,16 @@ command 'admin/delete_contact', :access => 'admin' do
   on(:submit) do
     contact = params[:data]
     if contact["jid"]
-      send_msg(AgentXmpp::Xmpp::IqRoster.remove(pipe, contact["jid"]))  
-      command_completed
+      xmpp_msg(AgentXmpp::Xmpp::IqRoster.remove(pipe, contact["jid"]))  
+      result_handlers = {
+        :on_remove_roster_item_result => lambda do |pipe, item_jid|           
+          command_completed if item_jid.eql?(contact["jid"])
+        end,
+        :on_remove_roster_item_error  => lambda do |pipe, item_jid|
+          error(:bad_request, params, 'roster updated failed') if item_jid.eql?(contact["jid"])
+        end
+      }
+      delegate_to(result_handlers)
     else
       error(:bad_request, params, 'jid not specified')
     end

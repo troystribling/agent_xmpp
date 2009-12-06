@@ -58,7 +58,7 @@ module AgentXmpp
   end
 
   #####-------------------------------------------------------------------------------------------------------
-  class Defer
+  class Delegate
 
     #.........................................................................................................
     attr_reader :methods
@@ -69,25 +69,29 @@ module AgentXmpp
     end
     
     #.........................................................................................................
-    def add_defered_methods(methods)
-      @methods << [methods].flatten
+    def add_delegate_methods(methods)
+      @methods << methods
     end
 
     #.........................................................................................................
     def delegate(pipe, delegate)
-      methods.each do |m|
-        delegate.define_meta_class_method(m[:method]) do
-          @count ||= methods.length
-          pipe.send_resp(m[:blk].call)
-          @scount -= 1; pipe.remove_delegate(delegate) if count.eql?(0)
+      methods.each do |meths|
+        meths.each do |(meth,blk)|
+          delegate.define_meta_class_method(meth) do |*args|
+            if res = blk.call(*args)
+              pipe.send_resp(res)             
+              pipe.remove_delegate(delegate)
+            end
+          end
         end
         pipe.add_delegate(delegate)
       end
+      methods.clear
     end
 
     #.........................................................................................................
     def method_missing(meth, *args, &blk)
-      method.send(meth, *args, &blk)
+      methods.send(meth, *args, &blk)
     end
 
   #### Error

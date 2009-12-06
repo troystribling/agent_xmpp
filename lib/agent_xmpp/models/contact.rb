@@ -58,8 +58,7 @@ module AgentXmpp
       #.........................................................................................................
       def destroy_by_jid(jid)
         contact = contacts.filter(:jid => jid_to_s(jid))
-        contact_id = contact.first[:contact_id]
-        Roster.destroy_by_contact_id(contact_id)
+        Roster.destroy_by_contact_id(contact.first[:id])
         contact.delete
       end 
 

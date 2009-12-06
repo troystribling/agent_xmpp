@@ -33,7 +33,7 @@ module AgentXmpp
           request.query.add(item)
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:on_update_roster_item_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_update_roster_item_result, pipe, roster_item_jid)
             elsif r.type.eql?(:error)
               pipe.broadcast_to_delegates(:on_update_roster_item_error, pipe, roster_item_jid)
             end
@@ -46,7 +46,7 @@ module AgentXmpp
           request.query.add(Xmpp::RosterItem.new(roster_item_jid, nil, :remove))
           Send(request) do |r|
             if r.type == :result and r.kind_of?(Xmpp::Iq)
-              pipe.broadcast_to_delegates(:on_remove_roster_item_result, pipe, r)
+              pipe.broadcast_to_delegates(:on_remove_roster_item_result, pipe, roster_item_jid)
             elsif r.type.eql?(:error)
               pipe.broadcast_to_delegates(:on_remove_roster_item_error, pipe, roster_item_jid)
             end

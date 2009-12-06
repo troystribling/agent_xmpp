@@ -15,7 +15,7 @@ module AgentXmpp
       attr_reader :routes, :before_filters
 
       #.........................................................................................................
-      # interface
+      # application interface
       #.........................................................................................................
       def command(node, opts = {}, &blk) 
         route(:command, {:node => node, :opts => opts, :blk => blk}) 
@@ -81,7 +81,7 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    # process requests
+    # internal interface
     #.......................................................................................................
     def invoke_command
       @route = get_route(:command)
@@ -93,15 +93,7 @@ module AgentXmpp
           end
           define_meta_class_method(:request_callback) do |*resp|
             resp = resp.length.eql?(1)  ? resp.first : resp  
-            payload = case resp
-                        when nil then resp
-                        when AgentXmpp::Error then resp
-                        when AgentXmpp::Defer then resp
-                        when AgentXmpp::Response then resp
-                      else
-                        resp.to_x_data   
-                      end
-            add_payload_to_container(payload)
+            add_payload_to_container(resp)
           end
           process_request
         else
@@ -115,17 +107,12 @@ module AgentXmpp
     end
 
     #.......................................................................................................
-    def on(action, &blk)
-      define_meta_class_method(("on_"+action.to_s).to_sym, &blk)
-    end
-
-    #.......................................................................................................
     def invoke_event
       @route = get_route(:event)
       unless route.nil?
         define_meta_class_method(:request, &route[:blk])
         define_meta_class_method(:request_handler) do
-          request; defered_methods.delegate(pipe, self); flush_messages
+          request; delegate_methods.delegate(pipe, self); flush_messages
         end
         process_request
       else
@@ -150,13 +137,8 @@ module AgentXmpp
     end
 
     #.......................................................................................................
-    def error(err, *args)
-      AgentXmpp::Error.new(err, *args)
-    end
-
-    #.......................................................................................................
-    def defered_methods
-      @defered_methods ||= AgentXmpp::Defer.new
+    def delegate_methods
+      @delegate_methods ||= AgentXmpp::Delegate.new
     end
 
     #.......................................................................................................
@@ -169,14 +151,26 @@ module AgentXmpp
       pipe.send_resp(messages); messages.clear
     end
 
+    #.........................................................................................................
+    # application interface
     #.......................................................................................................
-    def send_msg(msg)
+    def error(err, *args)
+      AgentXmpp::Error.new(err, *args)
+    end
+
+    #.......................................................................................................
+    def on(action, &blk)
+      define_meta_class_method(("on_"+action.to_s).to_sym, &blk)
+    end
+
+    #.......................................................................................................
+    def xmpp_msg(msg)
       messages << msg
     end
 
     #.......................................................................................................
-    def defer(methods)
-      defered_methods.add_defered_method(methods); defered_methods
+    def delegate_to(methods)
+      delegate_methods.add_delegate_methods(methods); delegate_methods
     end
 
     #.........................................................................................................
@@ -235,18 +229,18 @@ module AgentXmpp
     # add payloads
     #.........................................................................................................
     def result_jabber_x_data(payload)
-      defered_methods.delegate(pipe, self)  
+      delegate_methods.delegate(pipe, self)  
       flush_messages
       if params[:action].eql?(:cancel)
         command_canceled
       elsif payload.kind_of?(AgentXmpp::Error)
         payload.responce
-      elsif payload.kind_of?(AgentXmpp::Defer) 
+      elsif payload.kind_of?(AgentXmpp::Delegate) 
         nil
       elsif payload.kind_of?(AgentXmpp::Response)
         payload
       else
-        command_result(payload)
+        command_result(payload.nil? ? nil : payload.to_x_data)
       end
     end
 
