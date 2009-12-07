@@ -84,7 +84,9 @@ end
 #.........................................................................................................
 command 'admin/subscriptions', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/subscriptions"
-  AgentXmpp::Subscription.find_all.map{|s| {:node => s[:node].split("/")[2..-1].join("/"), :count => 0, :last => '1/1/09 12:00'}}
+  AgentXmpp::Subscription.find_all.map do |s|    
+    {:node => s[:node].split("/")[2..-1].join("/"), :count => 0, :last => '1/1/09 12:00'}
+  end
 end
 
 #.........................................................................................................
@@ -94,11 +96,13 @@ command 'admin/publications', :access => 'admin' do
 end
 
 #.........................................................................................................
-command 'admin/message stats', :access => 'admin' do
+command 'admin/message_stats_by_type', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/publications"
+  AgentXmpp::Message.stats_by_message_type
 end
 
 #.........................................................................................................
-command 'admin/contact stats', :access => 'admin' do
+command 'admin/contact_message_stats', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/publications"
+  AgentXmpp::Contact.message_stats
 end

@@ -55,6 +55,18 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def stats_by_message_type
+        AgentXmpp.agent_xmpp_db['SELECT message_type AS type, count(id) AS count, max(created_at) AS last FROM messages GROUP BY message_type'].all.map do |s|
+          {:type=>s[:type], :count=>s[:count], :last=>Time.parse(s[:last]).strftime("%y/%m/%d %H:%M")}
+        end        
+      end
+        
+      #.........................................................................................................
+      def stats_by_node(node)
+        AgentXmpp.agent_xmpp_db["SELECT count(id) AS count, max(created_at) AS last FROM messages WHERE from_jid LIKE '#{jid.to_s}%'"].first
+      end
+                
+      #.........................................................................................................
       # private
       #.........................................................................................................
       def update_with_chat_message(stanza)
@@ -62,7 +74,7 @@ module AgentXmpp
         messages << {
           :message_text => stanza.body,
           :content_type => 'text',
-          :message_type => stanza.type.to_s,
+          :message_type => 'chat',
           :to_jid       => stanza.to.to_s,
           :from_jid     => from_jid.to_s,
           :created_at   => Time.now}
@@ -73,7 +85,7 @@ module AgentXmpp
         from_jid = stanza.from || AgentXmpp.jid 
         messages << {
           :content_type  => 'command_request',
-          :message_type  => stanza.type.to_s,
+          :message_type   => 'command',
           :to_jid        => stanza.to.to_s,
           :from_jid      => from_jid.to_s,
           :node          => node,
@@ -86,7 +98,7 @@ module AgentXmpp
         messages << {
           :message_text  => data.to_s,
           :content_type  => 'x',
-          :message_type  => data.type.to_s,
+          :message_type  => 'command',
           :to_jid        => stanza.to.to_s,
           :from_jid      => from_jid.to_s,
           :node          => node,
@@ -99,7 +111,7 @@ module AgentXmpp
         messages << {
           :message_text  => data.to_s,
           :content_type  => 'x',
-          :message_type  => data.type.to_s,
+          :message_type  => 'event',
           :to_jid        => stanza.to.to_s,
           :from_jid      => from_jid.to_s,
           :node          => node,
@@ -112,7 +124,7 @@ module AgentXmpp
           messages << {
             :message_text  => event_item.to_s,
             :content_type  => event_item.name,
-            :message_type  => 'normal',
+            :message_type  => 'event',
             :to_jid        => AgentXmpp.jid.to_s,
             :from_jid      => from.to_s,
             :node          => node,

@@ -56,6 +56,14 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def message_stats
+        AgentXmpp::Contact.find_all.map do |c|
+          stats = AgentXmpp.agent_xmpp_db["SELECT count(id) AS count, max(created_at) AS last FROM messages WHERE from_jid LIKE '#{c[:jid]}%'"].first
+          {:jid=>c[:jid], :count=>stats[:count], :last=>stats[:last].nil? ? 'Never' : Time.parse(stats[:last]).strftime("%y/%m/%d %H:%M")}
+        end        
+      end
+      
+      #.........................................................................................................
       def destroy_by_jid(jid)
         contact = contacts.filter(:jid => jid_to_s(jid))
         Roster.destroy_by_contact_id(contact.first[:id])
