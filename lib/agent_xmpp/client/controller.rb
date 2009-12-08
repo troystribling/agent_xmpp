@@ -51,10 +51,12 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def command_nodes(jid)
-        (routes[:command] ||= []).inject([]) do |n,r| 
-          groups, access = Contact.find_by_jid(jid)[:groups], [r[:opts][:access] || []].flatten
-          (access.empty? or access.any?{|a| groups.include?(a)}) ? n << r[:node] : n
+      def command_nodes(jid=nil)
+        (routes[:command] ||= []).inject([]) do |n,r|
+          if jid 
+            groups, access = Contact.find_by_jid(jid)[:groups], [r[:opts][:access] || []].flatten
+            (access.empty? or access.any?{|a| groups.include?(a)}) ? n << r[:node] : n
+          else; n << r[:node]; end
         end
       end
 

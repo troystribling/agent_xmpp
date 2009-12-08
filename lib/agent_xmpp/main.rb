@@ -27,8 +27,7 @@ module AgentXmpp
     # database
     #.........................................................................................................
     def in_memory_db
-      # @in_memory_db ||= Sequel.sqlite
-      @in_memory_db ||= Sequel.sqlite("#{AgentXmpp.app_path}/in_memory.db")
+      @in_memory_db ||= Sequel.sqlite
     end
 
     #.........................................................................................................

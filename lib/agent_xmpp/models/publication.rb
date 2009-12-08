@@ -38,6 +38,11 @@ module AgentXmpp
         publications.filter(:node => node).update(:status => status.to_s)
       end
 
+      #.........................................................................................................
+      def stats_by_node
+        find_all.map{|p| Message.stats_by_node("#{AgentXmpp.user_pubsub_root}/#{p[:node]}").update(:node=>p[:node].split('/').last)}
+      end
+      
     #### self
     end
 

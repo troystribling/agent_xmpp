@@ -314,13 +314,13 @@ callbacks a delegate object must be provided that implements the callbacks of in
 
     on_all_roster_items(connection)
 
-    on_update_roster_item_result(connection, response)
+    on_update_roster_item_result(connection, item_jid)
 
-    on_update_roster_item_error(connection, response)
+    on_update_roster_item_error(connection, item_jid)
 
-    on_remove_roster_item(connection, response)
+    on_remove_roster_item(connection, item_jid)
 
-    on_remove_roster_item_error(connection, response)
+    on_remove_roster_item_error(connection, item_jid)
 
 === Service Discovery
 

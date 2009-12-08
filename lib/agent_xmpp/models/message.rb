@@ -63,7 +63,13 @@ module AgentXmpp
         
       #.........................................................................................................
       def stats_by_node(node)
-        AgentXmpp.agent_xmpp_db["SELECT count(id) AS count, max(created_at) AS last FROM messages WHERE from_jid LIKE '#{jid.to_s}%'"].first
+        stats = AgentXmpp.agent_xmpp_db["SELECT node, count(id) AS count, max(created_at) AS last FROM messages WHERE node = ?", node].first
+        {:node=>node, :count=>stats[:count], :last=>stats[:last].nil? ? 'Never' : Time.parse(stats[:last]).strftime("%y/%m/%d %H:%M")}
+      end
+                
+      #.........................................................................................................
+      def stats_by_command_node
+        BaseController.command_nodes.map{|n| stats_by_node(n)}        
       end
                 
       #.........................................................................................................

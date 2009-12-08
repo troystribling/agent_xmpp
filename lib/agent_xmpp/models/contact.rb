@@ -57,7 +57,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def message_stats
-        AgentXmpp::Contact.find_all.map do |c|
+        find_all.map do |c|
           stats = AgentXmpp.agent_xmpp_db["SELECT count(id) AS count, max(created_at) AS last FROM messages WHERE from_jid LIKE '#{c[:jid]}%'"].first
           {:jid=>c[:jid], :count=>stats[:count], :last=>stats[:last].nil? ? 'Never' : Time.parse(stats[:last]).strftime("%y/%m/%d %H:%M")}
         end        

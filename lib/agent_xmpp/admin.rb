@@ -39,15 +39,14 @@ command 'admin/add_contact', :access => 'admin' do
       AgentXmpp::Contact.update(contact)
       xmpp_msg(AgentXmpp::Xmpp::IqRoster.update(pipe, contact["jid"], contact["groups"].split(/,/))) 
       xmpp_msg(AgentXmpp::Xmpp::Presence.subscribe(contact["jid"]))
-      result_handlers = {
+      delegate_to(
         :on_update_roster_item_result => lambda do |pipe, item_jid|     
           command_completed if item_jid.eql?(contact["jid"])
         end,
         :on_update_roster_item_error  => lambda do |pipe, item_jid|
           error(:bad_request, params, 'roster updated failed') if item_jid.eql?(contact["jid"])
         end
-      }
-      delegate_to(result_handlers)
+      )
     else
       error(:bad_request, params, 'jid not specified')
     end
@@ -66,15 +65,14 @@ command 'admin/delete_contact', :access => 'admin' do
     contact = params[:data]
     if contact["jid"]
       xmpp_msg(AgentXmpp::Xmpp::IqRoster.remove(pipe, contact["jid"]))  
-      result_handlers = {
+      delegate_to(
         :on_remove_roster_item_result => lambda do |pipe, item_jid|           
           command_completed if item_jid.eql?(contact["jid"])
         end,
         :on_remove_roster_item_error  => lambda do |pipe, item_jid|
           error(:bad_request, params, 'roster updated failed') if item_jid.eql?(contact["jid"])
         end
-      }
-      delegate_to(result_handlers)
+      )
     else
       error(:bad_request, params, 'jid not specified')
     end
@@ -84,25 +82,29 @@ end
 #.........................................................................................................
 command 'admin/subscriptions', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/subscriptions"
-  AgentXmpp::Subscription.find_all.map do |s|    
-    {:node => s[:node].split("/")[2..-1].join("/"), :count => 0, :last => '1/1/09 12:00'}
-  end
+  AgentXmpp::Subscription.stats_by_node    
 end
 
 #.........................................................................................................
 command 'admin/publications', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/publications"
-  AgentXmpp::Publication.find_all.map{|p| {:node => p[:node], :count => 0, :last => '1/1/09 12:00'}}
+  AgentXmpp::Publication.stats_by_node
 end
 
 #.........................................................................................................
-command 'admin/message_stats_by_type', :access => 'admin' do
+command 'admin/messages_by_type', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/publications"
   AgentXmpp::Message.stats_by_message_type
 end
 
 #.........................................................................................................
-command 'admin/contact_message_stats', :access => 'admin' do
+command 'admin/messages_by_contact', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/publications"
   AgentXmpp::Contact.message_stats
+end
+
+#.........................................................................................................
+command 'admin/messages_by_command', :access => 'admin' do
+  AgentXmpp.logger.info "ACTION: admin/publications"
+  AgentXmpp::Message.stats_by_command_node
 end
