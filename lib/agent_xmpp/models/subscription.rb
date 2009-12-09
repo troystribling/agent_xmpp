@@ -34,7 +34,7 @@ module AgentXmpp
       def stats_by_node
         find_all.map do |s|
           node = s[:node].split('/')
-          Message.stats_by_node(s[:node]).update(:node=>node.last, :service=>node[2])
+          Message.stats_by_node(s[:node]).update(:node=>node.last, :jid=>"#{node[3]}@#{node[2]}")
         end
       end
       

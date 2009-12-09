@@ -60,31 +60,31 @@ end
 ##########################################################################################################
 # command processing: response payloads
 #.........................................................................................................
-command 'demo/scalar' do
+command '/scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 
 end
 
 #.........................................................................................................
-command 'demo/hash' do
+command '/hash' do
   AgentXmpp.logger.info "ACTION: hash"
   {:xyz => 'wuv', :attr1 => 'val1', :attr2 => 'val2', :test1 => 'ans1'}
 end
 
 #.........................................................................................................
-command 'demo/scalar_array' do
+command '/data/scalar_array' do
   AgentXmpp.logger.info "ACTION: array"
   ['val1', 'val2','val3', 'val4'] 
 end
 
 #.........................................................................................................
-command 'demo/hash_array' do
+command '/data/hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   {:attr1 => ['val11', 'val11'], :attr2 => 'val12'}
 end
 
 #.........................................................................................................
-command 'demo/array_hash' do
+command 'data/array_hash' do
   AgentXmpp.logger.info "ACTION: array_hash"
   [{:attr1 => 'val11', :attr2 => 'val12'}, 
    {:attr1 => 'val21', :attr2 => 'val22'}, 
@@ -92,7 +92,7 @@ command 'demo/array_hash' do
 end
 
 #.........................................................................................................
-command 'demo/array_hash_array' do
+command 'data/array_hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, 
    {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, 
