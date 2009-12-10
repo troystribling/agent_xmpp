@@ -60,25 +60,25 @@ end
 ##########################################################################################################
 # command processing: response payloads
 #.........................................................................................................
-command '/scalar' do
+command 'data/scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 
 end
 
 #.........................................................................................................
-command '/hash' do
+command 'data/hash' do
   AgentXmpp.logger.info "ACTION: hash"
   {:xyz => 'wuv', :attr1 => 'val1', :attr2 => 'val2', :test1 => 'ans1'}
 end
 
 #.........................................................................................................
-command '/data/scalar_array' do
+command 'data/scalar_array' do
   AgentXmpp.logger.info "ACTION: array"
   ['val1', 'val2','val3', 'val4'] 
 end
 
 #.........................................................................................................
-command '/data/hash_array' do
+command 'data/hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   {:attr1 => ['val11', 'val11'], :attr2 => 'val12'}
 end
@@ -102,7 +102,7 @@ end
 ##########################################################################################################
 # command processing: data forms
 #.........................................................................................................
-command 'demo/text_single' do
+command 'form/text_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('Your Name')
@@ -117,7 +117,7 @@ command 'demo/text_single' do
 end
 
 #.........................................................................................................
-command 'demo/text_private' do
+command 'form/text_private' do
   AgentXmpp.logger.info "ACTION: text_multi"
   on(:execute) do |form|
     form.add_title('Enter a Secret')
@@ -132,7 +132,7 @@ command 'demo/text_private' do
 end
 
 #.........................................................................................................
-command 'demo/jid_single' do
+command 'form/jid_single' do
   AgentXmpp.logger.info "ACTION: text_single"
   on(:execute) do |form|
     form.add_title('The JID')
@@ -147,7 +147,7 @@ command 'demo/jid_single' do
 end
 
 #.........................................................................................................
-command 'demo/text_multi' do
+command 'form/text_multi' do
   AgentXmpp.logger.info "ACTION: text_multi"
   on(:execute) do |form|
     form.add_title('Tell a Story')
@@ -162,7 +162,7 @@ command 'demo/text_multi' do
 end
 
 #.........................................................................................................
-command 'demo/list_single' do
+command 'form/list_single' do
   AgentXmpp.logger.info "ACTION: list_single"
   on(:execute) do |form|
     form.add_title('Fruits')
@@ -177,7 +177,7 @@ command 'demo/list_single' do
 end
 
 #.........................................................................................................
-command 'demo/boolean', :defer => true do
+command 'form/boolean', :defer => true do
   AgentXmpp.logger.info "ACTION: boolean"
   on(:execute) do |form|
     form.add_title('Hyper Drive Configuration')
@@ -193,7 +193,7 @@ command 'demo/boolean', :defer => true do
 end
 
 #.........................................................................................................
-command 'demo/long_form' do
+command 'form/long_form' do
   AgentXmpp.logger.info "ACTION: long_form"
   on(:execute) do |form|
     form.add_title('The Long Form')
@@ -228,7 +228,7 @@ command 'demo/long_form' do
 end
 
 #.........................................................................................................
-command 'demo/another_long_form' do
+command 'form/another_long_form' do
   AgentXmpp.logger.info "ACTION: another_long_form"
   on(:execute) do |form|
     form.add_title('The Other Long Form')
@@ -256,7 +256,7 @@ command 'demo/another_long_form' do
 end
 
 #.........................................................................................................
-command 'demo/no_title' do
+command 'form/no_title' do
   AgentXmpp.logger.info "ACTION: no_title"
   on(:execute) do |form|
     form.add_instructions('Choose On or Off')
@@ -268,7 +268,7 @@ command 'demo/no_title' do
 end
 
 #.........................................................................................................
-command 'demo/no_instructions' do
+command 'form/no_instructions' do
   AgentXmpp.logger.info "ACTION: no_instructions"
   on(:execute) do |form|
     form.add_title('Yes or No')
@@ -280,7 +280,7 @@ command 'demo/no_instructions' do
 end
 
 #.........................................................................................................
-command 'demo/text_view_with_jids' do
+command 'form/text_view_with_jids' do
   AgentXmpp.logger.info "ACTION: text_view_with_jids"
   on(:execute) do |form|
     form.add_title('Account Information')
