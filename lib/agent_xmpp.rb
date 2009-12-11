@@ -1,7 +1,6 @@
 $:.unshift(File.dirname(__FILE__))
 
 require 'find'
-require 'ftools'
 require 'singleton'
 require 'logger'
 require 'socket'
