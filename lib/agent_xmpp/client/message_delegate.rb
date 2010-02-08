@@ -17,7 +17,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_command_set(pipe, stanza)
         command = stanza.command
-        params = {:xmlns => 'jabber:x:data', :action => command.action, :to => stanza.from.to_s, 
+        params = {:xmlns => 'jabber:x:data', :action => command.action || :execute, :to => stanza.from.to_s, 
                   :from => stanza.from.to_s, :node => command.node, :id => stanza.id, 
                   :sessionid => command.sessionid}
         data = command.x
