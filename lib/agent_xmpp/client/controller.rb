@@ -189,8 +189,13 @@ module AgentXmpp
 
     #.........................................................................................................
     def command_result(payload)
-      Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>payload.type.eql?(:form) ? :executing : :completed, 
-                                   :id => params[:id], :sessionid => params[:sessionid], :payload => payload, :iq_type=>:result)
+      if payload
+        Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>payload.type.eql?(:form) ? :executing : :completed, 
+                                     :id => params[:id], :sessionid => params[:sessionid], :payload => payload, :iq_type=>:result)
+      else
+        Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=> :completed, :id => params[:id], 
+                                     :sessionid => params[:sessionid], :iq_type=>:result)
+      end
     end
 
     #.........................................................................................................
