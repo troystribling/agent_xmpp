@@ -310,7 +310,7 @@ end
 # end
 
 #.........................................................................................................
-event 'troy@plan-b.ath.cx', 'stupid' do
-  AgentXmpp.logger.info "EVENT: troy@plan-b.ath.cx/stupid"
-  send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
-end
+# event 'troy@test.local', 'stupid' do
+#   AgentXmpp.logger.info "EVENT: troy@test.local/stupid"
+#   send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
+# end
