@@ -444,7 +444,7 @@ module AgentXmpp
       def on_discovery_of_pupsub_service(pipe, jid)
         AgentXmpp.logger.info "DISCOVERED PUBSUB SERVICE: #{jid}"
         req = [Xmpp::IqPubSub.subscriptions(pipe, jid.to_s)]
-        unless pubsub_service
+        if /#{AgentXmpp.jid.domain}/.match(jid.to_s)
           add_publish_methods(pipe, jid)
           @pubsub_service = jid
            req += [Xmpp::IqDiscoItems.get(pipe, jid.to_s)] + init_remote_services(pipe)

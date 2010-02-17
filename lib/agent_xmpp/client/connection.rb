@@ -61,7 +61,7 @@ module AgentXmpp
   
     #.........................................................................................................
     def end_element(name)
-      if @current.parent
+      if @current and @current.parent
         @current = @current.parent
       else
         process
@@ -81,16 +81,18 @@ module AgentXmpp
 
     #.........................................................................................................
     def process
-      @current.add_namespace(@streamns) if @current.namespace('').to_s.eql?('')
-      begin
-        stanza = Xmpp::Stanza::import(@current)
-      rescue Xmpp::NoNameXmlnsRegistered
-        stanza = @current
+      if @current
+        @current.add_namespace(@streamns) if @current.namespace('').to_s.eql?('')
+        begin
+          stanza = Xmpp::Stanza::import(@current)
+        rescue Xmpp::NoNameXmlnsRegistered
+          stanza = @current
+        end
+        if @current.xpath.eql?('stream:stream')
+          @streamns = @current.namespace('') if @current.namespace('')
+        end
+        receive(stanza) if respond_to?(:receive)
       end
-      if @current.xpath.eql?('stream:stream')
-        @streamns = @current.namespace('') if @current.namespace('')
-      end
-      receive(stanza) if respond_to?(:receive)
     end
   
     #.........................................................................................................

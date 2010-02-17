@@ -127,7 +127,7 @@ module AgentXmpp
   
     #.........................................................................................................
     def demux_stanza(stanza)
-      unless Message.find_by_item_id(stanza.id)
+      if stanza.respond_to?(:id) and not Message.find_by_item_id(stanza.id)
         Message.update(stanza)
         meth = 'on_' + if stanza.class.eql?(AgentXmpp::Xmpp::Iq)
                          iqclass = if stanza.query
