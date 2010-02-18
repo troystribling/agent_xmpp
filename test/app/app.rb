@@ -34,7 +34,7 @@ discovered_pubsub_node do |service, node|
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
   if node.eql?(AgentXmpp.user_pubsub_root+'/time')
     AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
-    EventMachine::PeriodicTimer.new(600) do
+    EventMachine::PeriodicTimer.new(10) do
       publish_time(Time.now.to_s)
       AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
     end  

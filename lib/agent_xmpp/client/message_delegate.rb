@@ -47,7 +47,19 @@ module AgentXmpp
           on_unsupported_message(pipe, stanza)
         end
       end
-      
+
+      #.........................................................................................................
+      # process headline messages
+      #.........................................................................................................
+      def on_message_headline(pipe, stanza)
+        AgentXmpp.logger.info "RECEIVED HEADLINE MESSAGE FROM: #{stanza.from.to_s}"
+        if event = stanza.event
+          on_pubsub_event(pipe, event, stanza.to.to_s, stanza.from.to_s)
+        else
+          on_unsupported_message(pipe, stanza)
+        end
+      end
+            
       #.........................................................................................................
       # process events
       #.........................................................................................................
@@ -546,7 +558,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_pubsub_subscribe_result(pipe, result, node) 
         from_jid = result.from.to_s
-        Subscription.update(result, from_jid)
+        Subscription.update(result, node, from_jid)
         AgentXmpp.logger.info "RECEIVED SUBSCRIBE RESULT FROM: #{from_jid}, #{node}"
       end
 
