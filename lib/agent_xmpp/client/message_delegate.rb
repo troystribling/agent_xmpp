@@ -78,7 +78,7 @@ module AgentXmpp
                 params.update(:data => data.to_native)
                 Controller.new(pipe, params).invoke_event
               elsif entry = i.entry
-                params.update(:entry => entry.title)
+                params.update(:data => entry.title)
                 Controller.new(pipe, params).invoke_event
               else
                 on_unsupported_message(pipe, event)
@@ -491,7 +491,7 @@ module AgentXmpp
         app_subs = BaseController.subscriptions(result.from.domain)
         srvr_subs = result.pubsub.subscriptions.map do |s| 
           AgentXmpp.logger.info "SUBSCRIBED TO NODE: #{from_jid}, #{s.node}"
-          Subscription.update(s, from_jid); s.node
+          Subscription.update(s, s.node, from_jid); s.node
         end
         reqs = app_subs.inject([]) do |r,s|
                  unless srvr_subs.include?(s)

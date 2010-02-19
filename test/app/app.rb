@@ -34,7 +34,7 @@ discovered_pubsub_node do |service, node|
   AgentXmpp.logger.info "discovered_pubsub_node: #{service}, #{node}"
   if node.eql?(AgentXmpp.user_pubsub_root+'/time')
     AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
-    EventMachine::PeriodicTimer.new(10) do
+    EventMachine::PeriodicTimer.new(600) do
       publish_time(Time.now.to_s)
       AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
     end  
@@ -304,13 +304,9 @@ end
 ##########################################################################################################
 # pubsub events
 #.........................................................................................................
-# event 'nowhere@noone.com', 'val' do
-#   AgentXmpp.logger.info "EVENT: nowhere@noone.com/val"
-#   send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
-# end
 
 #.........................................................................................................
-# event 'troy@test.local', 'stupid' do
-#   AgentXmpp.logger.info "EVENT: troy@test.local/stupid"
-#   send_chat(:to=>params[:from], :body=>"Got the event at: " + Time.now.to_s)
-# end
+event 'troy@test.local', 'junk' do
+  AgentXmpp.logger.info "EVENT: troy@test.local/junk"
+  send_chat(:to=>params[:from], :body=>params[:data])
+end
