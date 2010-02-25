@@ -18,10 +18,10 @@ module AgentXmpp
       end
 
       #.........................................................................................................
-      def update(msg, node, service)
+      def update(msg, node, serv)
         case msg
-          when AgentXmpp::Xmpp::Subscription then update_with_subscription(msg, node, service)
-          when AgentXmpp::Xmpp::Iq then update_with_subscription(msg.pubsub.subscription, node, service)
+          when AgentXmpp::Xmpp::Subscription then update_with_subscription(msg, node, serv)
+          when AgentXmpp::Xmpp::Iq then update_with_subscription(msg.pubsub.subscription, node, serv)
         end                 
       end
  
@@ -41,9 +41,9 @@ module AgentXmpp
       #.........................................................................................................
       # private
       #.........................................................................................................
-      def update_with_subscription(msg, node, service)
+      def update_with_subscription(msg, node, serv)
         begin
-          subscriptions << {:node => node, :subscription => msg.subscription, :service => service}
+          subscriptions << {:node => node, :subscription => msg.subscription, :service => serv}
         rescue 
         end
       end
