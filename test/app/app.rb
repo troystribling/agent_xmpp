@@ -312,5 +312,5 @@ end
 #.........................................................................................................
 event 'troy@test.local', 'junk' do
   AgentXmpp.logger.info "EVENT: troy@test.local/junk"
-  send_chat(:to=>params[:from], :body=>params[:data])
+  send_chat(:to=>params[:from], :body=>'got '+params[:data])
 end
