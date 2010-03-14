@@ -3,7 +3,7 @@ module AgentXmpp
   #.........................................................................................................
   VERSION = "0.0.0"
   AGENT_XMPP_NAME = 'AgentXMPP'
-  OS_VERSION = IO.popen('uname -sr').readlines.to_s.strip
+  OS_VERSION = IO.popen('uname -sr').readlines.first.to_s.strip
   SUBSCRIBE_RETRY_PERIOD = 60
   IDENTITY = {:category => 'client', :name => AGENT_XMPP_NAME, :type => 'bot'}
   FEATURES = ['http://jabber.org/protocol/disco#info', 
