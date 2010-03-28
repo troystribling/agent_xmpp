@@ -7,4 +7,5 @@ pkg
 *.yml
 *.db
 log/*
+*.log
 test/xml_messages.txt
