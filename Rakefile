@@ -19,6 +19,7 @@ require 'jeweler'
     gem.files.include %w(lib/jeweler/templates/.gitignore VERSION)
     gem.add_dependency('rake',                              '>= 0.8.3')
     gem.add_dependency('eventmachine',                      '>= 0.12.6')
+    gem.add_dependency('sequel',                            '>= 3.9.0')
     gem.add_dependency('troystribling-evma_xmlpushparser',  '>= 0.0.1')
   end
 rescue LoadError
