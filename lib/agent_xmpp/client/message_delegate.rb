@@ -163,7 +163,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_presence(pipe, presence)
         from_jid = presence.from    
-        if Contact.has_jid?(presence.from) 
+        if Contact.has_jid?(presence.from) or AgentXmpp.is_account_jid?(from_jid) 
           Roster.update(presence)
           AgentXmpp.logger.info "RECEIVED PRESENCE FROM: #{from_jid.to_s}"
           response = []
@@ -183,7 +183,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_presence_subscribe(pipe, presence)
         from_jid = presence.from.to_s     
-        if Contact.has_jid?(presence.from) 
+        if Contact.has_jid?(presence.from)
           AgentXmpp.logger.info "RECEIVED SUBSCRIBE REQUEST: #{from_jid}"
           Xmpp::Presence.accept(from_jid)  
         else
@@ -200,7 +200,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_presence_unavailable(pipe, presence)
         from_jid = presence.from    
-        if Contact.has_jid?(from_jid) 
+        if Contact.has_jid?(from_jid) or AgentXmpp.is_account_jid?(from_jid) 
           Roster.update(presence)
           Boot.call_if_implemented(:call_received_presence, from_jid.to_s, :unavailable)             
           AgentXmpp.logger.info "RECEIVED UNAVAILABLE PRESENCE FROM: #{from_jid.to_s }"
@@ -223,10 +223,11 @@ module AgentXmpp
 
       #.........................................................................................................
       def on_presence_error(pipe, presence)
+        from_jid = presence.from     
         AgentXmpp.logger.warn "RECEIVED PRESENCE ERROR FROM: #{presence.from.to_s}" 
-        if Contact.has_jid?(presence.from)
+        if Contact.has_jid?(presence.from) or AgentXmpp.is_account_jid?(from_jid)
           AgentXmpp.logger.warn "REMOVING '#{presence.from.to_s}' FROM ROSTER" 
-          Xmpp::IqRoster.remove(pipe, presence.from.to_s)
+          Xmpp::IqRoster.remove(pipe, from_jid.to_s)
         end
       end
             
@@ -321,11 +322,13 @@ module AgentXmpp
       
       #.........................................................................................................
       def on_version_get(pipe, request)
-        if Contact.has_jid?(request.from)
+        from_jid = request.from
+        if Contact.has_jid?(from_jid) or AgentXmpp.is_account_jid?(from_jid)
           AgentXmpp.logger.info "RECEIVED VERSION REQUEST: #{request.from.to_s}"
           Xmpp::IqVersion.result(pipe, request)
         else
           AgentXmpp.logger.warn "RECEIVED VERSION REQUEST FROM JID NOT IN ROSTER: #{request.from.to_s}"
+          Xmpp::ErrorResponse.service_unavailable(request)
         end
       end
          
@@ -338,7 +341,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_discoinfo_get(pipe, request)   
         from_jid = request.from
-        if Contact.has_jid?(from_jid)
+        if Contact.has_jid?(from_jid) or AgentXmpp.is_account_jid?(from_jid)
           if request.query.node.nil?
             AgentXmpp.logger.info "RECEIVED DISCO INFO REQUEST FROM: #{from_jid.to_s}"
             Xmpp::IqDiscoInfo.result(pipe, request)
@@ -347,8 +350,8 @@ module AgentXmpp
             Xmpp::ErrorResponse.item_not_found(request)
           end
         else
-          Xmpp::ErrorResponse.service_unavailable(request)
           AgentXmpp.logger.warn "RECEIVED DISCO INFO REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+          Xmpp::ErrorResponse.service_unavailable(request)
         end
       end
 
@@ -394,7 +397,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_discoitems_get(pipe, request)   
         from_jid = request.from
-        if Contact.has_jid?(from_jid)
+        if Contact.has_jid?(from_jid) or AgentXmpp.is_account_jid?(from_jid)
           if request.query.node.eql?('http://jabber.org/protocol/commands')
             AgentXmpp.logger.info "RECEIVED COMMAND NODE DISCO ITEMS REQUEST FROM: #{from_jid.to_s}"
             Xmpp::IqDiscoItems.result_command_nodes(pipe, request)
@@ -406,8 +409,8 @@ module AgentXmpp
             Xmpp::ErrorResponse.item_not_found(request)
           end
         else
-          Xmpp::ErrorResponse.service_unavailable(request)
           AgentXmpp.logger.warn "RECEIVED DISCO ITEMS REQUEST FROM JID NOT IN ROSTER: #{from_jid.to_s}"
+          Xmpp::ErrorResponse.service_unavailable(request)
         end
       end
       

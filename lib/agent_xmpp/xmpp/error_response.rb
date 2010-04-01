@@ -74,7 +74,7 @@ module AgentXmpp
           iq.id = request.id unless request.id.nil?
           iq.query = Xmpp::IqQuery.new
           iq.query.add_namespace(request.query.namespace)
-          iq.query.attributes['node'] = request.query.node if request.query.node
+          iq.query.attributes['node'] = request.query.node if request.query.respond_to?(:node) and request.query.node
           iq.error = Xmpp::ErrorResponse.new(condition, text)
           Send(iq)
         end

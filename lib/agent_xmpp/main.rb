@@ -60,6 +60,11 @@ module AgentXmpp
     #####.....................................................................................................
     # client account configuration
     #.........................................................................................................
+    def is_account_jid?(jid)
+      @jid.bare.to_s.eql?(bare_jid_to_s(jid))
+    end
+    
+    #.........................................................................................................
     def jid
       @jid ||= Xmpp::Jid.new("#{config['jid']}/#{resource}")
     end
@@ -96,6 +101,24 @@ module AgentXmpp
                       end
                     else; 1; end
     end
+         
+    #.........................................................................................................
+    def bare_jid_to_s(jid)
+      case jid
+        when String then Xmpp::Jid.new(jid).bare.to_s
+        when Xmpp::Jid then jid.bare.to_s
+      else jid
+      end 
+    end  
+           
+    #.........................................................................................................
+    def full_jid_to_s(jid)
+      case jid
+        when String then jid
+        when Xmpp::Jid then jid.to_s
+      else jid
+      end 
+    end  
             
   #### self
   end

@@ -3,8 +3,11 @@
 #.........................................................................................................
 before :command => :all do
   if access = route[:opts][:access]
-    groups = AgentXmpp::Contact.find_by_jid(params[:from])[:groups] 
-    [access].flatten.any?{|a| groups.include?(a)}
+    jid = params[:from]    
+    unless AgentXmpp.is_account_jid?(jid)
+      groups = AgentXmpp::Contact.find_by_jid(jid)[:groups] 
+      [access].flatten.any?{|a| groups.include?(a)}
+    else; true; end
   else; true; end
 end
 

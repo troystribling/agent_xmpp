@@ -7,7 +7,8 @@ require "#{File.dirname(__FILE__)}/../../lib/agent_xmpp"
 #.........................................................................................................
 # only online contacts can send command messages
 before :command => :all do
-  AgentXmpp::Roster.find_by_jid(params[:from])
+  jid = params[:from]
+  AgentXmpp::Roster.find_by_jid(jid) or AgentXmpp.is_account_jid?(jid)
 end
 
 ##########################################################################################################
@@ -35,14 +36,14 @@ discovered_pubsub_node do |service, node|
   if node.eql?(AgentXmpp.user_pubsub_root+'/time')
     AgentXmpp.logger.info "LAUNCHING TIME PUBLISH TASK"
     EventMachine::PeriodicTimer.new(600) do
-      publish_time(Time.now.to_s)
+      # publish_time(Time.now.to_s)
       AgentXmpp.logger.info "FIRING EVENT TIME: #{Time.now.to_s}"
     end  
   elsif node.eql?(AgentXmpp.user_pubsub_root+'/gibberish')
     AgentXmpp.logger.info "LAUNCHING GIBBERISH PUBLISH TASK"
     EventMachine::PeriodicTimer.new(10) do
       letters = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',' ',' ',' ',' ',' ',' ',' ']
-      publish_gibberish((0..300).inject(''){|j,i| j+=letters[((letters.length*rand).truncate)]}.gsub(/\s+/,' '))
+      # publish_gibberish((0..300).inject(''){|j,i| j+=letters[((letters.length*rand).truncate)]}.gsub(/\s+/,' '))
       AgentXmpp.logger.info "FIRING EVENT GIBBERISH: #{Time.now.to_s}"
     end  
   end

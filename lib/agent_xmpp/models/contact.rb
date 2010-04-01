@@ -42,7 +42,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def find_by_jid(jid)
-        contacts[:jid => jid_to_s(jid)]
+        contacts[:jid => AgentXmpp.bare_jid_to_s(jid)]
       end
 
       #.........................................................................................................
@@ -52,7 +52,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def has_jid?(jid)
-        contacts.filter(:jid => jid_to_s(jid)).count > 0
+        contacts.filter(:jid => AgentXmpp.bare_jid_to_s(jid)).count > 0
       end
 
       #.........................................................................................................
@@ -65,7 +65,7 @@ module AgentXmpp
       
       #.........................................................................................................
       def destroy_by_jid(jid)
-        contact = contacts.filter(:jid => jid_to_s(jid))
+        contact = contacts.filter(:jid => AgentXmpp.bare_jid_to_s(jid))
         Roster.destroy_by_contact_id(contact.first[:id])
         contact.delete
       end 
@@ -74,20 +74,6 @@ module AgentXmpp
       def method_missing(meth, *args, &blk)
         contacts.send(meth, *args, &blk)
       end
-
-      #.........................................................................................................
-      # private
-      #.........................................................................................................
-      def jid_to_s(jid)
-        case jid
-          when String then Xmpp::Jid.new(jid).bare.to_s
-          when Xmpp::Jid then jid.bare.to_s
-        else jid
-        end 
-      end  
-
-      #.........................................................................................................
-      private :jid_to_s
       
     #### self
     end

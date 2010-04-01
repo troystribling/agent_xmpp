@@ -22,7 +22,7 @@ module AgentXmpp
  
       #.........................................................................................................
       def update_status(jid, status)
-        roster.filter(:jid => jid_to_s(jid)).update(:status => status.to_s)
+        roster.filter(:jid => AgentXmpp.full_jid_to_s(jid)).update(:status => status.to_s)
       end
                 
       #.........................................................................................................
@@ -32,7 +32,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def find_by_jid(jid)
-        roster[:jid => jid_to_s(jid)]
+        roster[:jid => AgentXmpp.full_jid_to_s(jid)]
       end 
       
       #.........................................................................................................
@@ -93,18 +93,9 @@ module AgentXmpp
           item.update(:client_name => vquery.iname, :client_version => vquery.version, :client_os => vquery.os)
         end
       end
-
-      #.........................................................................................................
-      def jid_to_s(jid)
-        case jid
-          when String then jid
-          when Xmpp::Jid then jid.to_s
-        else jid
-        end 
-      end  
       
       #.........................................................................................................
-      private :update_with_presence, :update_with_version, :jid_to_s
+      private :update_with_presence, :update_with_version
 
     #### self
     end
