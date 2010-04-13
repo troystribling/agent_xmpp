@@ -30,8 +30,8 @@ module AgentXmpp
   }
 
   #.........................................................................................................
-  @config_file = "agent_xmpp.yml"
-  @app_path = File.dirname($0)
+  @app_path = File.expand_path(File.dirname($0))
+  @config_file = File.join(@app_path, "agent_xmpp.yml")
   @log_file = STDOUT
   
   #.........................................................................................................
