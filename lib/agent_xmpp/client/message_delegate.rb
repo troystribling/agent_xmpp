@@ -23,7 +23,11 @@ module AgentXmpp
         data = command.x
         params.update(:data=>data.to_params, :x_data_type => data.type) unless data.nil?
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
-        Controller.new(pipe, params).invoke_command
+        if BaseController.commands[params[:sessionid]]
+          BaseController.commands[params[:sessionid]].next(params)
+        else
+          Controller.new(pipe, params)
+        end.invoke_command
       end
 
       #.........................................................................................................

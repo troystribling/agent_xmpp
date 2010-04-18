@@ -7,12 +7,13 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
     @routes = {}
     @before_filters = {}
+    @commands = {}
     
     #---------------------------------------------------------------------------------------------------------
     class << self
       
       #.........................................................................................................
-      attr_reader :routes, :before_filters
+      attr_reader :routes, :before_filters, :commands
 
       #.........................................................................................................
       # application interface
@@ -74,12 +75,19 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    attr_reader :params, :pipe, :route
+    attr_reader :params, :pipe, :route, :params_list, :submits
 
     #.........................................................................................................
     def initialize(pipe, params)
+      @params, @pipe = params, pipe
+      @params_list, @submits = [params], []
+    end
+
+    #.........................................................................................................
+    def next(params)
       @params = params
-      @pipe = pipe
+      @params_list << params
+      self
     end
 
     #.........................................................................................................
@@ -87,6 +95,7 @@ module AgentXmpp
     #.......................................................................................................
     def invoke_command
       @route = get_route(:command)
+      params[:sessionid] ||= Xmpp::IdGenerator.generate_id
       unless route.nil?
         if apply_before_filters(:command, params[:node])
           define_meta_class_method(:request, &route[:blk])
@@ -162,7 +171,11 @@ module AgentXmpp
 
     #.......................................................................................................
     def on(action, &blk)
-      define_meta_class_method(("on_"+action.to_s).to_sym, &blk)
+      if action.eql?(:submit)
+        @submits << blk
+      else
+        define_meta_class_method(("on_"+action.to_s).to_sym, &blk)
+      end
     end
 
     #.......................................................................................................
@@ -188,17 +201,6 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def command_result(payload)
-      if payload
-        Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>payload.type.eql?(:form) ? :executing : :completed, 
-                                     :id => params[:id], :sessionid => params[:sessionid], :payload => payload, :iq_type=>:result)
-      else
-        Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=> :completed, :id => params[:id], 
-                                     :sessionid => params[:sessionid], :iq_type=>:result)
-      end
-    end
-
-    #.........................................................................................................
     def command_request(args, &blk)
       raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
       Xmpp::IqCommand.send_command(:to=>args[:to], :node=>args[:node], :iq_type=>:set, :action=>:execute, :payload=>args[:payload], &blk)
@@ -221,8 +223,9 @@ module AgentXmpp
       else
         request
       end
+      update_command_list
     end
-
+    
     #.........................................................................................................
     def process_request
       if route[:opts][:defer]
@@ -247,7 +250,7 @@ module AgentXmpp
       elsif payload.kind_of?(AgentXmpp::Response)
         payload
       else
-        command_result(payload.nil? ? nil : payload.to_x_data)
+        command_result(payload.nil? ? nil : payload.to_x_data, params[:sessionid])
       end
     end
 
@@ -269,6 +272,35 @@ module AgentXmpp
       end
     end
     
+    #.........................................................................................................
+    # commands
+    #.........................................................................................................
+    def on_submit
+      unless(blk = submits.shift).nil?
+        blk.arity.eql?(1) ? blk.call(Xmpp::XData.new('form')) : blk.call
+      end
+    end
+
+    #.........................................................................................................
+    def update_command_list
+      if not BaseController.commands[params[:sessionid]] and submits.length > 1
+        BaseController.commands[params[:sessionid]] = self
+      elsif BaseController.commands[params[:sessionid]] and submits.length.eql?(1)
+        BaseController.commands.delete(params[:sessionid])
+      end
+    end
+
+    #.........................................................................................................
+    def command_result(payload, sessionid)
+      if payload
+        Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>payload.type.eql?(:form) ? :executing : :completed, 
+                                     :id => params[:id], :sessionid => sessionid, :payload => payload, :iq_type=>:result)
+      else
+        Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=> :completed, :id => params[:id], 
+                                     :sessionid => sessionid, :iq_type=>:result)
+      end
+    end
+
     #.........................................................................................................
     # routes
     #.........................................................................................................
