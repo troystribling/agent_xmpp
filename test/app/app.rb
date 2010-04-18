@@ -298,6 +298,28 @@ command 'form/text_view_with_jids' do
   end
 end
 
+#.........................................................................................................
+command 'form/multiple_steps' do
+  AgentXmpp.logger.info "ACTION: multiple_steps"
+  on(:execute) do |form|
+    form.add_title('Account Features')
+    form.add_instructions('Enter and Account')
+    form.add_jid_single('jid', 'account JID')
+  end
+  on(:submit) do |form|
+    form.add_title("Account '#{params["jid"]}'")
+    form.add_instructions('Enable/Disbale features')
+    form.add_boolean('idle_logout', 'On or Off please')
+    form.add_boolean('electrocution', 'Electrocute on login failure?')
+    form.add_text_multi('mod', 'Message of the day')
+    form.add_text_multi('warn', 'Warning message')
+  end
+  on(:submit) do
+    params_list.inject({}){|r,p| r.merge(p[:data])} 
+  end
+end
+
+
 ##########################################################################################################
 # chat messages
 #.........................................................................................................

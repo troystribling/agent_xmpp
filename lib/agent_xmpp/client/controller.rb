@@ -94,26 +94,29 @@ module AgentXmpp
     # internal interface
     #.......................................................................................................
     def invoke_command
-      @route = get_route(:command)
-      params[:sessionid] ||= Xmpp::IdGenerator.generate_id
-      unless route.nil?
-        if apply_before_filters(:command, params[:node])
-          define_meta_class_method(:request, &route[:blk])
-          define_meta_class_method(:request_handler) do           
-            run_command(request)  
-          end
-          define_meta_class_method(:request_callback) do |*resp|
-            resp = resp.length.eql?(1)  ? resp.first : resp  
-            add_payload_to_container(resp)
-          end
-          process_request
-        else
-          AgentXmpp.logger.error "ACCESS ERROR: before_filter prevented '#{params[:from]}' access {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
-          Xmpp::ErrorResponse.forbidden(params)
+      params[:sessionid] = Xmpp::IdGenerator.generate_id
+      invoke_command_on_route do
+        define_meta_class_method(:request, &route[:blk])
+        define_meta_class_method(:request_handler) do  
+          run_command(request)  
         end
-      else
-        AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
-        Xmpp::ErrorResponse.no_route(params)
+        define_meta_class_method(:request_callback) do |*resp|
+          resp = resp.length.eql?(1)  ? resp.first : resp  
+          add_payload_to_container(resp)
+        end
+        process_request
+      end
+    end
+
+    #.......................................................................................................
+    def invoke_command_next
+      invoke_command_on_route do
+        define_meta_class_method(:request_handler) do  
+          if params[:x_data_type].eql?(:submit)
+            on_submit
+          end
+        end
+        process_request
       end
     end
 
@@ -195,21 +198,25 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def command_canceled
-      Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>:canceled, :id => params[:id], 
-                                   :sessionid => params[:sessionid], :iq_type=>:result)
-    end
-
-    #.........................................................................................................
     def command_request(args, &blk)
       raise ArgmentError ':to and :node are required' unless args[:to] and args[:node]
       Xmpp::IqCommand.send_command(:to=>args[:to], :node=>args[:node], :iq_type=>:set, :action=>:execute, :payload=>args[:payload], &blk)
     end
+        
+    #.........................................................................................................
+    # managment
+    #.......................................................................................................
+    def on_submit
+      unless(blk = submits.shift).nil?
+        update_command_list        
+        blk.arity.eql?(1) ? blk.call(Xmpp::XData.new('form')) : blk.call
+      end
+    end
           
-    #.........................................................................................................
+    ####......................................................................................................
     # private
-    #.........................................................................................................
-    def run_command(request)
+    ####......................................................................................................
+    def run_command(req)
       request_method = ("on_"+(params[:x_data_type] || params[:action]).to_s).to_sym
       if respond_to?(request_method)
         if params[:action].eql?(:execute) and params[:x_data_type].nil?
@@ -221,9 +228,8 @@ module AgentXmpp
           send(request_method)
         end
       else
-        request
+        req
       end
-      update_command_list
     end
     
     #.........................................................................................................
@@ -275,17 +281,10 @@ module AgentXmpp
     #.........................................................................................................
     # commands
     #.........................................................................................................
-    def on_submit
-      unless(blk = submits.shift).nil?
-        blk.arity.eql?(1) ? blk.call(Xmpp::XData.new('form')) : blk.call
-      end
-    end
-
-    #.........................................................................................................
     def update_command_list
-      if not BaseController.commands[params[:sessionid]] and submits.length > 1
+      if not BaseController.commands[params[:sessionid]] and submits.length > 0
         BaseController.commands[params[:sessionid]] = self
-      elsif BaseController.commands[params[:sessionid]] and submits.length.eql?(1)
+      elsif BaseController.commands[params[:sessionid]] and submits.length.eql?(0)
         BaseController.commands.delete(params[:sessionid])
       end
     end
@@ -298,6 +297,29 @@ module AgentXmpp
       else
         Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=> :completed, :id => params[:id], 
                                      :sessionid => sessionid, :iq_type=>:result)
+      end
+    end
+
+    #.........................................................................................................
+    def command_canceled
+      BaseController.commands.delete(params[:sessionid]) if BaseController.commands[params[:sessionid]]
+      Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>:canceled, :id => params[:id], 
+                                   :sessionid => params[:sessionid], :iq_type=>:result)
+    end
+
+    #.......................................................................................................
+    def invoke_command_on_route
+      @route = get_route(:command)
+      unless route.nil?
+        if apply_before_filters(:command, params[:node])
+          yield
+        else
+          AgentXmpp.logger.error "ACCESS ERROR: before_filter prevented '#{params[:from]}' access {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
+          Xmpp::ErrorResponse.forbidden(params)
+        end
+      else
+        AgentXmpp.logger.error "ROUTING ERROR: no route for {:node => '#{params[:node]}', :action => '#{params[:action]}'}."
+        Xmpp::ErrorResponse.no_route(params)
       end
     end
 
@@ -328,7 +350,8 @@ module AgentXmpp
     
     #.........................................................................................................
     private :add_payload_to_container, :chat_route, :get_route, :result_jabber_x_data, :result_message_chat, 
-            :process_request, :command_result
+            :process_request, :run_command, :command_result, :invoke_command_on_route, :update_command_list, 
+            :command_canceled
     
   #### BaseController
   end
