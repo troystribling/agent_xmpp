@@ -16,7 +16,7 @@ module AgentXmpp
               'http://jabber.org/protocol/pubsub#subscribe',
               'http://jabber.org/protocol/pubsub#create-nodes',
               'http://jabber.org/protocol/pubsub#delete-nodes']
-  GARBAGE_COLLECTION_INTERVAL = 60
+  GARBAGE_COLLECTION_INTERVAL = 86400
   DEFAULT_PUBSUB_CONFIG = {
     :title                    => 'event',
     :access_model             => 'presence',
