@@ -25,6 +25,7 @@ module AgentXmpp
       @keepalive = EventMachine::PeriodicTimer.new(60) do 
         send_data("\n")
       end
+      AgentXmpp.start_garbage_collection(pipe)
       pipe.connection_completed
     end
 

@@ -5,8 +5,8 @@ module AgentXmpp
   class MessagePipe
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader   :connection_status, :delegates, :id_callbacks, :connection, :stream_features, 
-                  :stream_mechanisms
+    attr_reader   :connection_status, :delegates, :responder_list, :connection, :stream_features, 
+                  :stream_mechanisms, :responder_list_mutex
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
     #---------------------------------------------------------------------------------------------------------
@@ -16,7 +16,8 @@ module AgentXmpp
       @connection = connection
       @connection_status = :offline;
       @delegates = [MessageDelegate]
-      @id_callbacks = {}
+      @responder_list = {}
+      @responder_list_mutex = Mutex.new
     end
     
     #.........................................................................................................
@@ -40,18 +41,13 @@ module AgentXmpp
     end
 
     #.........................................................................................................
-    def responder_list
-      @id_callbacks
-    end
-    
-    #.........................................................................................................
     def send(data, &blk)
       raise AgentXmppError, 'not connected'  unless connected?
       if block_given? and data.kind_of?(Xmpp::Stanza)
         if data.id.nil?
           data.id = Xmpp::IdGenerator.generate_id
         end
-        @id_callbacks[data.id] = blk
+        add_to_responder_list(data.id, &blk)
       end
       AgentXmpp.logger.info "SEND: #{data.to_s}"
       Message.update(data)
@@ -67,15 +63,29 @@ module AgentXmpp
     def connected?
       connection and !connection.error?
     end
+ 
+    #.........................................................................................................
+    def add_to_responder_list(stanza_id, &blk)
+      responder_list_mutex.synchronize do
+        @responder_list[stanza_id] = {:blk=>blk, :created_at=>Time.now}
+      end
+    end
+ 
+    #.........................................................................................................
+    def remove_from_responder_list(stanza_id)
+      if @responder_list[stanza_id]
+        responder_list_mutex.synchronize{@responder_list.delete(stanza_id)}
+      end
+    end
     
     #---------------------------------------------------------------------------------------------------------
     # connection callbacks
     #.........................................................................................................
     def receive(stanza)
       AgentXmpp.logger.info "RECV: #{stanza.to_s}"
-      result = if stanza.kind_of?(Xmpp::Stanza) and stanza.id and blk = id_callbacks[stanza.id]
-                 id_callbacks.delete(stanza.id)
-                 blk.call(stanza)
+      result = if stanza.kind_of?(Xmpp::Stanza) and stanza.id and callback_info = responder_list[stanza.id]
+                 responder_list.delete(stanza.id)
+                 callback_info[:blk].call(stanza)
                else
                  process_stanza(stanza)
                end

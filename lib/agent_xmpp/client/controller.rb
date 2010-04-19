@@ -7,13 +7,14 @@ module AgentXmpp
     #---------------------------------------------------------------------------------------------------------
     @routes = {}
     @before_filters = {}
-    @commands = {}
+    @commands_list = {}    
+    @commands_list_mutex = Mutex.new
     
     #---------------------------------------------------------------------------------------------------------
     class << self
       
       #.........................................................................................................
-      attr_reader :routes, :before_filters, :commands
+      attr_reader :routes, :before_filters, :commands_list, :commands_list_mutex
 
       #.........................................................................................................
       # application interface
@@ -37,6 +38,11 @@ module AgentXmpp
       def before(args=nil, &blk)
         args = {:command => :all, :event => :all, :chat => :all} if args.nil? or args.eql?(:all)
         args.each {|(msg_type, nodes)| add_before_filter(msg_type, {:nodes => nodes, :blk => blk})}
+      end
+
+      #.........................................................................................................
+      def include_module(mod)
+        include(mod)
       end
 
       #.........................................................................................................
@@ -69,6 +75,20 @@ module AgentXmpp
       #.........................................................................................................
       def event_domains
         (routes[:event] ||= []).map{|r| r[:domain]}.uniq
+      end
+
+      #.........................................................................................................
+      def add_command_to_list(session_id, controller)
+        commands_list_mutex.synchronize do
+          commands_list[session_id] = {:controller=>controller, :created_at=>Time.now}
+        end
+      end
+
+      #.........................................................................................................
+      def remove_command_from_list(session_id)
+        if commands_list[session_id]
+          commands_list_mutex.synchronize{commands_list.delete(session_id)}
+        end
       end
 
     #### self
@@ -173,9 +193,9 @@ module AgentXmpp
     end
 
     #.......................................................................................................
-    def on(action, &blk)
+    def on(action, opts= {}, &blk)
       if action.eql?(:submit)
-        @submits << blk
+        @submits << {:opts=>opts, :blk=>blk}
       else
         define_meta_class_method(("on_"+action.to_s).to_sym, &blk)
       end
@@ -207,9 +227,16 @@ module AgentXmpp
     # managment
     #.......................................................................................................
     def on_submit
-      unless(blk = submits.shift).nil?
-        update_command_list        
-        blk.arity.eql?(1) ? blk.call(Xmpp::XData.new('form')) : blk.call
+      unless(sub = submits.shift).nil?
+        update_command_list 
+        blk, guard = sub[:blk], sub[:opts][:guard] 
+        call_blk = lambda{|| blk.arity.eql?(1) ? blk.call(Xmpp::XData.new('form')) : blk.call}
+        result = if guard.nil?
+                   call_blk[]
+                 else  
+                   guard.call(self) ? call_blk[] : on_submit
+                 end
+        result.nil? ? on_submit : result         
       end
     end
           
@@ -282,10 +309,10 @@ module AgentXmpp
     # commands
     #.........................................................................................................
     def update_command_list
-      if not BaseController.commands[params[:sessionid]] and submits.length > 0
-        BaseController.commands[params[:sessionid]] = self
-      elsif BaseController.commands[params[:sessionid]] and submits.length.eql?(0)
-        BaseController.commands.delete(params[:sessionid])
+      if not BaseController.commands_list[params[:sessionid]] and submits.length > 0
+        BaseController.add_command_to_list(params[:sessionid], self)
+      elsif BaseController.commands_list[params[:sessionid]] and submits.length.eql?(0)
+        BaseController.remove_command_from_list(params[:sessionid])
       end
     end
 
@@ -302,7 +329,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def command_canceled
-      BaseController.commands.delete(params[:sessionid]) if BaseController.commands[params[:sessionid]]
+      BaseController.remove_command_from_list(params[:sessionid])
       Xmpp::IqCommand.send_command(:to=>params[:from], :node=>params[:node], :status=>:canceled, :id => params[:id], 
                                    :sessionid => params[:sessionid], :iq_type=>:result)
     end

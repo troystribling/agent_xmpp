@@ -120,6 +120,19 @@ module AgentXmpp
       end 
     end  
             
+    #.........................................................................................................
+    def start_garbage_collection(pipe)
+      EventMachine::PeriodicTimer.new(AgentXmpp::GARBAGE_COLLECTION_INTERVAL) do
+        AgentXmpp.logger.info "GARBAGE COLLECTION IN PROGRESS ON INTERVAL: #{AgentXmpp::GARBAGE_COLLECTION_INTERVAL}"
+        AgentXmpp::BaseController.commands_list.each do |(session, command_info)|
+          AgentXmpp::BaseController.remove_command_from_list(session) if Time.now - command_info[:created_at] > AgentXmpp::GARBAGE_COLLECTION_INTERVAL
+        end
+        pipe.responder_list.each do |(stanza_id, command_info)|
+          pipe.remove_from_responder_list(stanza_id) if Time.now - command_info[:created_at] > AgentXmpp::GARBAGE_COLLECTION_INTERVAL
+        end
+      end  
+    end
+            
   #### self
   end
   
@@ -143,7 +156,7 @@ module AgentXmpp
     #### self
     end
 
-    delegate AgentXmpp::BaseController, :command, :chat, :event, :before
+    delegate AgentXmpp::BaseController, :command, :chat, :event, :before, :include_module
     delegate AgentXmpp::Boot, :before_start, :after_connected, :restarting_client, :discovered_pubsub_node, 
                               :discovered_command_nodes, :received_presence
 
