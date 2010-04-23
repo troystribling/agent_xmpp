@@ -20,8 +20,7 @@ module AgentXmpp
         params = {:xmlns => 'jabber:x:data', :action => command.action || :execute, :to => stanza.from.to_s, 
                   :from => stanza.from.to_s, :node => command.node, :id => stanza.id, 
                   :sessionid => command.sessionid}
-        data = command.x
-        params.update(:data=>data.to_params, :x_data_type => data.type) unless data.nil?
+        (data = command.x) ? params.update(:data=>data.to_params, :x_data_type => data.type) : params.update(:data=>{})
         AgentXmpp.logger.info "RECEIVED COMMAND NODE: #{command.node}, FROM: #{stanza.from.to_s}"
         if BaseController.commands_list[params[:sessionid]]
           BaseController.commands_list[params[:sessionid]][:controller].next(params).invoke_command_next

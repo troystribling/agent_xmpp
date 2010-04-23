@@ -234,7 +234,7 @@ module AgentXmpp
         result = if guard.nil?
                    call_blk[]
                  else  
-                   guard.call(self) ? call_blk[] : on_submit
+                   (guard.arity.eql?(1) ? guard.call(self) : guard.call) ? call_blk[] : on_submit
                  end
         result.nil? ? on_submit : result         
       end
