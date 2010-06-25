@@ -443,7 +443,7 @@ module AgentXmpp
       #.........................................................................................................
       def on_discoitems_error(pipe, result)   
         from_jid = result.from
-        AgentXmpp.logger.warn "RECEIVED DISCO ITEMS ERROR FROM: #{from_jid.to_s}, #{result.query.node}"
+        AgentXmpp.logger.warn "RECEIVED DISCO ITEMS ERROR FROM: #{from_jid.to_s}"
       end
                 
       #.........................................................................................................
