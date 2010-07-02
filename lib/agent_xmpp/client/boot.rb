@@ -48,8 +48,11 @@ module AgentXmpp
       def callbacks(*args)
         args.each do |meth| 
           instance_eval <<-do_eval
+            def call_#{meth}(*args)
+              @array_#{meth}.each{|m| m.call(*args)} unless @array_#{meth}.nil?
+            end
             def #{meth}(&blk)
-              define_meta_class_method(:call_#{meth}, &blk)
+              (@array_#{meth} ||= []) << blk
             end
           do_eval
         end
