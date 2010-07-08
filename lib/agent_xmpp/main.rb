@@ -2,7 +2,7 @@
 OptionParser.new do |opts|
   opts.banner = 'Usage: agent_xmpp.rb [options]'
   opts.separator ''
-  opts.on('-c', '--config agent_xmpp.yml', 'YAML agent configuration file absolute path') {|f| AgentXmpp.config_file = f}
+  opts.on('-a', '--app_path path', 'absolute path to application') {|a| AgentXmpp.app_path = a}
   opts.on('-l', '--logfile file.log', 'name of logfile') {|f| AgentXmpp.log_file = f}
   opts.on_tail('-h', '--help', 'Show this message') {
     puts opts

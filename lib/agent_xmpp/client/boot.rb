@@ -12,6 +12,8 @@ module AgentXmpp
       #.......................................................................................................
       def boot
         
+        AgentXmpp.config_file = File.join(AgentXmpp.app_path, "agent_xmpp.yml")
+
         AgentXmpp.log_file = add_path(AgentXmpp.log_file) if AgentXmpp.log_file.kind_of?(String)
         AgentXmpp.logger = Logger.new(AgentXmpp.log_file, 10, 1024000)
         AgentXmpp.logger.level = Logger::WARN 
