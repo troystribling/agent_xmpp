@@ -261,7 +261,7 @@ module AgentXmpp
     
     #.........................................................................................................
     def process_request
-      if route[:opts] and route[:opts][:defer]
+      if route and route[:opts] and route[:opts][:defer]
         EventMachine.defer(method(:request_handler).to_proc, respond_to?(:request_callback) ? method(:request_callback).to_proc : nil)
       else
         respond_to?(:request_callback) ? request_callback(request_handler) : request_handler
