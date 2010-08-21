@@ -144,7 +144,7 @@ XMPP provides a simple form specification for entry of ad-hoc command parameters
     
     <b>boolean</b>: Select a boolean value for an item.
     
-Form controls are specified in an <tt>on</tt> bloc which takes the command action as an argument. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
+Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>action</tt> as an argument and <tt>yields</tt> the <tt>form</tt>. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
 
     command 'form/long_form' do
       on(:execute) do |form|
