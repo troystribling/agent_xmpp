@@ -323,10 +323,10 @@ end
 ##########################################################################################################
 # chat messages
 #.........................................................................................................
-# chat do
-#   AgentXmpp.logger.info "CHAT MESSAGE: #{params[:from]}, #{params[:body]}"
-#   params[:body].nil? ? 'what?' : params[:body].reverse  
-# end
+chat do
+  AgentXmpp.logger.info "CHAT MESSAGE: #{params[:from]}, #{params[:body]}"
+  params[:body].nil? ? 'what?' : params[:body].reverse  
+end
 
 ##########################################################################################################
 # pubsub events

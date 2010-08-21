@@ -11,21 +11,23 @@ Events. An application that responds to an Ad-Hoc command can be written with fe
       'Hello World' 
     end
 
-Specify the application Jabber ID (JID), password and roster in <tt>agent_xmpp.yml</tt>.
+Specify the application Jabber ID (JID), password and contact roster in <tt>agent_xmpp.yml</tt>.
 
     jid: myapp@nowhere.com
     password: none
     roster:
         - 
             jid:you@home.com
+            groups: [admin]
 
-Be sure libxml2 headers are available,
+Be sure libxml2 headers are available and that libsqlite3-ruby1.9.1 is installed,
 
     sudo apt-get install libxml2-dev
+    sudo apt-get install libsqlite3-ruby1.9.1
 
 Install the gem,
 
-    sudo gem install troystribling-agent_xmpp --source=http://gems.github.com
+    sudo gem install agent_xmpp
 
 Install the Gajim XMPP Client version 0.12.3 or higher, http://www.gajim.org, and connect to <i>you@home.com</i>. 
 
@@ -33,20 +35,62 @@ Run the application,
 
     ruby myapp.rb
 
-When started for the first time <tt>myapp.rb</tt> will automatically send buddy requests to all contacts specified
-in <tt>agent_xmpp.yml</tt>. Accept the buddy request and _myapp_ will appear as a contact in the Gajim roster. Right click on _myapp_
-and select _execute_ _commands_ from the drop down menu. A list of Ad-Hoc Commands will be displayed containing _hello_. 
+When started for the first time <tt>myapp.rb</tt> will automatically send contact requests to all contacts specified
+in the <tt>agent_xmpp.yml</tt> contact roster. If you accept the contact request _myapp_ will appear in the Gajim contact roster. 
+Right click on _myapp_ and select _execute_ _commands_ from the drop down menu. A list of Ad-Hoc Commands will be displayed containing _hello_. 
 Select it and click the _forward_ _button_ to execute.
 
-== More Examples
+== Supported Environment
 
-More examples can be found at http://gist.github.com/160338
+The following versions of ruby are supported
 
+    ruby 1.9.1
+    
+The following Operating Systems are supported
+    
+    Ubuntu 10.4
+    
+== Contact Groups
+
+Contact groups may be specified in <tt>agent_xmpp.yml</tt>.
+
+    jid: myapp@nowhere.com
+    password: none
+    roster:
+        - 
+            jid:you@home.com
+            groups: [good group, owners]
+
+        - 
+            jid: someone@somewhere.com
+            groups: [bad group]
+    
+== Agent Administrator Commands
+
+Any contact that is in the <tt>admin</tt> contact group can execute the administrator commands. At least one administrator should be specified in <tt>agent_xmpp.yml</tt>. The following commands are available to agent administrators.
+
+    *contacts*: List the contact roster.
+
+    *online users*: List all online users.
+    
+    *add contact*: Add a contact.
+    
+    *delete contact*: Delete a contact.
+    
+    *subscriptions*: List all subscriptions with statistics.
+    
+    *publications*: List all publications with statistics.
+    
+    *messages by type*: List message statistics by message type.
+    
+    *messages by contact*: List message statistics by contact.
+    
+    *messages by command*: List message statistics by command.
+    
 == Ad-Hoc Command Response Payload
 
-Agent XMPP will map scalars, arrays and hashes returned by <tt>execute</tt> blocks to jabber:x:data command 
+Agent XMPP will map native ruby scalars, arrays and hashes returned by <tt>execute</tt> blocks to jabber:x:data command 
 response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
-All scalars have <tt>to_s</tt> applied prior to building the payload.
 
     command 'scalar' do
       'scalar' 
@@ -78,11 +122,121 @@ All scalars have <tt>to_s</tt> applied prior to building the payload.
 
 a <tt>params</tt> structure is available within the <tt>execute</tt> block containing routing information.
 
+== Ad-Hoc Command Data Forms
+
+XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html. Agent XMPP supports the following form controls,
+
+    *title*: The form title.
+    
+    *instructions*: Form usage instructions for the user.
+    
+    *fixed*: Static text.
+    
+    *text single*: Single line text entry.
+    
+    *text private*: Single line private text entry for passwords.
+    
+    *text JID*: Single JID entry with syntax validation.
+    
+    *text multi*: Muli-line text entry.
+    
+    *list single*: Select a single item from a list items.
+    
+    *boolean*: Select a boolean value for an item.
+    
+Form controls are specified in an <tt>on</tt> bloc which takes the command action as an argument. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
+
+    command 'form/long_form' do
+      on(:execute) do |form|
+        form.add_title('The Long Form')
+        form.add_instructions('Make the correct choices and provide the required information.')
+        form.add_fixed("Your name is required.")
+        form.add_text_single('first_name', 'First Name')
+        form.add_text_single('last_name', 'Last Name')
+        form.add_fixed("Your address is required.")
+        form.add_text_single('street', 'Street')
+        form.add_text_single('city', 'City')
+        form.add_text_single('state', 'State')
+        form.add_text_single('zip', 'Zip Code')
+        form.add_fixed("Enter two friends.")
+        form.add_jid_single('contact_1', 'contact JID')
+        form.add_jid_single('contact_2', 'contact JID')
+        form.add_fixed("Your password is required.")
+        form.add_text_private('password', 'Password')
+        form.add_text_private('renter_password', 'Renter Password')
+        form.add_fixed("Choose your food.")
+        form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'Select a Fruit')
+        form.add_list_single('nuts', [:peanut, :almond, :cashew, :pecan, :walnut], 'Select a Nut')
+        form.add_list_single('vegetables', [:broccoli, :carrot, :corn, :tomato, :onion], 'Select a Vegtable')
+        form.add_fixed("Answer the questions.")
+        form.add_boolean('yes_or_no', 'Yes or No please?')
+        form.add_boolean('flux_capcitors', 'Enable flux capacitors for superluminal transport')
+        form.add_fixed("A story of at least 250 characters is required")
+        form.add_text_multi('story', 'Your Story')
+      end
+      on(:submit) do
+        params[:data]
+      end
+    end
+
+    
+If command parameters have dependencies multi-step forms can be used. Multi-step forms are specified by a sequence of <tt>on(:submit)</tt> blocks that are called in the order listed. All parameters entered for multi-step forms are available in <tt>params_list</tt>.
+
+    command 'form/multiple_steps' do
+      on(:execute) do |form|
+        form.add_title('Account Features')
+        form.add_instructions('Enter and Account')
+        form.add_jid_single('jid', 'account JID')
+      end
+      on(:submit) do |form|
+        form.add_title("Account '#{params[:data]['jid']}'")
+        form.add_instructions('Enable/Disbale features')
+        form.add_boolean('idle_logout', 'On or Off please')
+        form.add_boolean('electrocution', 'Electrocute on login failure?')
+        form.add_text_multi('mod', 'Message of the day')
+        form.add_text_multi('warn', 'Warning message')
+      end
+      on(:submit) do
+        params_list.inject({}){|r,p| r.merge(p[:data])} 
+      end
+    end
+
+== Command Authorization
+
+Agent XMPP allows command authorization groups to be specified by XMPP contact groups. 
+
+== Command Before Filters
+
+Agent XMPP supports specification of filters executed before command execution that must return a boolean value. If the filter returns <tt>true</tt> the command executes. If <tt>false</tt> is returned the command does not execute. 
+
+    before :command => :all do
+      jid = params[:from]
+      AgentXmpp::Roster.find_by_jid(jid) or AgentXmpp.is_account_jid?(jid)
+    end
+
+== Deferred Command Execution
+
+By default Agent XMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool. 
+
+    command 'form/boolean', :defer => true do
+      on(:execute) do |form|
+        form.add_title('Hyper Drive Configuration')
+        form.add_instructions('Choose the hyperdrive configuration which best suits your needs')
+        form.add_boolean('answer', 'On or Off please')
+        form.add_boolean('flux_capcitors', 'Enable flux capacitors for superluminal transport')
+        form.add_fixed('Enable SQUIDs for enhanced quantum decoherence')
+        form.add_boolean('squids')
+      end
+      on(:submit) do
+        StarshipEngineering.engage(params[:data])
+      end
+    end
+
 == Send Commands
 
 Commands may be sent with or without a response callback,
 
-    send_command(:to=>'thatapp@a-place.com/ahost', :node=> 'hello') do |status, data|
+    send_command(:to=>'thatapp@aplace.com/ahost', :node=> 'hello') do |status, data|
       puts "COMMAND RESPONSE: #{status}, #{data.inspect}"
     end
 
@@ -173,23 +327,6 @@ If the <tt>chat</tt> block returns a <tt>String</tt> a response will be sent to 
 
     send_chat(:to=>'thatapp@a-place.com/onahost', :body=>"Hello from #{AgentXmpp.jid.to_s} at " + Time.now.to_s)
     
-== Roster
-
-Roster groups may be specified in <tt>agent_xmpp.yml</tt>.
-
-    jid: myapp@nowhere.com
-    password: none
-    roster:
-        - 
-            jid:you@home.com
-            groups: [good group, owners]
-        
-        - 
-            jid: someone@somewhere.com
-            groups: [bad group]
-     
-Agent XMPP will update the roster maintained on the XMPP server to be consistent with to the roster specified in <tt>agent_xmpp.yml</tt>. 
-
 == Routing Priority
 
 The routing priority may be configured in <tt>agent_xmpp.yml</tt>. The default value is 1. Valid values are between -127 and 128. 
@@ -248,6 +385,10 @@ The logger can be accessed and configured.
         before_start do
           AgentXmpp.logger.level = Logger::WARN 
         end
+
+== More Examples
+
+More examples can be found at http://gist.github.com/160338
 
 == Supported XEPs
 

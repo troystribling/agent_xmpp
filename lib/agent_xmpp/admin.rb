@@ -20,7 +20,7 @@ command 'admin/contacts', :access => 'admin' do
 end
 
 #.........................................................................................................
-command 'admin/on_line_users', :access => 'admin' do
+command 'admin/online_users', :access => 'admin' do
   AgentXmpp.logger.info "ACTION: admin/on_line_users"
   AgentXmpp::Roster.find_all_by_status(:available).map do |r| 
     jid = AgentXmpp::Xmpp::Jid.new(r[:jid]) 

@@ -2,7 +2,7 @@
 .DS_Store
 coverage/*
 rdoc/*
-pkg/*
+*.gem
 *.tmproj
 *.yml
 *.db

@@ -1,7 +1,7 @@
 module AgentXmpp
 
   #.........................................................................................................
-  VERSION = "0.0.0"
+  VERSION = "0.1.0"
   AGENT_XMPP_NAME = 'AgentXMPP'
   OS_VERSION = IO.popen('uname -sr').readlines.first.to_s.strip
   SUBSCRIBE_RETRY_PERIOD = 60
