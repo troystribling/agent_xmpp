@@ -124,11 +124,11 @@ a <tt>params</tt> structure is available within the <tt>execute</tt> block conta
 
 == Ad-Hoc Command Data Forms
 
-XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html. Agent XMPP supports the following form controls,
+XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls,
 
-[title] The form title.
+* title:: The form title.
     
-[instructions] Form usage instructions for the user.
+* instructions:: Form usage instructions for the user.
     
 [fixed] Static text.
     
@@ -269,7 +269,7 @@ and within <tt>command</tt> blocks.
 
 == Command Response Delegation
 
-Command responses may be delegated to one or more <em>Message Processing Callbacks</em> (see the last section <em>Message Processing Callbacks</em> for a list of supported callbacks). This feature is useful when a command must send another message whose response is processed by the framework and needs to delegate its response to the sent message response callback. In the example below of the <tt>add_contact</tt> administration message the command sends a command to the server to add a roster item and does not respond to the original request until the response of the add roster item request is received from the server. 
+Command responses may be delegated to one or more <em>Message Processing Callbacks</em> (see the last section <em>Message Processing Callbacks</em> for a list). <em>Message Processing Callbacks</em> give applications the ability to interface with the framework message processing workflow. <em>Command Response Delegation</em> is useful when a command must send another message and the response of this secondary message is processed by the framework. The command then delegates its response to the secondary message response. In the example below of the <tt>add_contact</tt> administration message the command sends a command to the server to add a roster item and does not respond to the original request until the response of the add roster item request is received from the server. 
 
     command 'admin/add_contact', :access => 'admin' do
       on(:execute) do |form|
@@ -446,7 +446,7 @@ More examples can be found at http://gist.github.com/160338
 
 == Message Processing Callbacks
 
-Message processing callbacks are available to applications to extend the message processing work flow. To receive
+<em>Message Processing Callbacks</em> are available to applications to extend the agent message processing work flow. To receive
 callbacks a delegate object must be provided that implements the callbacks of interest.   
 
     after_connected do |connection|
