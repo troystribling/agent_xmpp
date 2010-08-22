@@ -126,9 +126,9 @@ a <tt>params</tt> structure is available within the <tt>execute</tt> block conta
 
 XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls,
 
-* title:: The form title.
+* <b>title</b>: The form title.
     
-* instructions:: Form usage instructions for the user.
+* <b>instructions<b> Form usage instructions for the user.
     
 [fixed] Static text.
     
