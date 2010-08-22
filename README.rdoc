@@ -234,7 +234,7 @@ Agent XMPP supports specification of filters executed before command execution t
 
 By default Agent XMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool. Only the <tt>on(:submit)</tt> calls are deferred.
 
-    command 'starship_engines_configuration', :defer => true do
+    command 'starship_engine_configuration', :defer => true do
       on(:execute) do |form|
         form.add_title('Hyper Drive Configuration')
         form.add_instructions('Choose the hyperdrive configuration which best suits your needs')
