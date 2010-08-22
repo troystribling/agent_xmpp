@@ -264,6 +264,47 @@ and within <tt>command</tt> blocks.
       {:a1 => 'v1', :a2 => 'v2'}
     end
 
+== Command Error Response
+
+Error responses to <em>Ad-Hoc Command</em> requests can be sent if an error is encountered during command execution.
+    
+    command 'do_something' do
+      if MyValidator.can_do_something?(params)
+        'I did it'
+      else
+        error(:bad_request, params, 'jid not specified')
+      end
+    end
+    
+In general the error response syntax has the form,
+
+    error(error_type, params, error_message)
+
+Valid <tt>error_types</tt> are,
+
+    :bad-request
+    :conflict
+    :feature-not-implemented
+    :forbidden
+    :gone
+    :internal-server-error
+    :item-not-found
+    :jid-malformed
+    :not-acceptable
+    :not-allowed
+    :not-authorized
+    :payment-required
+    :recipient-unavailable
+    :redirect
+    :registration-required
+    :remote-server-not-found
+    :remote-server-timeout
+    :resource-constraint
+    :service-unavailable
+    :subscription-required
+    :undefined-condition
+    :unexpected-request
+
 == Command Response Delegation
 
 Command responses may be delegated to one or more <em>Message Processing Callbacks</em> (see the last section <em>Message Processing Callbacks</em> for a list). <em>Message Processing Callbacks</em> give applications the ability to interface with the framework message processing workflow. <em>Command Response Delegation</em> is useful when a command must send another message and the response of this secondary message is processed by the framework. The command then delegates its response to the secondary message response. In the example below of the <tt>add_contact</tt> administration message the command sends a command to the server to add a roster item and does not respond to the original request until the response of the add roster item request is received from the server. 
@@ -383,6 +424,12 @@ See http://xmpp.org/rfcs/rfc3921.html for a details.
             jid:you@home.com
             groups: [good group, owners]
         
+== Message Processing Context Extension
+
+You can add methods to the <tt>command</tt> and <tt>chat</tt> context by adding your methods to a module and calling,
+    
+    include_module MyExtensions
+            
 == Major Event Callbacks
 
 Agent XMPP provides callbacks for applications to respond to major events that occur during execution.
