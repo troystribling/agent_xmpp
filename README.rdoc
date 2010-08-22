@@ -146,7 +146,7 @@ XMPP provides a simple form specification for entry of ad-hoc command parameters
     
 Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>action</tt> as an argument and <tt>yields</tt> the <tt>form</tt>. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
 
-    command 'form/long_form' do
+    command 'long_form' do
       on(:execute) do |form|
         form.add_title('The Long Form')
         form.add_instructions('Make the correct choices and provide the required information.')
@@ -182,7 +182,7 @@ Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>a
     
 If command parameters have dependencies multi-step forms can be used. Multi-step forms are specified by a sequence of <tt>on(:submit)</tt> blocks that are called in the order listed.
 
-    command 'form/multiple_steps' do
+    command 'multiple_steps' do
       on(:execute) do |form|
         form.add_title('Account Features')
         form.add_instructions('Enter and Account')
@@ -234,7 +234,7 @@ Agent XMPP supports specification of filters executed before command execution t
 
 By default Agent XMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool. Only the <tt>on(:submit)</tt> calls are deferred.
 
-    command 'form/boolean', :defer => true do
+    command 'starship_engines_configuration', :defer => true do
       on(:execute) do |form|
         form.add_title('Hyper Drive Configuration')
         form.add_instructions('Choose the hyperdrive configuration which best suits your needs')
