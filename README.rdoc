@@ -1,7 +1,7 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing automated XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
-Events. An application that responds to an Ad-Hoc command can be written with few lines of code.
+Agent XMPP is a simple DSL for writing automated XMPP clients that support Messaging, <em>Ad-Hoc Commands</em> and Publish Subscribe 
+Events. An application that responds to an <em>Ad-Hoc Command</em> can be written with few lines of code.
 
     # myapp.rb
     require 'rubygems'
@@ -37,8 +37,9 @@ Run the application,
 
 When started for the first time <tt>myapp.rb</tt> will automatically send contact requests to all contacts specified
 in the <tt>agent_xmpp.yml</tt> contact roster. If you accept the contact request _myapp_ will appear in the Gajim contact roster. 
-Right click on _myapp_ and select _execute_ _commands_ from the drop down menu. A list of Ad-Hoc Commands will be displayed containing _hello_. 
-Select it and click the _forward_ _button_ to execute.
+Right click on _myapp_ and select _execute_ _commands_ from the drop down menu. A list of <em>Ad-Hoc Commands</em> will be displayed containing _hello_. Select it and click the _forward_ _button_ to execute.
+
+See <tt>http://github.com/troystribling/agent_xmpp/blob/master/test/app/app.rb</tt> for many examples.
 
 == Supported Environment
 
@@ -67,30 +68,29 @@ Contact groups may be specified in <tt>agent_xmpp.yml</tt>.
     
 == Agent Administrator Commands
 
-Any contact that is in the <tt>admin</tt> contact group can execute the administrator commands. At least one administrator should be specified in <tt>agent_xmpp.yml</tt>. The following commands are available to agent administrators.
+Any contact that is in the <tt>admin</tt> contact group can execute <em>Administrator Commands<.em>. At least one administrator should be specified in <tt>agent_xmpp.yml</tt>. The following commands are available to agent administrators.
 
-[contacts] List the contact roster.
+* <b>contacts</b>: List the contact roster.
 
-[online users] List all online users.
+* <b>online users</b>: List all online users.
 
-[add contact] Add a contact.
+* <b>add contact</b>: Add a contact.
 
-[delete contact] Delete a contact.
+* <b>delete contact</b>: Delete a contact.
 
-[subscriptions] List all subscriptions with statistics.
+* <b>subscriptions</b>: List all subscriptions with statistics.
 
-[publications] List all publications with statistics.
+* <b>publications</b>: List all publications with statistics.
 
-[messages by type] List message statistics by message type.
+* <b>messages by type</b>: List message statistics by message type.
 
-[messages by contact] List message statistics by contact.
+* <b>messages by contact</b>: List message statistics by contact.
 
-[messages by command] List message statistics by command.
+* <b>messages by command</b>: List message statistics by command.
     
 == Ad-Hoc Command Response Payload
 
-Agent XMPP will map native ruby scalars, arrays and hashes returned by <tt>execute</tt> blocks to jabber:x:data command 
-response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
+<em>Ad-Hoc Commands</em> allow XMPP clients to send and receive structured parameterized commands. To process an <em>Ad-Hoc Command</em> request in an Agent XMPP application use <tt>command</tt> blocks. Agent XMPP will map native ruby scalars, arrays and hashes returned by <tt>command</tt> blocks to jabber:x:data command response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
 
     command 'scalar' do
       'scalar' 
@@ -120,29 +120,27 @@ response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a d
        {:a1 => ['v31', 'v31'], :a2 => 'v32'}]
     end
 
-a <tt>params</tt> structure is available within the <tt>execute</tt> block containing routing information.
-
 == Ad-Hoc Command Data Forms
 
-XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls,
+XMPP provides a simple form specification for entry of Ad-Hoc Command parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls.
 
 * <b>title</b>: The form title.
     
-* <b>instructions<b> Form usage instructions for the user.
+* <b>instructions</b>: Form usage instructions for the user.
     
-[fixed] Static text.
+* <b>fixed</b>: Static text.
     
-[text single] Single line text entry.
+* <b>text-single</b>: Single line text entry.
     
-[text private] Single line private text entry for passwords.
+* <b>text-private</b>: Single line private text entry for passwords.
     
-[text JID] Single JID entry with syntax validation.
+* <b>jid-single</b>: Single JID entry with syntax validation.
     
-[text multi] Muli-line text entry.
+* <b>text-multi</b>: Muli-line text entry.
     
-[list single] Select a single item from a list items.
+* <b>list-single</b>: Select a single item from a list items.
     
-[boolean] Select a boolean value for an item.
+* <b>boolean</b>: Select a boolean value for an item.
     
 Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>action</tt> as an argument and <tt>yields</tt> the <tt>form</tt>. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
 
@@ -178,7 +176,6 @@ Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>a
         params[:data]
       end
     end
-
     
 If command parameters have dependencies multi-step forms can be used. Multi-step forms are specified by a sequence of <tt>on(:submit)</tt> blocks that are called in the order listed.
 
@@ -203,7 +200,7 @@ If command parameters have dependencies multi-step forms can be used. Multi-step
 
 == Command Authorization
 
-Agent XMPP allows command authorization groups to be specified by XMPP contact groups. For contacts in the groups <tt>good</tt> and <tt>bad</tt>,
+Agent XMPP allows command authorization groups to be specified by XMPP contact groups.
 
     command 'do_something', :access => 'good' do
         Something.do_it(params[:data])
@@ -223,16 +220,16 @@ Agent XMPP supports specification of filters executed before command execution t
     end
 
     before :command => 'do_something' do
-        Something.do_it?(params[:data])
+        Something.do_it?(params)
     end
 
     before :command => ['do_something', 'and_something_else'] do
-        Something.do_it?(params[:data])
+        Something.do_it?(params)
     end
 
 == Deferred Command Execution
 
-By default Agent XMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool. Only the <tt>on(:submit)</tt> calls are deferred.
+By default Agent XMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool.
 
     command 'starship_engine_configuration', :defer => true do
       on(:execute) do |form|
@@ -414,11 +411,8 @@ Agent XMPP provides callbacks for applications to respond to major events that o
 
 == Development with XMPP Clients
 
-Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and I have not found
-a client that supports Publish-Subscribe. Gajim http://www.gajim.org provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery,
-which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better
-implementation. Both Gajim and Psi provide an interface for manual entry of XML messages. Since Publish-Subscribe is not supported on
-the user interface manual entry of messages is required for development. Example messages can be found at http://gist.github.com/160344
+<em>Ad-Hoc Commands</em>, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and I have not found
+a client that supports Publish-Subscribe. Gajim http://www.gajim.org provides support for <em>Ad-Hoc Commands</em> and jabber:x:data Forms. Service Discovery, which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better implementation. Both Gajim and Psi provide an interface for manual entry of XML messages. Since Publish-Subscribe is not supported on the user interface manual entry of messages is required for development. Example messages can be found at http://gist.github.com/160344
 
 == Logging
 
@@ -438,11 +432,11 @@ More examples can be found at http://gist.github.com/160338
 
 == Supported XEPs
 
-    XEP-0004 jabber:x:data Forms    http://xmpp.org/extensions/xep-0004.html
-    XEP-0030 Service Discovery      http://xmpp.org/extensions/xep-0030.html
-    XEP-0050 Ad-Hoc Commands        http://xmpp.org/extensions/xep-0050.html
-    XEP-0060 Publish Subscribe      http://xmpp.org/extensions/xep-0060.html
-    XEP-0092 Software Version       http://xmpp.org/extensions/xep-0092.html
+* XEP-0004 jabber:x:data Forms    http://xmpp.org/extensions/xep-0004.html
+* XEP-0030 Service Discovery      http://xmpp.org/extensions/xep-0030.html
+* XEP-0050 Ad-Hoc Commands        http://xmpp.org/extensions/xep-0050.html
+* XEP-0060 Publish Subscribe      http://xmpp.org/extensions/xep-0060.html
+* XEP-0092 Software Version       http://xmpp.org/extensions/xep-0092.html
 
 == Message Processing Callbacks
 
