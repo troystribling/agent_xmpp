@@ -269,7 +269,7 @@ and within <tt>command</tt> blocks.
 
 == Command Response Delegation
 
-Command responses may be delegated to one or more *Message Processing Callbacks* (see the last section *Message Processing Callbacks* for a list of supported callbacks). This feature is useful when a command must send another message whose response is processed by the framework and needs to delegate its response to the sent message response callback. In the example below of the <tt>add_contact</tt> administration message the command sends a command to the server to add a roster item and does not respond to the original request until the response of the add roster item request is received from the server. 
+Command responses may be delegated to one or more <em>Message Processing Callbacks</em> (see the last section <em>Message Processing Callbacks</em> for a list of supported callbacks). This feature is useful when a command must send another message whose response is processed by the framework and needs to delegate its response to the sent message response callback. In the example below of the <tt>add_contact</tt> administration message the command sends a command to the server to add a roster item and does not respond to the original request until the response of the add roster item request is received from the server. 
 
     command 'admin/add_contact', :access => 'admin' do
       on(:execute) do |form|
