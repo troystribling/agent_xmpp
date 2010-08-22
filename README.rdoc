@@ -69,23 +69,23 @@ Contact groups may be specified in <tt>agent_xmpp.yml</tt>.
 
 Any contact that is in the <tt>admin</tt> contact group can execute the administrator commands. At least one administrator should be specified in <tt>agent_xmpp.yml</tt>. The following commands are available to agent administrators.
 
-    *contacts*: List the contact roster.
+[contacts] List the contact roster.
 
-    *online users*: List all online users.
-    
-    *add contact*: Add a contact.
-    
-    *delete contact*: Delete a contact.
-    
-    *subscriptions*: List all subscriptions with statistics.
-    
-    *publications*: List all publications with statistics.
-    
-    *messages by type*: List message statistics by message type.
-    
-    *messages by contact*: List message statistics by contact.
-    
-    *messages by command*: List message statistics by command.
+[online users] List all online users.
+
+[add contact] Add a contact.
+
+[delete contact] Delete a contact.
+
+[subscriptions] List all subscriptions with statistics.
+
+[publications] List all publications with statistics.
+
+[messages by type] List message statistics by message type.
+
+[messages by contact] List message statistics by contact.
+
+[messages by command] List message statistics by command.
     
 == Ad-Hoc Command Response Payload
 
@@ -126,11 +126,11 @@ a <tt>params</tt> structure is available within the <tt>execute</tt> block conta
 
 XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html. Agent XMPP supports the following form controls,
 
-title:: The form title.
+[title] The form title.
     
-[+instructions+] Form usage instructions for the user.
+[instructions] Form usage instructions for the user.
     
-+fixed+:: Static text.
+[fixed] Static text.
     
 [text single] Single line text entry.
     
@@ -203,7 +203,15 @@ If command parameters have dependencies multi-step forms can be used. Multi-step
 
 == Command Authorization
 
-Agent XMPP allows command authorization groups to be specified by XMPP contact groups. 
+Agent XMPP allows command authorization groups to be specified by XMPP contact groups. For contacts in the groups <tt>good</tt> and <tt>bad</tt>,
+
+    command 'do_something', :access => 'good' do
+        Something.do_it(params[:data])
+    end
+
+    command 'do_something', :access => ['bad', 'good'] do
+        SomethingElse.do_it(params[:data])
+    end
 
 == Command Before Filters
 
@@ -212,6 +220,14 @@ Agent XMPP supports specification of filters executed before command execution t
     before :command => :all do
       jid = params[:from]
       AgentXmpp::Roster.find_by_jid(jid) or AgentXmpp.is_account_jid?(jid)
+    end
+
+    before :command => 'do_something' do
+        Something.do_it?(params[:data])
+    end
+
+    before :command => ['do_something', 'and_something_else'] do
+        Something.do_it?(params[:data])
     end
 
 == Deferred Command Execution
