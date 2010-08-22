@@ -1,7 +1,7 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing automated XMPP clients that support Messaging, <em>Ad-Hoc Commands</em> and Publish Subscribe 
-Events. An application that responds to an <em>Ad-Hoc Command</em> can be written with few lines of code.
+Agent XMPP is a simple DSL for writing automated XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
+Events. An application that responds to an Ad-Hoc Command can be written with few lines of code.
 
     # myapp.rb
     require 'rubygems'
@@ -37,7 +37,7 @@ Run the application,
 
 When started for the first time <tt>myapp.rb</tt> will automatically send contact requests to all contacts specified
 in the <tt>agent_xmpp.yml</tt> contact roster. If you accept the contact request _myapp_ will appear in the Gajim contact roster. 
-Right click on _myapp_ and select _execute_ _commands_ from the drop down menu. A list of <em>Ad-Hoc Commands</em> will be displayed containing _hello_. Select it and click the _forward_ _button_ to execute.
+Right click on _myapp_ and select _execute_ _commands_ from the drop down menu. A list of Ad-Hoc Commands will be displayed containing _hello_. Select it and click the _forward_ _button_ to execute.
 
 See <tt>http://github.com/troystribling/agent_xmpp/blob/master/test/app/app.rb</tt> for many examples.
 
@@ -68,7 +68,7 @@ Contact groups may be specified in <tt>agent_xmpp.yml</tt>.
     
 == Agent Administrator Commands
 
-Any contact that is in the <tt>admin</tt> contact group can execute <em>Administrator Commands<.em>. At least one administrator should be specified in <tt>agent_xmpp.yml</tt>. The following commands are available to agent administrators.
+Any contact that is in the <tt>admin</tt> contact group can execute <em>Administrator Commands</em>. At least one administrator should be specified in <tt>agent_xmpp.yml</tt>. The following commands are available to agent administrators.
 
 * <b>contacts</b>: List the contact roster.
 
@@ -122,7 +122,7 @@ Any contact that is in the <tt>admin</tt> contact group can execute <em>Administ
 
 == Ad-Hoc Command Data Forms
 
-XMPP provides a simple form specification for entry of Ad-Hoc Command parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls.
+XMPP provides a simple form specification for entry of <em>Ad-Hoc Command</em> parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls.
 
 * <b>title</b>: The form title.
     
@@ -411,8 +411,8 @@ Agent XMPP provides callbacks for applications to respond to major events that o
 
 == Development with XMPP Clients
 
-<em>Ad-Hoc Commands</em>, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and I have not found
-a client that supports Publish-Subscribe. Gajim http://www.gajim.org provides support for <em>Ad-Hoc Commands</em> and jabber:x:data Forms. Service Discovery, which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better implementation. Both Gajim and Psi provide an interface for manual entry of XML messages. Since Publish-Subscribe is not supported on the user interface manual entry of messages is required for development. Example messages can be found at http://gist.github.com/160344
+Ad-Hoc Commands, jabber:x:data Forms nor Service Discovery are widely supported by XMPP clients and I have not found
+a client that adequately supports Publish-Subscribe. Gajim http://www.gajim.org provides support for Ad-Hoc Commands and jabber:x:data Forms. Service Discovery, which is useful for Publish-Subscibe development, is supported by Gajim, but Psi http://psi-im.org provides a much better implementation. Both Gajim and Psi provide an interface for manual entry of XML messages. Since Publish-Subscribe is not supported on the user interface manual entry of messages is required for development. Example messages can be found at http://gist.github.com/160344
 
 == Logging
 
