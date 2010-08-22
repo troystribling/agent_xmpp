@@ -126,23 +126,23 @@ a <tt>params</tt> structure is available within the <tt>execute</tt> block conta
 
 XMPP provides a simple form specification for entry of ad-hoc command parameters, http://xmpp.org/extensions/xep-0004.html. Agent XMPP supports the following form controls,
 
-    title:: The form title.
+title:: The form title.
     
-    [+instructions+] Form usage instructions for the user.
+[+instructions+] Form usage instructions for the user.
     
-    +fixed+:: Static text.
++fixed+:: Static text.
     
-    [text single] Single line text entry.
+[text single] Single line text entry.
     
-    [text private] Single line private text entry for passwords.
+[text private] Single line private text entry for passwords.
     
-    [text JID] Single JID entry with syntax validation.
+[text JID] Single JID entry with syntax validation.
     
-    [text multi] Muli-line text entry.
+[text multi] Muli-line text entry.
     
-    [list single] Select a single item from a list items.
+[list single] Select a single item from a list items.
     
-    [boolean] Select a boolean value for an item.
+[boolean] Select a boolean value for an item.
     
 Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>action</tt> as an argument and <tt>yields</tt> the <tt>form</tt>. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
 
