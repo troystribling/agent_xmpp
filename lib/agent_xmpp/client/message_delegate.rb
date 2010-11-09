@@ -658,7 +658,18 @@ module AgentXmpp
           Delegator.delegate(AgentXmpp, :publish)
         end
       end
-          
+
+      #.........................................................................................................
+      def add_create_pubsub_node(pipe, pubsub)
+        unless AgentXmpp.respond_to?(:create_pubsub_node)
+          AgentXmpp.define_meta_class_method(:create_pubsub_node) do |node| 
+            pipe.send_resp(Xmpp::IqPubSub.create_node(pipe, pubsub, node))
+          end
+          AgentXmpp.logger.info "ADDED CREATE_PUBSUB_NODE FOR: #{pubsub}"
+          Delegator.delegate(AgentXmpp, :create_pubsub_node)
+        end
+      end
+                   
       #.........................................................................................................
       def add_send_command_request_method(pipe)
         AgentXmpp.define_meta_class_method(:send_command_request) do |args, &blk| 
@@ -719,7 +730,7 @@ module AgentXmpp
 
       #.........................................................................................................
       private :init_remote_services, :update_publish_nodes, :create_user_pubsub_root, :add_send_chat_method, 
-              :add_send_command_request_method, :add_publish_methods, :process_roster_items, :process_pubsub_discoinfo,
+              :add_send_command_request_method, :add_publish_methods, :add_publish_method, :process_roster_items, :process_pubsub_discoinfo,
               :check_roster_item_group
           
     #### self
