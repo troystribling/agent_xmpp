@@ -465,6 +465,7 @@ module AgentXmpp
         if /#{AgentXmpp.jid.domain}/.match(jid.to_s)
           add_publish_methods(pipe, jid)
           add_publish_method(pipe, jid)
+          add_create_pubsub_node(pipe, jid)
           @pubsub_service = jid
            req += [Xmpp::IqDiscoItems.get(pipe, jid.to_s)] + init_remote_services(pipe)
         end; req
@@ -730,7 +731,7 @@ module AgentXmpp
 
       #.........................................................................................................
       private :init_remote_services, :update_publish_nodes, :create_user_pubsub_root, :add_send_chat_method, 
-              :add_send_command_request_method, :add_publish_methods, :add_publish_method, :process_roster_items, :process_pubsub_discoinfo,
+              :add_send_command_request_method, :add_publish_methods, :add_publish_method, :add_create_pubsub_node, :process_roster_items, :process_pubsub_discoinfo,
               :check_roster_item_group
           
     #### self
