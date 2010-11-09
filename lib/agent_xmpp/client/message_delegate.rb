@@ -464,6 +464,7 @@ module AgentXmpp
         req = [Xmpp::IqPubSub.subscriptions(pipe, jid.to_s)]
         if /#{AgentXmpp.jid.domain}/.match(jid.to_s)
           add_publish_methods(pipe, jid)
+          add_publish_method(pipe, jid)
           @pubsub_service = jid
            req += [Xmpp::IqDiscoItems.get(pipe, jid.to_s)] + init_remote_services(pipe)
         end; req
@@ -644,6 +645,17 @@ module AgentXmpp
           else
             AgentXmpp.logger.warn "NODE NOT SPECIFIED FOR PUBSUB PUBLISH CONFIGURATION"
           end
+        end
+      end
+ 
+      #.........................................................................................................
+      def add_publish_method(pipe, pubsub)
+        unless AgentXmpp.respond_to?(:publish)
+          AgentXmpp.define_meta_class_method(:publish) do |node, payload| 
+            pipe.send_resp(Xmpp::IqPublish.set(pipe, :node => node, :to => pubsub, :payload => payload.to_x_data))
+          end
+          AgentXmpp.logger.info "ADDED PUBLISH METHOD FOR: #{pubsub}"
+          Delegator.delegate(AgentXmpp, :publish)
         end
       end
           

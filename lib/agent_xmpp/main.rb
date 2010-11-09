@@ -15,14 +15,22 @@ end
 module AgentXmpp
   
   #...........................................................................................................
+  @settings = {}
   @config = {}
 
   #####-------------------------------------------------------------------------------------------------------
   class << self
 
     #.........................................................................................................
-    attr_accessor :config
+    attr_accessor :config, :settings
     
+    #####.....................................................................................................
+    # settings
+    #.........................................................................................................
+    def set(key, value)
+      @settings[key] = value
+    end
+
     #####.....................................................................................................
     # database
     #.........................................................................................................
@@ -32,7 +40,11 @@ module AgentXmpp
 
     #.........................................................................................................
     def agent_xmpp_db
-      @agent_xmpp_db ||= Sequel.sqlite("#{AgentXmpp.app_path}/agent_xmpp.db")
+      @agent_xmpp_db ||= if settings[:agent_xmpp_db_adapter] 
+                           settings[:agent_xmpp_db_adapter].call
+                         else 
+                           Sequel.sqlite("#{AgentXmpp.app_path}/agent_xmpp.db") 
+                         end
     end
 
     #.........................................................................................................
@@ -156,6 +168,7 @@ module AgentXmpp
     #### self
     end
 
+    delegate AgentXmpp, :set
     delegate AgentXmpp::BaseController, :command, :chat, :event, :before, :include_module
     delegate AgentXmpp::Boot, :before_start, :after_connected, :restarting_client, :discovered_pubsub_node, 
                               :discovered_command_nodes, :received_presence
