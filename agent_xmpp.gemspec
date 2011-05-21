@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Troy Stribling"]
-  s.date = %q{2010-08-21}
+  s.date = %q{2010-11-09}
   s.email = %q{troy.stribling@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -93,7 +93,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}
-  s.summary = %q{Agent XMPP is a ruby XMPP bot framework inspired by MVC web frameworks.}
+  s.summary = %q{Agent XMPP is a ruby XMPP bot framework inspired by web frameworks.}
   s.test_files = [
     "test/app/app.rb",
      "test/cases/test_application_message_processing.rb",
