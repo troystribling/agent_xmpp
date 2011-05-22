@@ -1,6 +1,6 @@
 = Agent XMPP
 
-Agent XMPP is a simple DSL for writing automated XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
+Agent XMPP is an application framework for writing XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
 Events. An application that responds to an Ad-Hoc Command can be written with few lines of code.
 
     # myapp.rb
