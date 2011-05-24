@@ -1,6 +1,6 @@
-= Agent XMPP
+= AgentXMPP
 
-Agent XMPP is an application framework for writing XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
+AgentXMPP is an application framework for writing XMPP clients that support Messaging, Ad-Hoc Commands and Publish Subscribe 
 Events. An application that responds to an Ad-Hoc Command can be written with few lines of code.
 
     # myapp.rb
@@ -39,7 +39,7 @@ When started for the first time <tt>myapp.rb</tt> will automatically send contac
 in the <tt>agent_xmpp.yml</tt> contact roster. If you accept the contact request _myapp_ will appear in the Gajim contact roster. 
 Right click on _myapp_ and select _execute_ _commands_ from the drop down menu. A list of Ad-Hoc Commands will be displayed containing _hello_. Select it and click the _forward_ _button_ to execute.
 
-See <tt>http://github.com/troystribling/agent_xmpp/blob/master/test/app/app.rb</tt> for many examples.
+See http://github.com/troystribling/agent_xmpp/blob/master/test/app/app.rb for many examples.
 
 == Supported Environment
 
@@ -90,7 +90,7 @@ Any contact that is in the <tt>admin</tt> contact group can execute <em>Administ
     
 == Ad-Hoc Command Response Payload
 
-<em>Ad-Hoc Commands</em> allow XMPP clients to send and receive structured parameterized commands. To process an <em>Ad-Hoc Command</em> request in an Agent XMPP application use <tt>command</tt> blocks. Agent XMPP will map native ruby scalars, arrays and hashes returned by <tt>command</tt> blocks to jabber:x:data command response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
+<em>Ad-Hoc Commands</em> allow XMPP clients to send and receive structured parameterized commands. To process an <em>Ad-Hoc Command</em> request in an AgentXMPP application use <tt>command</tt> blocks. AgentXMPP will map native ruby scalars, arrays and hashes returned by <tt>command</tt> blocks to jabber:x:data command response payloads (see XEP-0004 http://xmpp.org/extensions/xep-0004.html for a description of jabber:x:data).
 
     command 'scalar' do
       'scalar' 
@@ -122,7 +122,7 @@ Any contact that is in the <tt>admin</tt> contact group can execute <em>Administ
 
 == Ad-Hoc Command Data Forms
 
-XMPP provides a simple form specification for entry of <em>Ad-Hoc Command</em> parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. Agent XMPP supports the following form controls.
+XMPP provides a simple form specification for entry of <em>Ad-Hoc Command</em> parameters, http://xmpp.org/extensions/xep-0004.html#protocol-fieldtypes. AgentXMPP supports the following form controls.
 
 * <b>title</b>: The form title.
     
@@ -200,7 +200,7 @@ If command parameters have dependencies multi-step forms can be used. Multi-step
 
 == Command Authorization
 
-Agent XMPP allows command authorization groups to be specified by XMPP contact groups.
+AgentXMPP allows command authorization groups to be specified by XMPP contact groups.
 
     command 'do_something', :access => 'good' do
         Something.do_it(params[:data])
@@ -212,7 +212,7 @@ Agent XMPP allows command authorization groups to be specified by XMPP contact g
 
 == Command Before Filters
 
-Agent XMPP supports specification of filters executed before command execution that must return a boolean value. If the filter returns <tt>true</tt> the command executes. If <tt>false</tt> is returned the command does not execute. 
+AgentXMPP supports specification of filters executed before command execution that must return a boolean value. If the filter returns <tt>true</tt> the command executes. If <tt>false</tt> is returned the command does not execute. 
 
     before :command => :all do
       jid = params[:from]
@@ -229,7 +229,7 @@ Agent XMPP supports specification of filters executed before command execution t
 
 == Deferred Command Execution
 
-By default Agent XMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool.
+By default AgentXMPP executes commands in the main event loop. If a command requires a lot of time for execution it can be deferred to a thread pool.
 
     command 'starship_engine_configuration', :defer => true do
       on(:execute) do |form|
@@ -390,7 +390,7 @@ Declare <tt>event</tt> blocks in <tt>myapp.rb</tt> to subscribe to published eve
       message(:to=>'someone@somewhere.com', :body=>"Got the event at: " + Time.now.to_s)
     end
 
-Agent XMPP will verify subscription to the event and subscribe if required. Subscriptions
+AgentXMPP will verify subscription to the event and subscribe if required. Subscriptions
 discovered that are not declared by an event block will be deleted.
 
 == Receive Chat Messages
@@ -432,7 +432,7 @@ You can add methods to the <tt>command</tt> and <tt>chat</tt> context by adding 
             
 == Major Event Callbacks
 
-Agent XMPP provides callbacks for applications to respond to major events that occur during execution.
+AgentXMPP provides callbacks for applications to respond to major events that occur during execution.
  
     # application starting
     before_start{}
