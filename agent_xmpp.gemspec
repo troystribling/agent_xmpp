@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version = "0.1.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Troy Stribling"]
+  s.authors = [%q{Troy Stribling}]
   s.date = %q{2011-06-12}
   s.email = %q{troy.stribling@gmail.com}
   s.extra_rdoc_files = [
@@ -17,11 +17,13 @@ Gem::Specification.new do |s|
   ]
   s.files = [
     ".document",
+    ".rvmrc",
     "LICENSE",
     "README.rdoc",
     "Rakefile",
     "VERSION",
     "agent_xmpp.gemspec",
+    "default.gems",
     "lib/agent_xmpp.rb",
     "lib/agent_xmpp/admin.rb",
     "lib/agent_xmpp/client.rb",
@@ -89,8 +91,8 @@ Gem::Specification.new do |s|
     "test/peer/peer.rb"
   ]
   s.homepage = %q{http://github.com/troystribling/agent_xmpp}
-  s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.2}
+  s.require_paths = [%q{lib}]
+  s.rubygems_version = %q{1.8.4}
   s.summary = %q{Agent XMPP is a ruby XMPP bot framework inspired by web frameworks.}
 
   if s.respond_to? :specification_version then
