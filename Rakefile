@@ -14,10 +14,9 @@ require 'jeweler'
     gem.name = "agent_xmpp"
     gem.summary = %Q{Agent XMPP is a ruby XMPP bot framework inspired by web frameworks.}
     gem.email = "troy.stribling@gmail.com"
-    gem.homepage = "http://github.com/troystribling/agent_xmpp"
+    gem.homepage = "http://imaginaryproducts.com/projects/agent-xmpp"
     gem.authors = ["Troy Stribling"]
     gem.files.include %w(lib/jeweler/templates/.gitignore VERSION)
-    gem.add_dependency('rake',                   '>= 0.8.3')
     gem.add_dependency('eventmachine',           '>= 0.12.6')
     gem.add_dependency('sequel',                 '>= 3.9.0')
     gem.add_dependency('evma_xmlpushparser',     '>= 0.0.1')
