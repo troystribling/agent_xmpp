@@ -17,10 +17,11 @@ require 'jeweler'
     gem.homepage = "http://github.com/troystribling/agent_xmpp"
     gem.authors = ["Troy Stribling"]
     gem.files.include %w(lib/jeweler/templates/.gitignore VERSION)
-    gem.add_dependency('rake',                              '>= 0.8.3')
-    gem.add_dependency('eventmachine',                      '>= 0.12.6')
-    gem.add_dependency('sequel',                            '>= 3.9.0')
-    gem.add_dependency('evma_xmlpushparser',                '>= 0.0.1')
+    gem.add_dependency('rake',                   '>= 0.8.3')
+    gem.add_dependency('eventmachine',           '>= 0.12.6')
+    gem.add_dependency('sequel',                 '>= 3.9.0')
+    gem.add_dependency('evma_xmlpushparser',     '>= 0.0.1')
+    gem.add_dependency('sqlite3',                '>= 1.3.3')
   end
 rescue LoadError
   abort "jeweler is not available. In order to run test, you must: sudo gem install technicalpickles-jeweler --source=http://gems.github.com"

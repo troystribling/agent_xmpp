@@ -3,6 +3,7 @@
 coverage/*
 rdoc/*
 doc/*
+pkg/*
 *.gem
 *.tmproj
 *.yml

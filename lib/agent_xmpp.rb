@@ -7,6 +7,7 @@ require 'socket'
 require 'optparse'
 require 'rexml/document'
 require 'base64'
+require 'yaml'
 
 require 'eventmachine'
 require 'evma_xmlpushparser'
