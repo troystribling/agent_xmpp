@@ -1,9 +1,9 @@
 # default.gems generated gem export file. Note that any env variable settings will be missing. Append these after using a ';' field separator
-agent_xmpp -v0.1.0
 bundler -v1.0.15
 eventmachine -v0.12.10
 evma_xmlpushparser -v0.0.1
 git -v1.2.5
 jeweler -v1.6.2
 rake -v0.8.7
+sqlite3 -v1.3.3
 sequel -v3.24.1

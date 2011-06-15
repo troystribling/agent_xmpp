@@ -114,7 +114,7 @@ module AgentXmpp
     # internal interface
     #.......................................................................................................
     def invoke_command
-      params[:sessionid] = Xmpp::IdGenerator.generate_id
+      params[:sessionid] ||= Xmpp::IdGenerator.generate_id
       invoke_command_on_route do
         define_meta_class_method(:request, &route[:blk])
         define_meta_class_method(:request_handler) do  
