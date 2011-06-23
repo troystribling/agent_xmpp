@@ -4,12 +4,12 @@ require 'rubygems'
 begin
   require 'shoulda'
 rescue LoadError
-  abort "shoulda is not available. In order to run test, you must: sudo gem install thoughtbot-shoulda --source=http://gems.github.com"
+  abort "shoulda is not available. In order to run test, you must: sudo gem install shoulda"
 end
 begin
   require 'matchy'
 rescue LoadError
-  abort "matchy is not available. In order to run test, you must: sudo gem install mhennemeyer-matchy --source=http://gems.github.com"
+  abort "matchy is not available. In order to run test, you must: sudo gem install mhennemeyer-matchy"
 end
 
 #####-------------------------------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ require 'test_delegate'
 require 'mocks'
 require 'test_client'
 require 'matchers'
-require 'test_case_extensions'
+require 'test_utils'
 
 #####-------------------------------------------------------------------------------------------------------
 require 'application_messages'
@@ -50,42 +50,42 @@ restarting_client do |pipe|
   AgentXmpp.logger.info "AgentXmpp::BootApp.restarting_client"
 end
 
-discovered_pubsub_service do |pipe|
-  AgentXmpp.logger.info "discovered_pubsub_service"
+discovered_pubsub_node do |service, node|
+  AgentXmpp.logger.info "discovered_pubsub_node: #{service}:#{node}"
 end
 
 #####-------------------------------------------------------------------------------------------------------
-execute 'scalar' do
+command 'scalar' do
   AgentXmpp.logger.info "ACTION: scalar"
   'scalar' 
 end
 
 #.........................................................................................................
-execute 'hash' do
+command 'hash' do
   AgentXmpp.logger.info "ACTION: hash"
   {:attr1 => 'val1', :attr2 => 'val2'}
 end
 
 #.........................................................................................................
-execute 'scalar_array' do
+command 'scalar_array' do
   AgentXmpp.logger.info "ACTION: array"
   ['val1', 'val2','val3', 'val4'] 
 end
 
 #.........................................................................................................
-execute 'hash_array' do
+command 'hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   {:attr1 => ['val11', 'val11'], :attr2 => 'val12'}
 end
 
 #.........................................................................................................
-execute 'array_hash' do
+command 'array_hash' do
   AgentXmpp.logger.info "ACTION: array_hash"
   [{:attr1 => 'val11', :attr2 => 'val12'}, {:attr1 => 'val21', :attr2 => 'val22'}, {:attr1 => 'val31', :attr2 => 'val32'}]
 end
 
 #.........................................................................................................
-execute 'array_hash_array' do
+command 'array_hash_array' do
   AgentXmpp.logger.info "ACTION: hash_array"
   [{:attr1 => ['val11', 'val11'], :attr2 => 'val12'}, {:attr1 => ['val21', 'val21'], :attr2 => 'val22'}, {:attr1 => ['val31', 'val31'], :attr2 => 'val32'}]
 end

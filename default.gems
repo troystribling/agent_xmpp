@@ -4,6 +4,8 @@ eventmachine -v0.12.10
 evma_xmlpushparser -v0.0.1
 git -v1.2.5
 jeweler -v1.6.2
+mhennemeyer-matchy -v0.3.3
 rake -v0.8.7
-sqlite3 -v1.3.3
 sequel -v3.24.1
+shoulda -v2.11.3
+sqlite3 -v1.3.3

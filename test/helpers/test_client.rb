@@ -7,8 +7,8 @@ class TestClient
   #.........................................................................................................
   def initialize(config = nil)
     @config = config || File.open('test/helpers/agent_xmpp.yml') {|yf| YAML::load(yf)}
-    @client = AgentXmpp::Client.new(@config)
-    @jid = @client.jid
+    @client = AgentXmpp::Client.new
+    @jid = AgentXmpp::Xmpp::Jid.new('test', 'nowhere.com', 'unit')
     @client.connect
   end
 
