@@ -92,7 +92,7 @@ module AgentXmpp
         if @current.xpath.eql?('stream:stream')
           @streamns = @current.namespace('') if @current.namespace('')
         end
-        receive(stanza) if respond_to?(:receive)
+        receive(stanza)
       end
     end
   

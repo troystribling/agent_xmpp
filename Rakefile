@@ -3,9 +3,11 @@ $:.unshift('lib')
 require 'rubygems'
 require 'rake'
 require 'agent_xmpp/config'
+require 'rspec/core/rake_task'
+require 'rake/testtask'
 
 #####-------------------------------------------------------------------------------------------------------
-task :default => :test
+task :default => :spec
 
 #####-------------------------------------------------------------------------------------------------------
 begin
@@ -35,7 +37,6 @@ end
 task :default => [:test]
 
 #####-------------------------------------------------------------------------------------------------------
-require 'rake/testtask'
 Rake::TestTask.new(:test) do |test|
   test.libs << ['test/cases', 'test/helpers', 'test/messages']
   test.pattern = 'test/cases/**/test_*.rb'
@@ -51,25 +52,9 @@ Rake::TestTask.new(:test_case) do |test|
 end
 
 #####-------------------------------------------------------------------------------------------------------
-begin
-  require 'rcov/rcovtask'
-  Rcov::RcovTask.new do |test|
-    test.libs << 'test'
-    test.pattern = 'test/**/test_*.rb'
-    test.verbose = true
-  end
-rescue LoadError
-  task :rcov do
-    abort "RCov is not available. In order to run rcov, you must: sudo gem install spicycode-rcov --source=http://gems.github.com"
-  end
-end
-
-#####-------------------------------------------------------------------------------------------------------
-require 'rake/rdoctask'
-Rake::RDocTask.new do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "agent_xmpp #{AgentXmpp::VERSION}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
+desc "run specs"
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = 'spec/examples/*_spec.rb'
+  spec.rspec_opts = ['--backtrace']  
 end
 
