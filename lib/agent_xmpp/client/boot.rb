@@ -35,7 +35,7 @@ module AgentXmpp
         Contact.load_config 
         Publication.load_config 
                 
-        AgentXmpp::Client.new().connect
+        AgentXmpp::Client.new.connect(MessagePipe.new)
       
       end
       

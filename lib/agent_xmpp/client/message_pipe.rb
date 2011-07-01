@@ -5,15 +5,16 @@ module AgentXmpp
   class MessagePipe
 
     #---------------------------------------------------------------------------------------------------------
-    attr_reader   :connection_status, :delegates, :responder_list, :connection, :stream_features, 
+    attr_reader   :connection_status, :delegates, :responder_list, :stream_features, 
                   :stream_mechanisms, :responder_list_mutex
+    #---------------------------------------------------------------------------------------------------------
+    attr_accessor :connection
     #---------------------------------------------------------------------------------------------------------
     alias_method :send_to_method, :send
     #---------------------------------------------------------------------------------------------------------
 
     #.........................................................................................................
-    def initialize(connection)
-      @connection = connection
+    def initialize
       @connection_status = :offline;
       @delegates = [MessageDelegate]
       @responder_list = {}
@@ -51,7 +52,7 @@ module AgentXmpp
       end
       AgentXmpp.logger.info "SEND: #{data.to_s}"
       Message.update(data)
-      @connection.send_data(data.to_s)
+      connection.send_data(data.to_s)
     end
 
     #.........................................................................................................
@@ -120,7 +121,7 @@ module AgentXmpp
       when 'stream'
       when 'success'
         if connection_status.eql?(:offline)
-          @connection.reset_parser
+          connection.reset_parser
           @connection_status = :authenticated
           broadcast_to_delegates(:on_authenticate, self)
           init_connection(false)

@@ -1,5 +1,6 @@
 $:.unshift('lib')
 require 'rubygems'
+require 'rspec'
 require 'agent_xmpp'
 
 #####-------------------------------------------------------------------------------------------------------
@@ -8,13 +9,8 @@ Dir.glob('spec/messages/*').each{|f| require File.join(File.dirname(File.expand_
 #####-------------------------------------------------------------------------------------------------------
 RSpec.configure do |config|
   config.before(:all) do
-    AgentXmpp::Boot.should_receive(:boot)
-    @client = AgentXmpp::Client.new
-    @client.stub!(:connect).and_return{@connection = AgentXmpp::Connection.new(self)}
-    @client.connection.stub!(:reste_parser)
   end
 end
-
 
 #####-------------------------------------------------------------------------------------------------------
 class ExampleHelper
