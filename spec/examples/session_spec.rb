@@ -12,20 +12,36 @@ describe 'session protocol' do
   let(:config){{'jid'      => agent_jid.to_s, 
                 'password' => 'pass', 
                 'roster'   => [{'jid' => admin, 'groups' => ['admin']}, {'jid' => user, 'groups' => ['user']}]}}
-  let(:delegate) do
-    client.delegates.each{|d| client.remove_delegate(d)}
-    del = TestDelegate.new
-    client.add_delegate(del); del
+  let(:delegate){client.add_delegate(TestDelegate.new)}
+
+  #.......................................................................................................................................................................
+  def client_should_send_data(data)
+    client.connection.should_receive(:send_data).once.with(data).and_return(data)
   end
 
+  #.........................................................................................................
+  def parse_stanza(stanza)
+    prepared_stanza = stanza.split(/\n/).inject("") {|p, m| p + m.strip}
+    doc = REXML::Document.new(prepared_stanza).root
+    doc = doc.elements.first if doc.name.eql?('stream')
+    if ['presence', 'message', 'iq'].include?(doc.name)
+      doc = AgentXmpp::Xmpp::Stanza::import(doc) 
+    end; doc
+  end
 
+  #.......................................................................................................................................................................
+  def client_receiving(stanza)
+    parsed_stanza = parse_stanza(stanza)
+    client.receive(parsed_stanza)
+  end
+  
   #.......................................................................................................................................................................
   before(:each) do
     client.connection = mock('connection')
     client.connection.stub!(:reset_parser)
     client.connection.stub!(:error?).and_return(false)    
-    AgentXmpp::Boot.stub!(:boot).and_return(nil)
     AgentXmpp.config = config
+    delegate    
   end
   
   ####**********************************************************************************************************************************************************************
@@ -34,8 +50,8 @@ describe 'session protocol' do
     ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
     it 'should send XML version message and stream initialization message' do
       messages = [SessionMessages.send_supported_xml_version(agent_jid), SessionMessages.send_stream(agent_jid)]
-      client.connection.should_receive(:send_data).once.with(messages.first).and_return(messages.first)
-      client.connection.should_receive(:send_data).once.with(messages.last).and_return(messages.last)
+      client_should_send_data(messages.first)
+      client_should_send_data(messages.last)
       client.connection_completed.should == messages
     end
   
@@ -44,31 +60,52 @@ describe 'session protocol' do
   ####**********************************************************************************************************************************************************************
   context 'when connection status is not authenticated' do
     
+    ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    it 'should equal :not_authenticated' do
+      client.connection_status.should == :not_authenticated
+    end
+
     ####**********************************************************************************************************************************************************************
     context 'and before preauthenticate stream features are received' do
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_authenticate' 
+      it 'should not call on_authenticate' do
+        delegate.on_authenticate_method.should_not be_called
+      end
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_preauthenticate_features' 
+      it 'should not call on_preauthenticate_features' do
+        delegate.on_preauthenticate_features_method.should_not be_called
+      end
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_did_not_authenticate' 
+      it 'should not call on_did_not_authenticate' do
+        delegate.on_did_not_authenticate_method.should_not be_called
+      end
       
     end
   
     ####**********************************************************************************************************************************************************************
     context 'and when preauthenticate stream features are received' do
   
-      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should call on_preauthenticate_features' 
-  
       ####**********************************************************************************************************************************************************************
       context 'with PLAIN authentication' do
   
+        #.......................................................................................................................................................................
+        before(:each) do
+          client_should_send_data(SessionMessages.send_auth_plain(agent_jid))
+        end  
+        
         ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        it 'should send a PLAIN authentication message' 
+        it 'should call on_preauthenticate_features'  do
+          client_receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(agent_jid))
+          delegate.on_preauthenticate_features_method.should be_called
+        end
+
+        ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        it 'should send a PLAIN authentication message' do
+          client_receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(agent_jid)).should respond_with(SessionMessages.send_auth_plain(agent_jid))
+        end
   
       end
   
@@ -76,7 +113,9 @@ describe 'session protocol' do
       context 'without PLAIN authentication' do
   
         ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-        it 'should raise an exception' 
+        it 'should raise an exception' do
+          expect{client_receiving(SessionMessages.recv_preauthentication_stream_features_without_plain_SASL(agent_jid))}.to raise_error(AgentXmpp::AgentXmppError)
+        end
   
       end
   
@@ -92,7 +131,7 @@ describe 'session protocol' do
       it 'should call on_authenticate' 
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should set connection status to authenticated' 
+      it 'should set connection status to :authenticated' 
                  
     end
   

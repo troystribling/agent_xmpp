@@ -31,7 +31,7 @@ class TestDelegate
   #### connection
   delegate_callbacks :on_connect, :on_disconnect, :on_did_not_connect, :on_did_not_authenticate
 
-  #### authentication
+  #### session
   delegate_callbacks :on_authenticate, :on_bind, :on_start_session, :on_preauthenticate_features,
                      :on_postauthenticate_features
 

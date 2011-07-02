@@ -6,6 +6,7 @@ require 'agent_xmpp'
 #####-------------------------------------------------------------------------------------------------------
 Dir.glob('spec/messages/*').each{|f| require File.join(File.dirname(File.expand_path(f)), File.basename(f, '.rb'))}
 require 'test_delegate'
+require 'matchers'
 
 #####-------------------------------------------------------------------------------------------------------
 RSpec.configure do |config|
@@ -14,27 +15,9 @@ RSpec.configure do |config|
 end
 
 #####-------------------------------------------------------------------------------------------------------
-class ExampleHelper
-  
-  #.........................................................................................................
-  def parse_msg(msg)
-    prepared_msg = msg.split(/\n/).inject("") {|p, m| p + m.strip}
-    doc = REXML::Document.new(prepared_msg).root
-    doc = doc.elements.first if doc.name.eql?('stream')
-    if ['presence', 'message', 'iq'].include?(doc.name)
-      doc = AgentXmpp::Xmpp::Stanza::import(doc) 
-    end
-    doc
-  end
-
-  #.........................................................................................................
-  def new_delegate(client)
-    client.remove_delegate(delegate) unless del.nil?
-    del = TestDelegate.new
-    client.add_delegate(del); del
-  end
-
-#### ExampleHelper
+class AgentXmpp::Boot  
+  def self.boot     
+  end        
 end
 
 #####-------------------------------------------------------------------------------------------------------

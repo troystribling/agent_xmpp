@@ -119,7 +119,7 @@ module SessionMessages
 
     #.........................................................................................................
     def send_auth_plain(jid)
-      "<auth mechanism='PLAIN' xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>"
+      "<auth mechanism='PLAIN' xmlns='urn:ietf:params:xml:ns:xmpp-sasl'>YWdlbnRAbm93aGVyZS5jb20AYWdlbnQAcGFzcw==</auth>"
     end
   
     #.........................................................................................................
