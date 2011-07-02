@@ -12,6 +12,10 @@ describe 'session protocol' do
   let(:config) {{'jid' => agent_jid.to_s, 'password' => 'pass', 'roster' => [{'jid' => admin, 'groups' => ['admin']}, {'jid' => user, 'groups' => ['user']}]}}
 
   #.......................................................................................................................................................................
+  def new_delegate
+  end
+
+  #.......................................................................................................................................................................
   before(:each) do
     client.connection = mock('connection')
     client.connection.stub!(:reset_parser)
@@ -20,40 +24,6 @@ describe 'session protocol' do
     AgentXmpp.config = config
   end
   
-#.........................................................................................................
-# should "authenticate with PLAIN SASL authentication when stream features includes PLAIN authentication" do
-# 
-#   #### connect to server
-#   @client.client.pipe.connection_completed.should \
-#     respond_with(SessionMessages.send_supported_xml_version(@client), SessionMessages.send_stream(@client))
-# 
-#   #### receive pre authentication stream feautues and mechanisms and authenticate
-#   @delegate.on_authenticate_method.should_not be_called
-#   @delegate.on_preauthenticate_features_method.should_not be_called
-#   @client.receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(@client)).should \
-#     respond_with(SessionMessages.send_auth_plain(@client)) 
-#   @client.receiving(SessionMessages.recv_auth_success(@client)).should respond_with(SessionMessages.send_stream(@client)) 
-#   @delegate.on_preauthenticate_features_method.should be_called
-#   @delegate.on_authenticate_method.should be_called
-# 
-#   #### bind resource
-#   @delegate.on_bind_method.should_not be_called
-#   @delegate.on_postauthenticate_features_method.should_not be_called
-#   @client.receiving(SessionMessages.recv_postauthentication_stream_features(@client)).should respond_with(SessionMessages.send_iq_set_bind(@client)) 
-#   @client.receiving(SessionMessages.recv_iq_result_bind(@client)).should respond_with(SessionMessages.send_iq_set_session(@client)) 
-#   @delegate.on_postauthenticate_features_method.should be_called
-#   @delegate.on_bind_method.should be_called
-# 
-#   #### start session and request roster
-#   @delegate.on_start_session_method.should_not be_called
-#   @client.receiving(SessionMessages.recv_iq_result_session(@client)).should \
-#     respond_with(SessionMessages.send_presence_init(@client), RosterMessages.send_iq_get_query_roster(@client),
-#                  ServiceDiscoveryMessages.send_iq_get_query_discoinfo(@client, @client.jid.domain)) 
-#   @delegate.on_start_session_method.should be_called
-# 
-# end
-
-
   ####**********************************************************************************************************************************************************************
   context 'when TCP connection to server is established' do
 
@@ -68,11 +38,111 @@ describe 'session protocol' do
   end
 
   ####**********************************************************************************************************************************************************************
-  context 'when connection status is offline' do
-  end
+  context 'when connection status is not authenticated' do
+    
+    ####**********************************************************************************************************************************************************************
+    context 'before preauthenticate stream features' do
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_authenticate callback should not have been called' do
+      end
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_preauthenticate_features callback should not have been called' do
+      end
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_did_not_authenticate callback should not have been called' do
+      end
+      
+    end
+  
+    ####**********************************************************************************************************************************************************************
+    context 'when preauthenticate stream features are received' do
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_preauthenticate_features callback should have been called' do
+      end
+  
+      ####**********************************************************************************************************************************************************************
+      context 'with PLAIN authentication' do
+  
+        ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        it 'should send a PLAIN authentication message' do
+        end
+  
+      end
+  
+      ####**********************************************************************************************************************************************************************
+      context 'without PLAIN authentication' do
+  
+        ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        it 'should raise an exception' do
+        end
+  
+      end
+  
+    end
+  
+    ####**********************************************************************************************************************************************************************
+    context 'when the PLAIN authentication success message is received' do
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'should send stream initialization message' do
+      end
 
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_authenticate callback should have been called' do
+      end
+      
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'connection status should be authenticated' do
+      end
+      
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_did_not_authenticate callback should not have been called' do
+      end
+            
+    end
+  
+    ####**********************************************************************************************************************************************************************
+    context 'when the PLAIN authentication failure message is received' do
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'should raise an exception' do
+      end
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_authenticate callback should not have been called' do
+      end
+  
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'on_did_not_authenticate callback should have been called' do
+      end
+      
+    end
+     
+  end
+  
   ####**********************************************************************************************************************************************************************
   context 'when connection status is authenticated' do
+  
+    ####**********************************************************************************************************************************************************************
+    context 'before postauthenticate stream features are received' do
+    end
+
+    ####**********************************************************************************************************************************************************************
+    context 'when postauthenticate stream features ae received' do
+    end
+  
+    ####**********************************************************************************************************************************************************************
+    context 'when bind resource success message is received' do
+    end
+
+    ####**********************************************************************************************************************************************************************
+    context 'when bind resource failure message is received' do
+    end
+    
   end
   
 end

@@ -5,6 +5,7 @@ require 'agent_xmpp'
 
 #####-------------------------------------------------------------------------------------------------------
 Dir.glob('spec/messages/*').each{|f| require File.join(File.dirname(File.expand_path(f)), File.basename(f, '.rb'))}
+require 'test_delegate'
 
 #####-------------------------------------------------------------------------------------------------------
 RSpec.configure do |config|

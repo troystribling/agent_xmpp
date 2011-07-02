@@ -15,7 +15,7 @@ module AgentXmpp
 
     #.........................................................................................................
     def initialize
-      @connection_status = :offline;
+      @connection_status = :not_authenticated;
       @delegates = [MessageDelegate]
       @responder_list = {}
       @responder_list_mutex = Mutex.new
@@ -113,21 +113,21 @@ module AgentXmpp
       case stanza.name
       when 'features'
         set_stream_features_and_mechanisms(stanza)
-        if connection_status.eql?(:offline)
+        if connection_status.eql?(:not_authenticated)
           broadcast_to_delegates(:on_preauthenticate_features, self)
         elsif connection_status.eql?(:authenticated)
           broadcast_to_delegates(:on_postauthenticate_features, self)
         end
       when 'stream'
       when 'success'
-        if connection_status.eql?(:offline)
+        if connection_status.eql?(:not_authenticated)
           connection.reset_parser
           @connection_status = :authenticated
           broadcast_to_delegates(:on_authenticate, self)
           init_connection(false)
         end
       when 'failure'
-        if connection_status.eql?(:offline)
+        if connection_status.eql?(:not_authenticated)
           @connection.reset_parser
           broadcast_to_delegates(:on_did_not_authenticate, self)
         end
