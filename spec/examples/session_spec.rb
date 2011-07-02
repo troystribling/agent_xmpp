@@ -79,10 +79,15 @@ describe 'session protocol' do
       end
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_did_not_authenticate' do
-        delegate.on_did_not_authenticate_method.should_not be_called
+      it 'should not not call on_bind' do
+        delegate.on_bind_method.should_not be_called
       end
-      
+
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'should not call on_start_session' do
+        delegate.on_start_session_method.should_not be_called
+      end
+  
     end
   
     ####**********************************************************************************************************************************************************************
@@ -124,14 +129,27 @@ describe 'session protocol' do
     ####**********************************************************************************************************************************************************************
     context 'and when the PLAIN authentication success message is received' do
   
+      #.......................................................................................................................................................................
+      before(:each) do
+        client_should_send_data(SessionMessages.send_stream(agent_jid))
+      end  
+        
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should send stream initialization message' 
+      it 'should send stream initialization message' do
+        client_receiving(SessionMessages.recv_auth_success(agent_jid)).should respond_with(SessionMessages.send_stream(agent_jid))
+      end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should call on_authenticate' 
+      it 'should call on_authenticate'  do
+        client_receiving(SessionMessages.recv_auth_success(agent_jid))
+        delegate.on_authenticate_method.should be_called
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should set connection status to :authenticated' 
+      it 'should set connection status to :authenticated' do
+        client_receiving(SessionMessages.recv_auth_success(agent_jid))
+        client.connection_status.should == :authenticated       
+      end
                  
     end
   
@@ -139,10 +157,9 @@ describe 'session protocol' do
     context 'and when the PLAIN authentication failure message is received' do
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should raise an exception' 
-  
-      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should call on_did_not_authenticate' 
+      it 'should raise an exception' do
+        expect{client_receiving(SessionMessages.recv_auth_failure(agent_jid))}.to raise_error(AgentXmpp::AgentXmppError)
+      end
       
     end
      
