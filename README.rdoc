@@ -510,8 +510,6 @@ callbacks a delegate object must be provided that implements the callbacks of in
 
     on_authenticate(connection)
 
-    on_did_not_authenticate(connection)
-
     on_postauthenticate_features(connection)
 
     on_start_session(connection)

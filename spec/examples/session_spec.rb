@@ -6,32 +6,23 @@ describe 'session protocol' do
 
   #.......................................................................................................................................................................
   let(:client){AgentXmpp::MessagePipe.new}
-  let(:agent_jid){AgentXmpp::Xmpp::Jid.new('agent@nowhere.com/testing')}
+  let(:agent_jid){AgentXmpp::Xmpp::Jid.new('agent@nowhere.com/ubuntu')}
   let(:admin){AgentXmpp::Xmpp::Jid.new('troy@somewhere.com/there')}
   let(:user){AgentXmpp::Xmpp::Jid.new('vanessa@there.com/where')}
-  let(:config){{'jid'      => agent_jid.to_s, 
+  let(:config){{'jid'      => 'agent@nowhere.com', 
                 'password' => 'pass', 
-                'roster'   => [{'jid' => admin, 'groups' => ['admin']}, {'jid' => user, 'groups' => ['user']}]}}
+                'roster'   => [{'jid' => 'troy@somewhere.com', 'groups' => ['admin']}, {'jid' => 'vanessa@there.com/where', 'groups' => ['user']}]}}
   let(:delegate){client.add_delegate(TestDelegate.new)}
 
   #.......................................................................................................................................................................
   def client_should_send_data(data)
-    client.connection.should_receive(:send_data).once.with(data).and_return(data)
-  end
-
-  #.........................................................................................................
-  def parse_stanza(stanza)
-    prepared_stanza = stanza.split(/\n/).inject("") {|p, m| p + m.strip}
-    doc = REXML::Document.new(prepared_stanza).root
-    doc = doc.elements.first if doc.name.eql?('stream')
-    if ['presence', 'message', 'iq'].include?(doc.name)
-      doc = AgentXmpp::Xmpp::Stanza::import(doc) 
-    end; doc
+    prepared_data = SpecUtils.prepare_msg([data].flatten).join
+    client.connection.should_receive(:send_data).once.with(prepared_data).and_return(prepared_data)
   end
 
   #.......................................................................................................................................................................
   def client_receiving(stanza)
-    parsed_stanza = parse_stanza(stanza)
+    parsed_stanza = SpecUtils.parse_stanza(stanza)
     client.receive(parsed_stanza)
   end
   
@@ -167,40 +158,72 @@ describe 'session protocol' do
   
   ####************************************************************************************************************************************************************************
   context 'when connection status is authenticated' do
+    
+    #.......................................................................................................................................................................
+    before(:each) do
+      client_should_send_data(SessionMessages.send_stream(agent_jid))
+      client_receiving(SessionMessages.recv_auth_success(agent_jid))      
+    end
   
     ####**********************************************************************************************************************************************************************
     context 'and before postauthenticate stream features are received' do
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_postauthenticate_features' 
+      it 'should not call on_postauthenticate_features' do
+        delegate.on_postauthenticate_features_method.should_not be_called
+      end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_bind' 
+      it 'should not call on_bind' do
+        delegate.on_bind_method.should_not be_called
+      end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_start_session' 
+      it 'should not call on_start_session' do
+        delegate.on_start_session_method.should_not be_called
+      end
       
     end
 
     ####**********************************************************************************************************************************************************************
     context 'and when postauthenticate stream features are received' do
+
+      #.......................................................................................................................................................................
+      before(:each) do
+        client_should_send_data(SessionMessages.send_iq_set_bind(agent_jid))
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should send bind resource message' 
+      it 'should send bind resource message' do
+        client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid)).should respond_with(SessionMessages.send_iq_set_bind(agent_jid))
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should call on_postauthenticate_features' 
+      it 'should call on_postauthenticate_features' do
+        client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid))
+        delegate.on_postauthenticate_features_method.should be_called
+      end
       
     end
   
     ####**********************************************************************************************************************************************************************
     context 'and when bind resource success message is received' do
+
+      #.......................................................................................................................................................................
+      before(:each) do
+        client_should_send_data(SessionMessages.send_iq_set_session(agent_jid))
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should send start session message' 
+      it 'should send start session message' do
+        client_receiving(SessionMessages.recv_iq_result_bind(agent_jid)).should respond_with(SessionMessages.send_iq_set_session(agent_jid))
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should call on_bind' 
+      it 'should call on_bind' do
+        client_receiving(SessionMessages.recv_iq_result_bind(agent_jid))
+        delegate.on_bind_method.should be_called
+      end
       
     end
 

@@ -11,6 +11,42 @@ require 'matchers'
 #####-------------------------------------------------------------------------------------------------------
 RSpec.configure do |config|
   config.before(:all) do
+    AgentXmpp::Xmpp::IdGenerator.set_gen_id
+  end
+end
+
+#####-------------------------------------------------------------------------------------------------------
+class SpecUtils 
+
+  #.........................................................................................................
+  def self.parse_stanza(stanza)
+    prepared_stanza = stanza.split(/\n/).inject("") {|p, m| p + m.strip}
+    doc = REXML::Document.new(prepared_stanza).root
+    doc = doc.elements.first if doc.name.eql?('stream')
+    if ['presence', 'message', 'iq'].include?(doc.name)
+      doc = AgentXmpp::Xmpp::Stanza::import(doc) 
+    end; doc
+  end
+
+  #.........................................................................................................
+  def self.prepare_msg(msg)
+    msg.collect{|i| i.split(/\n+/).inject("") {|p, m| p + m.strip.gsub(/\s+/, " ")}}
+  end
+
+#### SpecUtils
+end
+
+#####-------------------------------------------------------------------------------------------------------
+module AgentXmpp
+  module Xmpp
+    class IdGenerator
+      @gen_id;
+      class << self
+        def set_gen_id(val=1); @gen_id = val; end
+        def gen_id; @gen_id; end;
+        def generate_id; @gen_id.kind_of?(Array) ? @gen_id.shift : @gen_id; end
+      end
+    end
   end
 end
 
