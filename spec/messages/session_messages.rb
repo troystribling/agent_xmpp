@@ -142,15 +142,6 @@ module SessionMessages
       MSG
     end
 
-    #.........................................................................................................
-    def send_presence_init(jid)
-      <<-MSG
-        <presence xmlns='jabber:client'>
-          <priority>1</priority>
-        </presence>
-      MSG
-    end
-
   ## self  
   end
 

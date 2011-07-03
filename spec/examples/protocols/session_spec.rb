@@ -227,35 +227,70 @@ describe 'session protocol' do
 
     ####**********************************************************************************************************************************************************************
     context 'and when bind resource failure message is received' do
+
+      #.......................................................................................................................................................................
+      before(:each) do
+        client_should_send_data(SessionMessages.send_iq_set_bind(agent_jid))
+        client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid))        
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should raise an exception' 
-      
-      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_bind' 
+      it 'should raise an exception' do
+        expect{client_receiving(SessionMessages.recv_error_bind(agent_jid))}.to raise_error{AgentXmpp::AgentXmppError}
+      end
       
     end
 
     ####**********************************************************************************************************************************************************************
     context 'and when start session success message is received' do
       
-      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should send roster request message' 
+      #.......................................................................................................................................................................
+      before(:each) do
+        client_should_send_data(SessionMessages.send_iq_set_bind(agent_jid))
+        client_should_send_data(SessionMessages.send_iq_set_session(agent_jid))
+        client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid)) 
+        client_receiving(SessionMessages.recv_iq_result_bind(agent_jid))       
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should call on_start_session' 
+      it 'should send sign on presense message' do
+        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(RosterMessages.send_iq_get_query_roster(agent_jid))
+      end
+
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'should send disco#info' do
+        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(RosterMessages.send_iq_get_query_roster(agent_jid))
+      end
+
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'should send roster request message' do
+        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(RosterMessages.send_iq_get_query_roster(agent_jid))
+      end
+      
+      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      it 'should call on_start_session' do
+        client_receiving(SessionMessages.recv_iq_result_session(agent_jid))
+        delegate.on_start_session_methoid.should be_called
+      end
       
     end
 
     ####**********************************************************************************************************************************************************************
     context 'and when start session failure message is received' do
       
-      ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should raise an exception' 
+      #.......................................................................................................................................................................
+      before(:each) do
+        client_should_send_data(SessionMessages.send_iq_set_bind(agent_jid))
+        client_should_send_data(SessionMessages.send_iq_set_session(agent_jid))
+        client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid)) 
+        client_receiving(SessionMessages.recv_iq_result_bind(agent_jid))       
+      end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should not call on_start_session' 
-            
+      it 'should raise an exception' do
+        expect{client_receiving(SessionMessages.recv_error_session(agent_jid))}.to raise_error(AgentXmpp::AgentXmppError)
+      end
+      
     end
     
   end

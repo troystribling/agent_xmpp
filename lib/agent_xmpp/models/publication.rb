@@ -13,6 +13,11 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def drop
+        AgentXmpp.in_memory_db(:publications)
+      end
+
+      #.........................................................................................................
       def load_config
         if AgentXmpp.config['publish'].kind_of?(Array)
           AgentXmpp.config['publish'].each do |pub|

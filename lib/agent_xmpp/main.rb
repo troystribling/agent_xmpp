@@ -39,12 +39,22 @@ module AgentXmpp
     end
 
     #.........................................................................................................
+    def drop_tables_in_memory_db
+      in_memory_db.tables.each{|t| in_memory_db.drop_table(t)}
+    end
+
+    #.........................................................................................................
     def agent_xmpp_db
       @agent_xmpp_db ||= if settings[:agent_xmpp_db_adapter] 
                            settings[:agent_xmpp_db_adapter].call
                          else 
                            Sequel.sqlite("#{AgentXmpp.app_path}/agent_xmpp.db") 
                          end
+    end
+
+    #.........................................................................................................
+    def drop_tables_agent_xmpp_db
+      agent_xmpp_db.tables.each{|t| agent_xmpp_db.drop_table(t)}
     end
 
     #.........................................................................................................

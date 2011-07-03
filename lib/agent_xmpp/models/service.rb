@@ -13,6 +13,11 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def drop
+        AgentXmpp.in_memory_db(:services)
+      end
+
+      #.........................................................................................................
       def service_items
         @service_items ||= AgentXmpp.in_memory_db[:service_items]
       end

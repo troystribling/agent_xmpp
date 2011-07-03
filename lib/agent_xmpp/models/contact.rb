@@ -13,6 +13,11 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def drop
+        AgentXmpp.agent_xmpp_db(:contacts)
+      end
+      
+      #.........................................................................................................
       def load_config
         if AgentXmpp.config['roster'].kind_of?(Array)
           AgentXmpp.config['roster'].each {|c| update(c)}

@@ -54,7 +54,7 @@ end
 #####-------------------------------------------------------------------------------------------------------
 desc "run specs"
 RSpec::Core::RakeTask.new(:spec) do |spec|
-  spec.pattern = 'spec/examples/*_spec.rb'
+  spec.pattern = 'spec/examples/**/*_spec.rb'
   spec.rspec_opts = ['--backtrace','--color', '--format nested']  
 end
 

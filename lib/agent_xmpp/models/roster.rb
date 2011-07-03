@@ -13,6 +13,11 @@ module AgentXmpp
       end
 
       #.........................................................................................................
+      def drop
+        AgentXmpp.in_memory_db(:roster)
+      end
+
+      #.........................................................................................................
       def update(msg, from=nil)
         case msg
           when AgentXmpp::Xmpp::Presence then update_with_presence(msg)

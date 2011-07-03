@@ -148,7 +148,7 @@ module AgentXmpp
 
       #.........................................................................................................
       def on_postauthenticate_features(pipe)
-        AgentXmpp.logger.info "SESSION STARTED"
+        AgentXmpp.logger.info "RECEIVED POSTAUTHENTICATE FEATURES"
         Xmpp::Iq.bind(pipe) if pipe.stream_features.has_key?('bind')
       end
  
