@@ -6,12 +6,9 @@ describe 'session protocol' do
 
   #.......................................................................................................................................................................
   let(:client){AgentXmpp::MessagePipe.new}
-  let(:agent_jid){AgentXmpp::Xmpp::Jid.new('agent@nowhere.com/ubuntu')}
-  let(:admin){AgentXmpp::Xmpp::Jid.new('troy@somewhere.com/there')}
-  let(:user){AgentXmpp::Xmpp::Jid.new('vanessa@there.com/where')}
-  let(:config){{'jid'      => 'agent@nowhere.com', 
-                'password' => 'pass', 
-                'roster'   => [{'jid' => 'troy@somewhere.com', 'groups' => ['admin']}, {'jid' => 'vanessa@there.com/where', 'groups' => ['user']}]}}
+  let(:agent_jid){AgentXmpp::Xmpp::Jid.new("#{@agent}/ubuntu")}
+  let(:admin){AgentXmpp::Xmpp::Jid.new("#{@admin}/there")}
+  let(:user){AgentXmpp::Xmpp::Jid.new("#{@user}/where")}
   let(:delegate){client.add_delegate(TestDelegate.new)}
 
   #.......................................................................................................................................................................
@@ -31,7 +28,6 @@ describe 'session protocol' do
     client.connection = mock('connection')
     client.connection.stub!(:reset_parser)
     client.connection.stub!(:error?).and_return(false)    
-    AgentXmpp.config = config
     delegate    
   end
   
@@ -212,6 +208,8 @@ describe 'session protocol' do
       #.......................................................................................................................................................................
       before(:each) do
         client_should_send_data(SessionMessages.send_iq_set_session(agent_jid))
+        client_should_send_data(SessionMessages.send_iq_set_bind(agent_jid))
+        client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid))        
       end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------

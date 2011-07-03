@@ -11,6 +11,23 @@ require 'matchers'
 #####-------------------------------------------------------------------------------------------------------
 RSpec.configure do |config|
   config.before(:all) do
+    @agent = 'agent@nowhere.com'
+    @admin = 'troy@somewhere.com'
+    @user = 'vanessa@there.com'
+    config = {'jid'      => @agent, 
+              'password' => 'pass', 
+              'roster'   => [{'jid' => @admin, 'groups' => ['admin']}, 
+                             {'jid' => @user, 'groups' => ['user']}
+                            ]
+             }
+    AgentXmpp.config = config
+    AgentXmpp.create_agent_xmpp_db  
+    AgentXmpp.create_in_memory_db        
+    AgentXmpp.upgrade_agent_xmpp_db
+    AgentXmpp::Contact.load_config 
+    AgentXmpp::Publication.load_config     
+  end
+  config.before(:each) do
     AgentXmpp::Xmpp::IdGenerator.set_gen_id
   end
 end
@@ -58,6 +75,7 @@ end
 
 #####-------------------------------------------------------------------------------------------------------
 AgentXmpp.logger.level = Logger::DEBUG
+AgentXmpp.app_path = 'spec'
 
 ####------------------------------------------------------------------------------------------------------
 before_start do
