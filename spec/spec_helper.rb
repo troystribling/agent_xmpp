@@ -4,11 +4,14 @@ require 'rspec'
 require 'agent_xmpp'
 
 #####-------------------------------------------------------------------------------------------------------
+##### test message definitions and test delegate
+#####-------------------------------------------------------------------------------------------------------
 Dir.glob('spec/messages/*').each{|f| require File.join(File.dirname(File.expand_path(f)), File.basename(f, '.rb'))}
 require 'test_delegate'
-require 'matchers'
 
-#####-------------------------------------------------------------------------------------------------------
+####-------------------------------------------------------------------------------------------------------
+#### global spec configuration
+####-------------------------------------------------------------------------------------------------------
 RSpec.configure do |config|
   config.before(:all) do
     @agent = 'agent@nowhere.com'
@@ -19,21 +22,23 @@ RSpec.configure do |config|
               'roster'   => [{'jid' => @admin, 'groups' => ['admin']}, 
                              {'jid' => @user, 'groups' => ['user']}]
              }
-  AgentXmpp.config = config
-  AgentXmpp.drop_tables_in_memory_db
-  AgentXmpp.drop_tables_agent_xmpp_db
-  AgentXmpp.create_agent_xmpp_db  
-  AgentXmpp.create_in_memory_db        
-  AgentXmpp.upgrade_agent_xmpp_db
-  AgentXmpp::Contact.load_config 
-  AgentXmpp::Publication.load_config  
+    AgentXmpp.config = config
+    AgentXmpp.drop_tables_in_memory_db
+    AgentXmpp.drop_tables_agent_xmpp_db
+    AgentXmpp.create_agent_xmpp_db  
+    AgentXmpp.create_in_memory_db        
+    AgentXmpp.upgrade_agent_xmpp_db
+    AgentXmpp::Contact.load_config 
+    AgentXmpp::Publication.load_config  
   end
   config.before(:each) do
     AgentXmpp::Xmpp::IdGenerator.set_gen_id
   end
 end
 
-#####-------------------------------------------------------------------------------------------------------
+####-------------------------------------------------------------------------------------------------------
+#### uility methods
+####-------------------------------------------------------------------------------------------------------
 class SpecUtils 
 
   #.........................................................................................................
@@ -54,7 +59,95 @@ class SpecUtils
 #### SpecUtils
 end
 
-#####-------------------------------------------------------------------------------------------------------
+####-------------------------------------------------------------------------------------------------------
+#### spec helper
+####-------------------------------------------------------------------------------------------------------
+module SpecInclude
+   
+  #.........................................................................................................
+  def self.included(mod)
+    mod.before(:each) do
+      client.connection = mock('connection')
+      client.connection.stub!(:reset_parser)
+      client.connection.stub!(:error?).and_return(false)    
+      test_delegate    
+    end
+  end
+
+  #.........................................................................................................
+  def client
+    @client ||= AgentXmpp::MessagePipe.new
+  end
+  
+  #.........................................................................................................
+  def test_delegate
+    @test_delegate ||= client.add_delegate(TestDelegate.new)
+  end
+
+  #.........................................................................................................
+  def user_jid
+    @admin_jid ||= AgentXmpp::Xmpp::Jid.new("#{@user}/ubuntu")
+  end
+
+  #.........................................................................................................
+  def admin_jid
+    @admin_jid ||= AgentXmpp::Xmpp::Jid.new("#{@admin}/ubuntu")
+  end
+
+  #.........................................................................................................
+  def agent_jid
+    @agent_jid ||= AgentXmpp::Xmpp::Jid.new("#{@agent}/ubuntu")
+  end
+  
+  #.........................................................................................................
+  def client_should_send_data(data)
+    prepared_data = SpecUtils.prepare_msg([data].flatten).join
+    client.connection.should_receive(:send_data).once.with(prepared_data).and_return(prepared_data)
+  end
+  
+  #.........................................................................................................
+  def client_receiving(stanza)
+    parsed_stanza = SpecUtils.parse_stanza(stanza)
+    client.receive(parsed_stanza)
+  end
+  
+
+#### SpecInclude
+end
+
+####-------------------------------------------------------------------------------------------------------
+#### custom matchers
+####--------------------------------------------------------------------------------------------------------
+RSpec::Matchers.define :be_called do
+  match do |return_val|
+    return_val.first
+  end
+  failure_message_for_should do |return_val|
+    "Expected '#{return_val.last}' to have been called"
+  end
+  failure_message_for_should_not do |return_val|
+    "Expected '#{return_val.last}' to not have been called"
+  end
+end
+
+####--------------------------------------------------------------------------------------------------------
+RSpec::Matchers.define :respond_with do |expected_response|
+  expected = SpecUtils.prepare_msg([expected_response].flatten).join
+  match do |response|
+    given = SpecUtils.prepare_msg([response].flatten).join
+    given.include?(expected)
+  end
+  failure_message_for_should do |response|
+    "Expected response message to include '#{expected}' but was given message '#{SpecUtils.prepare_msg([response].flatten).join}'"
+  end
+  failure_message_for_should_not do |response|
+    "Expected response message '#{expected}' to not include given message '#{SpecUtils.prepare_msg([response].flatten).join}'"
+  end
+end
+
+####-------------------------------------------------------------------------------------------------------
+#### manual stubs
+####-------------------------------------------------------------------------------------------------------
 module AgentXmpp
   module Xmpp
     class IdGenerator
@@ -68,16 +161,20 @@ module AgentXmpp
   end
 end
 
-#####-------------------------------------------------------------------------------------------------------
+####--------------------------------------------------------------------------------------------------------
 class AgentXmpp::Boot  
   def self.boot     
   end        
 end
 
-#####-------------------------------------------------------------------------------------------------------
+####-------------------------------------------------------------------------------------------------------
+#### application configuration
+####------------------------------------------------------------------------------------------------------
 AgentXmpp.logger.level = Logger::DEBUG
 AgentXmpp.app_path = 'spec'
 
+####------------------------------------------------------------------------------------------------------
+#### example application
 ####------------------------------------------------------------------------------------------------------
 before_start do
   AgentXmpp.logger.info "AgentXmpp::BootApp.before_start"

@@ -6,31 +6,7 @@ describe 'session protocol' do
 ##########################################################################################################################################################################
 
   #.......................................................................................................................................................................
-  let(:client){AgentXmpp::MessagePipe.new}
-  let(:agent_jid){AgentXmpp::Xmpp::Jid.new("#{@agent}/ubuntu")}
-  let(:admin){AgentXmpp::Xmpp::Jid.new("#{@admin}/there")}
-  let(:user){AgentXmpp::Xmpp::Jid.new("#{@user}/where")}
-  let(:delegate){client.add_delegate(TestDelegate.new)}
-
-  #.......................................................................................................................................................................
-  def client_should_send_data(data)
-    prepared_data = SpecUtils.prepare_msg([data].flatten).join
-    client.connection.should_receive(:send_data).once.with(prepared_data).and_return(prepared_data)
-  end
-
-  #.......................................................................................................................................................................
-  def client_receiving(stanza)
-    parsed_stanza = SpecUtils.parse_stanza(stanza)
-    client.receive(parsed_stanza)
-  end
-  
-  #.......................................................................................................................................................................
-  before(:each) do
-    client.connection = mock('connection')
-    client.connection.stub!(:reset_parser)
-    client.connection.stub!(:error?).and_return(false)    
-    delegate    
-  end
+  include SpecInclude
   
   ####**********************************************************************************************************************************************************************
   context 'when TCP connection to server is established' do
@@ -58,22 +34,22 @@ describe 'session protocol' do
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not call on_authenticate' do
-        delegate.on_authenticate_method.should_not be_called
+        test_delegate.on_authenticate_method.should_not be_called
       end
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not call on_preauthenticate_features' do
-        delegate.on_preauthenticate_features_method.should_not be_called
+        test_delegate.on_preauthenticate_features_method.should_not be_called
       end
   
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not not call on_bind' do
-        delegate.on_bind_method.should_not be_called
+        test_delegate.on_bind_method.should_not be_called
       end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not call on_start_session' do
-        delegate.on_start_session_method.should_not be_called
+        test_delegate.on_start_session_method.should_not be_called
       end
   
     end
@@ -92,7 +68,7 @@ describe 'session protocol' do
         ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
         it 'should call on_preauthenticate_features'  do
           client_receiving(SessionMessages.recv_preauthentication_stream_features_with_plain_SASL(agent_jid))
-          delegate.on_preauthenticate_features_method.should be_called
+          test_delegate.on_preauthenticate_features_method.should be_called
         end
 
         ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -130,7 +106,7 @@ describe 'session protocol' do
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should call on_authenticate'  do
         client_receiving(SessionMessages.recv_auth_success(agent_jid))
-        delegate.on_authenticate_method.should be_called
+        test_delegate.on_authenticate_method.should be_called
       end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -167,17 +143,17 @@ describe 'session protocol' do
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not call on_postauthenticate_features' do
-        delegate.on_postauthenticate_features_method.should_not be_called
+        test_delegate.on_postauthenticate_features_method.should_not be_called
       end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not call on_bind' do
-        delegate.on_bind_method.should_not be_called
+        test_delegate.on_bind_method.should_not be_called
       end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should not call on_start_session' do
-        delegate.on_start_session_method.should_not be_called
+        test_delegate.on_start_session_method.should_not be_called
       end
       
     end
@@ -198,7 +174,7 @@ describe 'session protocol' do
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should call on_postauthenticate_features' do
         client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid))
-        delegate.on_postauthenticate_features_method.should be_called
+        test_delegate.on_postauthenticate_features_method.should be_called
       end
       
     end
@@ -221,7 +197,7 @@ describe 'session protocol' do
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should call on_bind' do
         client_receiving(SessionMessages.recv_iq_result_bind(agent_jid))
-        delegate.on_bind_method.should be_called
+        test_delegate.on_bind_method.should be_called
       end
       
     end
@@ -274,7 +250,7 @@ describe 'session protocol' do
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should call on_start_session' do
         client_receiving(SessionMessages.recv_iq_result_session(agent_jid))
-        delegate.on_start_session_method.should be_called
+        test_delegate.on_start_session_method.should be_called
       end
       
     end
