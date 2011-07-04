@@ -1,3 +1,4 @@
+##########################################################################################################################################################################
 require 'spec_helper'
 
 ##########################################################################################################################################################################
@@ -248,18 +249,21 @@ describe 'session protocol' do
       before(:each) do
         client_should_send_data(SessionMessages.send_iq_set_bind(agent_jid))
         client_should_send_data(SessionMessages.send_iq_set_session(agent_jid))
+        client_should_send_data(PresenceMessages.send_sign_on_presence(agent_jid))
+        client_should_send_data(RosterMessages.send_iq_get_query_roster(agent_jid))
+        client_should_send_data(ServiceDiscoveryMessages.send_iq_get_query_discoinfo(agent_jid))
         client_receiving(SessionMessages.recv_postauthentication_stream_features(agent_jid)) 
         client_receiving(SessionMessages.recv_iq_result_bind(agent_jid))       
       end
       
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should send sign on presense message' do
-        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(RosterMessages.send_iq_get_query_roster(agent_jid))
+        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(PresenceMessages.send_sign_on_presence(agent_jid))
       end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should send disco#info' do
-        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(RosterMessages.send_iq_get_query_roster(agent_jid))
+        client_receiving(SessionMessages.recv_iq_result_session(agent_jid)).should respond_with(ServiceDiscoveryMessages.send_iq_get_query_discoinfo(agent_jid))
       end
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -270,7 +274,7 @@ describe 'session protocol' do
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
       it 'should call on_start_session' do
         client_receiving(SessionMessages.recv_iq_result_session(agent_jid))
-        delegate.on_start_session_methoid.should be_called
+        delegate.on_start_session_method.should be_called
       end
       
     end

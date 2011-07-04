@@ -114,7 +114,7 @@ module ServiceDiscoveryMessages
     #.........................................................................................................
     def send_iq_get_query_discoinfo(jid)
       <<-MSG
-        <iq id='2' to='#{jid.to_s}' type='get' xmlns='jabber:client'>
+        <iq id='1' to='#{jid.domain}' type='get' xmlns='jabber:client'>
           <query xmlns='http://jabber.org/protocol/disco#info'/>
         </iq>
       MSG
