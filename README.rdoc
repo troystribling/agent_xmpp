@@ -45,11 +45,11 @@ See http://github.com/troystribling/agent_xmpp/blob/master/test/app/app.rb for m
 
 The following versions of ruby are supported
 
-    ruby 1.9.1
+    ruby 1.9.1, 1.9.2
     
 The following Operating Systems are supported
     
-    Ubuntu 10.4
+    Ubuntu 10.4, 10.10, 11.04
     
 == Contact Groups
 
@@ -60,7 +60,7 @@ Contact groups may be specified in <tt>agent_xmpp.yml</tt>.
     roster:
         - 
             jid:you@home.com
-            groups: [good group, owners]
+            groups: [good group, owners, admin]
 
         - 
             jid: someone@somewhere.com
@@ -144,33 +144,11 @@ XMPP provides a simple form specification for entry of <em>Ad-Hoc Command</em> p
     
 Form controls are specified in an <tt>on</tt> bloc which takes the command <tt>action</tt> as an argument and <tt>yields</tt> the <tt>form</tt>. Valid values for the action are <tt>:execute</tt> and <tt>:submit</tt>. In a simple form the controls are specified in <tt>on(:execute)</tt>  and the response in <tt>on(:submit)</tt>.
 
-    command 'long_form' do
+    command 'register' do
       on(:execute) do |form|
-        form.add_title('The Long Form')
-        form.add_instructions('Make the correct choices and provide the required information.')
-        form.add_fixed("Your name is required.")
-        form.add_text_single('first_name', 'First Name')
-        form.add_text_single('last_name', 'Last Name')
-        form.add_fixed("Your address is required.")
-        form.add_text_single('street', 'Street')
-        form.add_text_single('city', 'City')
-        form.add_text_single('state', 'State')
-        form.add_text_single('zip', 'Zip Code')
-        form.add_fixed("Enter two friends.")
-        form.add_jid_single('contact_1', 'contact JID')
-        form.add_jid_single('contact_2', 'contact JID')
-        form.add_fixed("Your password is required.")
-        form.add_text_private('password', 'Password')
-        form.add_text_private('renter_password', 'Renter Password')
-        form.add_fixed("Choose your food.")
-        form.add_list_single('fruits', [:apple, :orange, :lemon, :lime, :kiwi_fruit], 'Select a Fruit')
-        form.add_list_single('nuts', [:peanut, :almond, :cashew, :pecan, :walnut], 'Select a Nut')
-        form.add_list_single('vegetables', [:broccoli, :carrot, :corn, :tomato, :onion], 'Select a Vegtable')
-        form.add_fixed("Answer the questions.")
-        form.add_boolean('yes_or_no', 'Yes or No please?')
-        form.add_boolean('flux_capcitors', 'Enable flux capacitors for superluminal transport')
-        form.add_fixed("A story of at least 250 characters is required")
-        form.add_text_multi('story', 'Your Story')
+        form.add_title('Register')
+        form.add_instructions('Enter you JID.')
+        form.add_jid_single('contact_1', 'JID')
       end
       on(:submit) do
         params[:data]
