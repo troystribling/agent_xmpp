@@ -145,6 +145,19 @@ RSpec::Matchers.define :respond_with do |expected_response|
   end
 end
 
+####--------------------------------------------------------------------------------------------------------
+RSpec::Matchers.define :not_respond do |expected_response|
+  match do |response|
+    response.nil? || expected_response.empty?
+  end
+  failure_message_for_should do |response|
+    "Expected no response"
+  end
+  failure_message_for_should_not do |response|
+    "Expected response"
+  end
+end
+
 ####-------------------------------------------------------------------------------------------------------
 #### manual stubs
 ####-------------------------------------------------------------------------------------------------------
