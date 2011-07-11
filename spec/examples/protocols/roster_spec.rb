@@ -92,7 +92,7 @@ describe 'roster protocol' do
     context 'and when roster query error is received' do
 
       ####--------------------------------------------------------------------------------------------------------------------------------------------------------------------
-      it 'should throw and exception' do
+      it 'should throw an exception' do
       end
       
     end
